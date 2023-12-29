@@ -11,7 +11,7 @@ def readLoop(stopEvent,camera,canvas,nameText,singleText,averageText):
             dataList = dataLine.split(';')
             canvas.itemconfig(nameText, text=dataList[0])
             canvas.itemconfig(singleText, text='PR Single : ' + dataList[1])
-            canvas.itemconfig(averageText, text='PR average : ' + dataList[2])
+            canvas.itemconfig(averageText, text='PR Average : ' + dataList[2])
             os.remove(f'./changePending{camera}.txt')
         if stopEvent.is_set():
             break

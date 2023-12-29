@@ -19,26 +19,26 @@ main.pack()
 
 width = 500
 leftLimit = 80
-lineHeight = 30
+lineHeight = 100
 totalHeight = 3*lineHeight
 
-canvasLeft = tk.Canvas(main, width=width, height=totalHeight+5, background='magenta')
-line = canvasLeft.create_rectangle(50, 5, 60, totalHeight, fill='black')
-nameText = canvasLeft.create_text(leftLimit, lineHeight/2, text = '', anchor='w')
-singleText = canvasLeft.create_text(leftLimit, lineHeight+lineHeight/2, text= 'PR Single', anchor='w')
-averageText = canvasLeft.create_text(leftLimit, 2*lineHeight+lineHeight/2, text= 'PR Average', anchor='w')
+canvasLeft = tk.Canvas(main, width=width, height=totalHeight+5, background='#f9f8eb')
 canvasLeft.pack(side=tk.LEFT)
-canvasRight = tk.Canvas(main, width=width, height=totalHeight+5, background='magenta')
-line = canvasRight.create_rectangle(50, 5, 60, totalHeight, fill='black')
-nameText = canvasRight.create_text(leftLimit, lineHeight/2, text = '', anchor='w')
-singleText = canvasRight.create_text(leftLimit, lineHeight+lineHeight/2, text= 'PR Single', anchor='w')
-averageText = canvasRight.create_text(leftLimit, 2*lineHeight+lineHeight/2, text= 'PR Average', anchor='w')
+lineLeft = canvasLeft.create_rectangle(50, 5, 60, totalHeight, fill='black')
+nameTextLeft = canvasLeft.create_text(leftLimit, lineHeight/2, font='Helvetica 30', text = '', anchor='w')
+singleTextLeft = canvasLeft.create_text(leftLimit, lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Single', anchor='w')
+averageTextLeft = canvasLeft.create_text(leftLimit, 2*lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Average', anchor='w')
+canvasRight = tk.Canvas(main, width=width, height=totalHeight+5, background='#f9f8eb')
 canvasRight.pack(side=tk.LEFT)
+lineRight = canvasRight.create_rectangle(50, 5, 60, totalHeight, fill='black')
+nameTextRight = canvasRight.create_text(leftLimit, lineHeight/2, font='Helvetica 30', text = '', anchor='w')
+singleTextRight = canvasRight.create_text(leftLimit, lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Single', anchor='w')
+averageTextRight = canvasRight.create_text(leftLimit, 2*lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Average', anchor='w')
 
 stopEvent = threading.Event()
-readThreadLeft = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 0, canvasLeft, nameText, singleText, averageText))
+readThreadLeft = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 0, canvasLeft, nameTextLeft, singleTextLeft, averageTextLeft))
 readThreadLeft.start()
-readThreadRight = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 1, canvasRight, nameText, singleText, averageText))
+readThreadRight = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 1, canvasRight, nameTextRight, singleTextRight, averageTextRight))
 readThreadRight.start()
 
 root.protocol("WM_DELETE_WINDOW", lambda:closeWindow(root, stopEvent))

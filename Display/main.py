@@ -3,6 +3,8 @@ from tkinter import ttk
 import os, threading
 import dataRead
 
+LINE_COUNT = 3
+
 root = tk.Tk()
 root.title('Stream Display')
 
@@ -24,21 +26,20 @@ totalHeight = 3*lineHeight
 
 canvasLeft = tk.Canvas(main, width=width, height=totalHeight+5, background='#f9f8eb')
 canvasLeft.pack(side=tk.LEFT)
-lineLeft = canvasLeft.create_rectangle(50, 5, 60, totalHeight, fill='black')
-nameTextLeft = canvasLeft.create_text(leftLimit, lineHeight/2, font='Helvetica 30', text = '', anchor='w')
-singleTextLeft = canvasLeft.create_text(leftLimit, lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Single', anchor='w')
-averageTextLeft = canvasLeft.create_text(leftLimit, 2*lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Average', anchor='w')
 canvasRight = tk.Canvas(main, width=width, height=totalHeight+5, background='#f9f8eb')
 canvasRight.pack(side=tk.LEFT)
+lineLeft = canvasLeft.create_rectangle(50, 5, 60, totalHeight, fill='black')
 lineRight = canvasRight.create_rectangle(50, 5, 60, totalHeight, fill='black')
-nameTextRight = canvasRight.create_text(leftLimit, lineHeight/2, font='Helvetica 30', text = '', anchor='w')
-singleTextRight = canvasRight.create_text(leftLimit, lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Single', anchor='w')
-averageTextRight = canvasRight.create_text(leftLimit, 2*lineHeight+lineHeight/2, font='Helvetica 30', text= 'PR Average', anchor='w')
+textsLeft = []
+textsRight = []
+for i in range(0,LINE_COUNT):
+    textsLeft.append(canvasLeft.create_text(leftLimit, i*lineHeight+lineHeight/2, font='Helvetica 30', text='', anchor='w'))
+    textsRight.append(canvasRight.create_text(leftLimit, i*lineHeight+lineHeight/2, font='Helvetica 30', text='', anchor='w'))
 
 stopEvent = threading.Event()
-readThreadLeft = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 0, canvasLeft, nameTextLeft, singleTextLeft, averageTextLeft))
+readThreadLeft = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 0, canvasLeft, textsLeft))
 readThreadLeft.start()
-readThreadRight = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 1, canvasRight, nameTextRight, singleTextRight, averageTextRight))
+readThreadRight = threading.Thread(target=dataRead.readLoop, name="readLoop", args=(stopEvent, 1, canvasRight, textsRight))
 readThreadRight.start()
 
 root.protocol("WM_DELETE_WINDOW", lambda:closeWindow(root, stopEvent))

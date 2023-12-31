@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-import dataWrite
+import json
+import dataWrite, WCIFParse
 
 def configureButton(button,camera,name,id):
     button.configure(text=name,command=lambda:dataWrite.sendData(camera,id))
@@ -9,7 +10,14 @@ def updateCubers(group,buttonsLeft,buttonsRight):
     for i in range(0,2):
         configureButton(buttonsLeft[i],0,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
         configureButton(buttonsRight[i],1,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
-    
+
+
+with open('./Oullins.json') as exampleJson:
+    wcif = json.load(exampleJson)
+competitors = WCIFParse.getCompetitors(wcif)
+for personId in competitors['333-r3-g1']:
+    print(wcif['persons'][personId]['name'])
+
 root = tk.Tk()
 root.title('Stream Interface')
 root.geometry('500x300')

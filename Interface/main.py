@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-import dataWrite, WCIFParse
+import dataWrite, WCIFParse, Settings
+
+##############################################################################
+# FUNCTIONS
+##############################################################################
 
 def configureButton(button,camera,name,id):
     button.configure(text=name,command=lambda:dataWrite.sendData(camera,id))
@@ -11,19 +15,26 @@ def updateCubers(group,buttonsLeft,buttonsRight):
         configureButton(buttonsLeft[i],0,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
         configureButton(buttonsRight[i],1,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
 
-
-with open('./Oullins.json') as exampleJson:
-    wcif = json.load(exampleJson)
-competitors = WCIFParse.getCompetitors(wcif)
-for personId in competitors['333-r3-g1']:
-    print(wcif['persons'][personId]['name'])
+##############################################################################
+# ROOT
+##############################################################################
 
 root = tk.Tk()
 root.title('Stream Interface')
-root.geometry('500x300')
+
+##############################################################################
+# SETTINGS
+##############################################################################
+
+localSettings = Settings.Settings(root)
+localSettings.showFrame()
+
+##############################################################################
+# MAIN
+##############################################################################
 
 main = tk.Frame(root)
-main.pack(side=tk.TOP,pady=50)
+main.pack(side=tk.TOP,padx=50,pady=50)
 
 frameLeft = tk.Frame(main,highlightbackground='black',highlightthickness=2)
 frameLeft.columnconfigure(0, pad=20)
@@ -59,7 +70,11 @@ for i in range(0,2):
     configureButton(buttonsRight[i],1,personTest[i],idTest[i])
     buttonsRight[i].grid(column=i,row=1)
 
-groupFrame = tk.Frame(root)
+##############################################################################
+# CHOOSE GROUP
+##############################################################################
+
+groupFrame = tk.Frame(root,padx=50,pady=20)
 groupFrame.pack()
 
 eventLabel = tk.Label(groupFrame,text='Event:')
@@ -82,5 +97,7 @@ groupVar.set('1')
 groupMenu.grid(column=5,row=0,sticky=tk.W)
 
 groupVar.trace_add('write',lambda var,index,mode :updateCubers(groupVar.get(),buttonsLeft,buttonsRight))
+
+##############################################################################
 
 root.mainloop()

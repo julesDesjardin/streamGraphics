@@ -3,6 +3,7 @@ import tkinter.messagebox
 from tkinter import ttk
 import json, urllib.request
 import WCIFParse
+import constants
 
 class Settings:
 
@@ -12,6 +13,8 @@ class Settings:
         self.root = root
         self.compId = ''
         self.wcif = {}
+        self.rounds = {}
+        self.groups = {}
     
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
@@ -34,9 +37,6 @@ class Settings:
     def reloadWCIF(self):
         jsonFile = urllib.request.urlopen(f'https://worldcubeassociation.org/api/v0/competitions/{self.compId}/wcif/public')
         self.wcif = json.loads(jsonFile.read())
-        competitors = WCIFParse.getCompetitors(self.wcif)
-        for personId in competitors['333-r3-g1']:
-            print(self.wcif['persons'][personId]['name'])
 
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)

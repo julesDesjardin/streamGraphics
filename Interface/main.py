@@ -3,17 +3,37 @@ from tkinter import ttk
 import json
 import dataWrite, WCIFParse, Settings, constants
 
+BUTTONS_ROWS = 10
+BUTTONS_COLS = 5
+BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
+
 ##############################################################################
 # FUNCTIONS
 ##############################################################################
 
-def configureButton(button,camera,name,id):
+def configureButton(button,camera,name,id,visible,row,column):
     button.configure(text=name,command=lambda:dataWrite.sendData(camera,id))
+    if visible:
+        button.grid(row=row,column=column)
+    else:
+        button.grid_forget()
 
-def updateCubers(group,buttonsLeft,buttonsRight):
-    for i in range(0,2):
-        configureButton(buttonsLeft[i],0,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
-        configureButton(buttonsRight[i],1,personTest[2*(int(group)-1)+i],idTest[2*(int(group)-1)+i])
+def updateCubers(settings,event,round,group,buttonsLeft,buttonsRight):
+    activities = WCIFParse.getActivities(settings.wcif)
+    activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
+    competitors = WCIFParse.getCompetitors(settings.wcif,activityId)
+    fullCompetitors = [(id, settings.wcif['persons'][id]['name']) for id in competitors]
+    fullCompetitors.sort(key=lambda x:x[1])
+    for i in range(0,BUTTONS_ROWS):
+        for j in range(0,BUTTONS_COLS):
+            index = i*BUTTONS_COLS + j
+            if index < len(fullCompetitors):
+                configureButton(buttonsLeft[index], 0, fullCompetitors[index][1], fullCompetitors[index][0], True, i + 1, j) # + 1 because row 0 is for label
+                configureButton(buttonsRight[index], 1, fullCompetitors[index][1], fullCompetitors[index][0], True, i + 1, j)
+            else:
+                configureButton(buttonsLeft[index], 0, '', 0, False, i, j)
+                configureButton(buttonsRight[index], 1, '', 0, False, i + 1, j)
+
 
 def updateGroups(settings,event,round,groupMenu,groupVar):
     activities = WCIFParse.getActivities(settings.wcif)
@@ -66,17 +86,13 @@ main = tk.Frame(root)
 main.pack(side=tk.TOP,padx=50,pady=50)
 
 frameLeft = tk.Frame(main,highlightbackground='black',highlightthickness=2)
-frameLeft.columnconfigure(0, pad=20)
-frameLeft.columnconfigure(1, pad=20)
-frameLeft.rowconfigure(0, pad=20)
-frameLeft.rowconfigure(1, pad=20)
-frameLeft.rowconfigure(2, pad=20)
 frameRight = tk.Frame(main,highlightbackground='black',highlightthickness=2)
-frameRight.columnconfigure(0, pad=20)
-frameRight.columnconfigure(1, pad=20)
-frameRight.rowconfigure(0, pad=20)
-frameRight.rowconfigure(1, pad=20)
-frameRight.rowconfigure(2, pad=20)
+for i in range(0,BUTTONS_COLS):
+    frameLeft.columnconfigure(i, pad=5)
+    frameRight.columnconfigure(i, pad=5)
+for i in range(0,BUTTONS_ROWS):
+    frameLeft.rowconfigure(i, pad=5)
+    frameRight.rowconfigure(i, pad=5)
 frameLeft.pack(side=tk.LEFT)
 frameRight.pack(side=tk.LEFT)
 
@@ -86,18 +102,14 @@ personTest = ['Tymon Kolasinski','Juliette Sebastien','Twan Dullemond','Sebastia
 idTest = range(0,4)
 
 labelLeft = tk.Label(frameLeft,text='Cuber on left camera')
-labelLeft.grid(column=0, row=0, columnspan=2)
+labelLeft.grid(column=0, row=0, columnspan=BUTTONS_COLS)
 labelRight = tk.Label(frameRight,text='Cuber on right camera')
-labelRight.grid(column=0, row=0, columnspan=2)
+labelRight.grid(column=0, row=0, columnspan=BUTTONS_COLS)
 buttonsLeft = []
 buttonsRight = []
-for i in range(0,2):
-    buttonsLeft.append(tk.Button(frameLeft))
-    configureButton(buttonsLeft[i],0,personTest[i],idTest[i])
-    buttonsLeft[i].grid(column=i,row=1)
-    buttonsRight.append(tk.Button(frameRight))
-    configureButton(buttonsRight[i],1,personTest[i],idTest[i])
-    buttonsRight[i].grid(column=i,row=1)
+for i in range(0,BUTTONS_COUNT):
+    buttonsLeft.append(tk.Button(frameLeft,height=3,width=15,anchor=tk.W))
+    buttonsRight.append(tk.Button(frameRight,height=3,width=15,anchor=tk.W))
 
 ##############################################################################
 # CHOOSE GROUP
@@ -122,7 +134,7 @@ groupVar = tk.StringVar()
 groupMenu = ttk.OptionMenu(groupFrame,groupVar)
 groupMenu.grid(column=5,row=0,sticky=tk.W)
 
-groupVar.trace_add('write',lambda var,index,mode :updateCubers(groupVar.get(),buttonsLeft,buttonsRight))
+groupVar.trace_add('write',lambda var,index,mode :updateCubers(localSettings,eventVar.get(),roundVar.get(),groupVar.get(),buttonsLeft,buttonsRight))
 roundVar.trace_add('write',lambda var,index,mode :updateGroups(localSettings,eventVar.get(),roundVar.get(),groupMenu,groupVar))
 eventVar.trace_add('write',lambda var,index,mode :updateRounds(localSettings,eventVar.get(),roundMenu,roundVar))
 

@@ -7,12 +7,10 @@ def getActivities(wcif):
                     activities[childActivity['id']] = childActivity["activityCode"]
     return activities
 
-def getCompetitors(activities):
-    competitors = {}
+def getCompetitors(wcif,activityId):
+    competitors = []
     for i in range(0,len(wcif['persons'])):
         for assignment in wcif['persons'][i]['assignments']:
-            if assignment['assignmentCode'] == 'competitor':
-                if activities[assignment['activityId']] not in competitors:
-                    competitors[activities[assignment['activityId']]] = []
-                competitors[activities[assignment['activityId']]].append(i)
+            if assignment['assignmentCode'] == 'competitor' and assignment['activityId'] == activityId:
+                competitors.append(i)
     return competitors

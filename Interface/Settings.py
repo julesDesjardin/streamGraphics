@@ -15,6 +15,7 @@ class Settings:
         self.wcif = {}
         self.rounds = {}
         self.groups = {}
+        self.maxSeed = constants.MAX_SEED
     
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
@@ -38,6 +39,23 @@ class Settings:
         jsonFile = urllib.request.urlopen(f'https://worldcubeassociation.org/api/v0/competitions/{self.compId}/wcif/public')
         self.wcif = json.loads(jsonFile.read())
 
+    def updateMaxSeedCloseButton(self,maxSeed,window):
+        try:
+            self.maxSeed = int(maxSeed)
+        except:
+             tkinter.messagebox.showerror(title='Max Seed Error !', message='Error ! Please make sure the seed is a number')
+        else:
+            window.destroy()
+
+    def updateMaxSeed(self):
+        maxSeedWindow = tk.Toplevel(self.root)
+        maxSeedLabel = tk.Label(maxSeedWindow,text='Please enter the maximum seed to be shown on stream')
+        maxSeedLabel.pack(padx=20,pady=5)
+        maxSeedEntry = tk.Entry(maxSeedWindow,text=self.maxSeed,width=20)
+        maxSeedEntry.pack(padx=20,pady=5)
+        maxSeedCloseButton = tk.Button(maxSeedWindow,text='Save max seed',command=lambda:self.updateMaxSeedCloseButton(maxSeedEntry.get(),maxSeedWindow))
+        maxSeedCloseButton.pack(padx=20,pady=5)
+
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)
         settingsLabel = tk.Label(frame,text='Settings',bg=self.BG_COLOR)
@@ -46,9 +64,12 @@ class Settings:
         compIdButton.grid(column=0,row=1)
         reloadButton = tk.Button(frame,text='Reload WCIF',command=self.reloadWCIF)
         reloadButton.grid(column=0,row=2)
+        maxSeedButton = tk.Button(frame,text='Change Max Seed',command=self.updateMaxSeed)
+        maxSeedButton.grid(column=0,row=3)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
         frame.rowconfigure(1, pad=20)
         frame.rowconfigure(2, pad=20)
+        frame.rowconfigure(3, pad=20)
 

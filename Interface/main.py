@@ -15,7 +15,7 @@ def configureButton(button,camera,competitor,visible,row,column):
     id = competitor[0]
     seed = competitor[1]
     name = competitor[2]
-    button.configure(text=f'{name}\nSeed {seed+1}',command=lambda:dataWrite.sendData(camera,id))
+    button.configure(text=f'{name}\nSeed {seed}',command=lambda:dataWrite.sendData(camera,id))
     if visible:
         button.grid(row=row,column=column)
     else:
@@ -27,15 +27,21 @@ def updateCubers(settings,event,round,group,buttonsLeft,buttonsRight):
     competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
     fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
     fullCompetitors.sort(key=lambda x:x[2])
+    index = 0
     for i in range(0,BUTTONS_ROWS):
         for j in range(0,BUTTONS_COLS):
-            index = i*BUTTONS_COLS + j
+            buttonIndex = i*BUTTONS_COLS + j
+            while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
+                print(f'Row {i}, column {j}, index {index}')
+                index = index + 1
+            print(f'Choosing index {index}')
             if index < len(fullCompetitors):
-                configureButton(buttonsLeft[index], 0, fullCompetitors[index], True, i + 1, j) # + 1 because row 0 is for label
-                configureButton(buttonsRight[index], 1, fullCompetitors[index], True, i + 1, j)
+                configureButton(buttonsLeft[buttonIndex], 0, fullCompetitors[index], True, i + 1, j) # + 1 because row 0 is for label
+                configureButton(buttonsRight[buttonIndex], 1, fullCompetitors[index], True, i + 1, j)
+                index = index + 1
             else:
-                configureButton(buttonsLeft[index], 0, ('', 0, 0), False, i, j)
-                configureButton(buttonsRight[index], 1, ('', 0, 0), False, i + 1, j)
+                configureButton(buttonsLeft[buttonIndex], 0, ('', 0, 0), False, i, j)
+                configureButton(buttonsRight[buttonIndex], 1, ('', 0, 0), False, i + 1, j)
 
 
 def updateGroups(settings,event,round,groupMenu,groupVar):

@@ -18,6 +18,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
 - [x] Have configurable thresholds to only show the best cubers in the group
     - Current implementation is based on seeding. For finals, it can be good to put back the seeding at a high value so all finalists are shown.
     - [ ] Have a button for finals/automatically detect finals and remove the seeding condition?
+- [ ] Add Settings Save/Load button
 - [ ] Handle a big number of interesting competitors: scroll? Have a fixed maximum and prompt user to update threshold? Only show the top X, being stricter than the threshold?
 - [ ] Handle separate stages
     - [ ] Configurable colors for each stage

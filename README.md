@@ -14,7 +14,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
 - [x] Ability to fetch WCIF from the WCA with a given comp ID
 - [x] Automatically update menus to show available rounds and groups for each event
     - [ ] Improve layout when no groups have been assigned in a round or an event yet?
-- [ ] Generate buttons for cubers in the selected group
+- [x] Generate buttons for cubers in the selected group
 - [ ] Have configurable thresholds to only show the best cubers in the group
 - [ ] Handle a big number of interesting competitors: scroll? Have a fixed maximum and prompt user to update threshold? Only show the top X, being stricter than the threshold?
 - [ ] Handle separate stages

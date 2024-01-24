@@ -11,8 +11,11 @@ BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
 # FUNCTIONS
 ##############################################################################
 
-def configureButton(button,camera,name,id,visible,row,column):
-    button.configure(text=name,command=lambda:dataWrite.sendData(camera,id))
+def configureButton(button,camera,competitor,visible,row,column):
+    id = competitor[0]
+    seed = competitor[1]
+    name = competitor[2]
+    button.configure(text=f'{name}\nSeed {seed+1}',command=lambda:dataWrite.sendData(camera,id))
     if visible:
         button.grid(row=row,column=column)
     else:
@@ -21,18 +24,18 @@ def configureButton(button,camera,name,id,visible,row,column):
 def updateCubers(settings,event,round,group,buttonsLeft,buttonsRight):
     activities = WCIFParse.getActivities(settings.wcif)
     activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
-    competitors = WCIFParse.getCompetitors(settings.wcif,activityId)
-    fullCompetitors = [(id, settings.wcif['persons'][id]['name']) for id in competitors]
-    fullCompetitors.sort(key=lambda x:x[1])
+    competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
+    fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
+    fullCompetitors.sort(key=lambda x:x[2])
     for i in range(0,BUTTONS_ROWS):
         for j in range(0,BUTTONS_COLS):
             index = i*BUTTONS_COLS + j
             if index < len(fullCompetitors):
-                configureButton(buttonsLeft[index], 0, fullCompetitors[index][1], fullCompetitors[index][0], True, i + 1, j) # + 1 because row 0 is for label
-                configureButton(buttonsRight[index], 1, fullCompetitors[index][1], fullCompetitors[index][0], True, i + 1, j)
+                configureButton(buttonsLeft[index], 0, fullCompetitors[index], True, i + 1, j) # + 1 because row 0 is for label
+                configureButton(buttonsRight[index], 1, fullCompetitors[index], True, i + 1, j)
             else:
-                configureButton(buttonsLeft[index], 0, '', 0, False, i, j)
-                configureButton(buttonsRight[index], 1, '', 0, False, i + 1, j)
+                configureButton(buttonsLeft[index], 0, ('', 0, 0), False, i, j)
+                configureButton(buttonsRight[index], 1, ('', 0, 0), False, i + 1, j)
 
 
 def updateGroups(settings,event,round,groupMenu,groupVar):
@@ -108,8 +111,8 @@ labelRight.grid(column=0, row=0, columnspan=BUTTONS_COLS)
 buttonsLeft = []
 buttonsRight = []
 for i in range(0,BUTTONS_COUNT):
-    buttonsLeft.append(tk.Button(frameLeft,height=3,width=15,anchor=tk.W))
-    buttonsRight.append(tk.Button(frameRight,height=3,width=15,anchor=tk.W))
+    buttonsLeft.append(tk.Button(frameLeft,height=3,width=15,anchor=tk.W,justify=tk.LEFT))
+    buttonsRight.append(tk.Button(frameRight,height=3,width=15,anchor=tk.W,justify=tk.LEFT))
 
 ##############################################################################
 # CHOOSE GROUP

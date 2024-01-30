@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 from tkinter import ttk
 import json, urllib.request
-import WCIFParse
+import Stage
 import constants
 
 class Settings:
@@ -16,6 +16,7 @@ class Settings:
         self.rounds = {}
         self.groups = {}
         self.maxSeed = constants.MAX_SEED
+        self.stages = []
     
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
@@ -56,6 +57,14 @@ class Settings:
         maxSeedCloseButton = tk.Button(maxSeedWindow,text='Save max seed',command=lambda:self.updateMaxSeedCloseButton(maxSeedEntry.get(),maxSeedWindow))
         maxSeedCloseButton.pack(padx=20,pady=5)
 
+    def updateStages(self):
+        # TODO
+        for stage in self.stages:
+            stage.hideStage()
+        stage = Stage.Stage(self.root, self.wcif, '#FFFFFF', '#000000')
+        self.stages = [stage]
+        stage.showStage()
+
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)
         settingsLabel = tk.Label(frame,text='Settings',bg=self.BG_COLOR)
@@ -66,10 +75,13 @@ class Settings:
         reloadButton.grid(column=0,row=2)
         maxSeedButton = tk.Button(frame,text='Change Max Seed',command=self.updateMaxSeed)
         maxSeedButton.grid(column=0,row=3)
+        stagesButton = tk.Button(frame,text='Setup stages',command=self.updateStages)
+        stagesButton.grid(column=0,row=4)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
         frame.rowconfigure(1, pad=20)
         frame.rowconfigure(2, pad=20)
         frame.rowconfigure(3, pad=20)
+        frame.rowconfigure(4, pad=20)
 

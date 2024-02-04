@@ -38,9 +38,7 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
             for j in range(0,BUTTONS_COLS):
                 buttonIndex = i*BUTTONS_COLS + j
                 while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
-                    print(f'Row {i}, column {j}, index {index}')
                     index = index + 1
-                print(f'Choosing index {index}')
                 if index < len(fullCompetitors):
                     configureButton(buttonsLeft[buttonIndex], 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
                     configureButton(buttonsRight[buttonIndex], 1, fullCompetitors[index], True, i + 1, j, bg, fg)

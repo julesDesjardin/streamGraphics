@@ -30,6 +30,12 @@ class Stage:
         self.eventVar.trace_add('write',lambda var,index,mode :self.updateRounds())
 
 
+    def editStage(self,window):
+        editLabel = tk.Label(window,text='Edit stage')
+        editLabel.pack(side=tk.TOP)
+        editButton = tk.Button(window,text='OK',command=lambda:window.destroy())
+        editButton.pack(side=tk.TOP,pady=20)
+        
     def updateGroups(self):
         activities = WCIFParse.getActivities(self.wcif)
         maxGroup = 0

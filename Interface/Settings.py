@@ -57,13 +57,55 @@ class Settings:
         maxSeedCloseButton = tk.Button(maxSeedWindow,text='Save max seed',command=lambda:self.updateMaxSeedCloseButton(maxSeedEntry.get(),maxSeedWindow))
         maxSeedCloseButton.pack(padx=20,pady=5)
 
-    def updateStages(self):
-        # TODO
+    def addStage(self,window):
+        self.stages.append(Stage.Stage(self.root,self.wcif,'#FFFFFF','#000000'))
+        subWindow = tkinter.Toplevel(window)
+        self.stages[-1].editStage(subWindow)
+
+        window.destroy()
+        self.updateStages()
+
+    def editStage(self,window,id):
+        self.stages[id].editStage(window)
+        
+        self.updateStages()
+
+    def deleteStage(self,window,id):
+        self.stages.pop(id)
+        window.destroy()
+        self.updateStages()
+
+    def updateStagesCloseButton(self,window):
+        for stage in self.stages:
+            stage.showStage()
+        window.destroy()
+
+    def updateStagesWindow(self):
+        stagesWindow = tk.Toplevel(self.root)
+        self.updateStage(stagesWindow)
+
+    def updateStages(self,window):
         for stage in self.stages:
             stage.hideStage()
-        stage = Stage.Stage(self.root, self.wcif, '#FFFFFF', '#000000')
-        self.stages = [stage]
-        stage.showStage()
+        stagesLabel = tk.Label(window,text='Please setup stages here')
+        stagesLabel.pack(side=tk.TOP, pady=20)
+        stagesFrames = []
+        stagesLabels = []
+        stagesEditButtons = []
+        stagesDeleteButtons = []
+        for i in range(0,len(self.stages)):
+            stagesFrames.append(tk.Frame(window))
+            stagesLabels.append(tk.Label(stagesFrames[i],text=f'Stage {i+1}',bg=self.stages[i].backgroundColor,fg=self.stages[i].textColor,highlightbackground='black',highlightthickness=1))
+            stagesLabels[i].pack(side=tk.LEFT)
+            stagesEditButtons.append(tk.Button(stagesFrames[i],text=f'Edit',command=lambda:self.editStage(window,i)))
+            stagesEditButtons[i].pack(side=tk.LEFT)
+            stagesDeleteButtons.append(tk.Button(stagesFrames[i],text=f'Delete',command=lambda:self.deleteStage(window,i)))
+            stagesDeleteButtons[i].pack(side=tk.LEFT)
+            stagesFrames[i].pack(side=tk.TOP,pady=10)
+        addButton = tk.Button(window,text='Add',command=lambda:self.addStage(window))
+        addButton.pack(side=tk.TOP,pady=20)
+        closeButton = tk.Button(window,text='OK',command=lambda:self.updateStagesCloseButton(window))
+        closeButton.pack(side=tk.TOP,pady=30)
 
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)

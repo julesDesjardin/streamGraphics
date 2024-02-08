@@ -81,9 +81,6 @@ frameRight.pack(side=tk.LEFT)
 
 ttk.Style().configure("TButton", padding=6, relief="flat", background="#ccc")
 
-personTest = ['Tymon Kolasinski','Juliette Sebastien','Twan Dullemond','Sebastian Weyer']
-idTest = range(0,4)
-
 labelLeft = tk.Label(frameLeft,text='Cuber on left camera')
 labelLeft.grid(column=0, row=0, columnspan=BUTTONS_COLS)
 labelRight = tk.Label(frameRight,text='Cuber on right camera')

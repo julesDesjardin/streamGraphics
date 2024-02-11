@@ -15,6 +15,18 @@ def getRanking(wcif,competitor,event):
             return pb['worldRanking']
     return constants.MAX_RANKING
 
+def getRoundRank(wcif,competitor,event,round):
+    if round is None:
+        return None
+    registrantId = wcif['persons'][competitor]['registrantId']
+    for wcifEvent in wcif['events']:
+        if(wcifEvent['id'] == constants.EVENTS[event]):
+            for wcifRound in wcifEvent['rounds']:
+                if(wcifRound['id'] == f'{constants.EVENTS[event]}-r{round}'):
+                    for result in wcifRound['results']:
+                        if(result['personId'] == registrantId):
+                            return result['ranking']
+
 def getAllCompetitorsRanked(wcif,event):
     competitors = []
     activities = getActivities(wcif)

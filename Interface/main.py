@@ -15,7 +15,11 @@ def configureButton(button,camera,competitor,visible,row,column,bg,fg):
     id = competitor[0]
     seed = competitor[1]
     name = competitor[2]
-    button.configure(text=f'{name}\nSeed {seed}',command=lambda:dataWrite.sendData(camera,id),bg=bg,fg=fg)
+    rank = competitor[3]
+    extraText = f'Seed {seed}'
+    if rank is not None:
+        extraText = extraText + f', Placed {rank}'
+    button.configure(text=f'{name}\n{extraText}',command=lambda:dataWrite.sendData(camera,id),bg=bg,fg=fg)
     if visible:
         button.grid(row=row,column=column)
     else:
@@ -31,8 +35,12 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
         bg = stage.backgroundColor
         fg = stage.textColor
         activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
+        if int(round) > 1:
+            previousRound = int(round) - 1
+        else:
+            previousRound = None
         competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
-        fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
+        fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name'], WCIFParse.getRoundRank(settings.wcif, id, event, previousRound)) for (id, seed) in competitors]
         fullCompetitors.sort(key=lambda x:x[2])
         for i in range(0,BUTTONS_ROWS):
             for j in range(0,BUTTONS_COLS):
@@ -44,8 +52,8 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
                     configureButton(buttonsRight[buttonIndex], 1, fullCompetitors[index], True, i + 1, j, bg, fg)
                     index = index + 1
                 else:
-                    configureButton(buttonsLeft[buttonIndex], 0, ('', 0, 0), False, i, j, bg, fg)
-                    configureButton(buttonsRight[buttonIndex], 1, ('', 0, 0), False, i + 1, j, bg, fg)
+                    configureButton(buttonsLeft[buttonIndex], 0, ('', 0, 0, 0), False, i, j, bg, fg)
+                    configureButton(buttonsRight[buttonIndex], 1, ('', 0, 0, 0), False, i + 1, j, bg, fg)
 
 ##############################################################################
 # ROOT

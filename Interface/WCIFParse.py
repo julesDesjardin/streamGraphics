@@ -33,7 +33,7 @@ def getAllCompetitorsRanked(wcif,event):
     eventActivities = []
     for activity in activities:
         activitySplit = activities[activity].split('-')
-        if activitySplit[0] == constants.EVENTS[event]:
+        if activitySplit[0] == constants.EVENTS[event] and activitySplit[1] == 'r1': # Only count R1 for seeding
             eventActivities.append(activity)
 
     for i in range(0,len(wcif['persons'])):

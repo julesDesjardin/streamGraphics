@@ -43,6 +43,9 @@ class Stage:
             for i in range(1,maxGroup+1):
                 menu.add_command(label=f'{i}',command=lambda value=f'{i}': self.groupVar.set(value))
             self.groupVar.set(1)
+        else:
+            menu.add_command(label='No group',command=lambda value=0:self.roundVar.set(value))
+            self.groupVar.set(0)
 
     def updateRounds(self):
         activities = WCIFParse.getActivities(self.wcif)
@@ -57,6 +60,9 @@ class Stage:
             for i in range(1,maxRound+1):
                 menu.add_command(label=f'{i}',command=lambda value=f'{i}': self.roundVar.set(value))
             self.roundVar.set(1)
+        else:
+            menu.add_command(label='No round',command=lambda value=0:self.roundVar.set(value))
+            self.roundVar.set(0)
 
     def hideStage(self):
         self.frame.pack_forget()

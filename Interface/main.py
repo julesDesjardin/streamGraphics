@@ -3,9 +3,22 @@ from tkinter import ttk
 import json
 import dataWrite, WCIFParse, Settings, constants
 
+import sys
+sys.path.append('.')
+from Common import TelegramBot, Secrets
+
 BUTTONS_ROWS = 10
 BUTTONS_COLS = 5
 BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
+
+##############################################################################
+# TELEGRAM BOT
+##############################################################################
+
+bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken)
+print('Please send /start to a conversation with the Interface Telegram Bot to start...')
+print('Program can not start until the Interface Telegram Bot is started')
+bot.startPolling()
 
 ##############################################################################
 # FUNCTIONS
@@ -16,10 +29,11 @@ def configureButton(button,camera,competitor,visible,row,column,bg,fg):
     seed = competitor[1]
     name = competitor[2]
     rank = competitor[3]
-    extraText = f'Seed {seed}'
+    extraButtonText = f'Seed {seed}'
     if rank is not None:
-        extraText = extraText + f', Placed {rank}'
-    button.configure(text=f'{name}\n{extraText}',command=lambda:dataWrite.sendData(camera,id),bg=bg,fg=fg)
+        extraButtonText = extraButtonText + f', Placed {rank}'
+    cardData = name
+    button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(bot,camera,cardData),bg=bg,fg=fg)
     if visible:
         button.grid(row=row,column=column)
     else:

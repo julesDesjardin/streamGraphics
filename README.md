@@ -34,3 +34,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
 - [ ] Generate recap page for a group, showing who is interesting in the group (useful both for camera crew and commentary team)
 - [ ] Generate live results page
 - [ ] Make it work on different computers: use a server to share files, or send files directly to clients, or have clients poll data from the server?
+- [ ] Make a scoretaking program because we can't fetch data from WCA Live
+    - [ ] A checker view, with a list of competitors and their times
+    - [ ] A scoretaker view, with people on their correct positions
+    - [ ] When times are unchecked they are yellow, once checked they become green and are sent to Live

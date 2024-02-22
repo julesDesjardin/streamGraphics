@@ -15,10 +15,7 @@ BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
 # TELEGRAM BOT
 ##############################################################################
 
-bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken)
-print('Please send /start to a conversation with the Interface Telegram Bot to start...')
-print('Program can not start until the Interface Telegram Bot is started')
-bot.startPolling()
+bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken,Secrets.interfaceCardChannelId)
 
 ##############################################################################
 # FUNCTIONS

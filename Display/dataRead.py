@@ -1,15 +1,25 @@
-import os
-
-def readLoop(stopEvent,camera,canvas,texts):
+def checkQueue(root, queue, canvas, text):
     while True:
-        if f'changePending{camera}.txt' in os.listdir('.'):
-            for textLine in texts:
-                canvas.itemconfig(textLine, text='')
-            with open(f'./data{camera}.txt','r') as dataFile:
-                counter = 0
-                for line in dataFile.readlines():
-                    canvas.itemconfig(texts[counter], text=line)
-                    counter = counter + 1
-            os.remove(f'./changePending{camera}.txt')
-        if stopEvent.is_set():
+        try:
+            data = queue.get(timeout=0.1)
+        except:
             break
+        canvas.itemconfig(text, text=data)
+    root.after(1000, lambda:checkQueue(root, queue, canvas, text))
+
+def checkBothQueues(root, queueLeft, queueRight, canvasLeft, canvasRight, textLeft, textRight):
+    checkQueue(root, queueLeft, canvasLeft, textLeft)
+    checkQueue(root, queueRight, canvasRight, textRight)
+
+def botCallback(message, queueLeft, queueRight):
+    fullMessage = message.text.removeprefix('/cardData ')
+    camera = fullMessage[0]
+    data = fullMessage[2:]
+    print('Start put')
+    if camera == '0':
+        queueLeft.put(data)
+    elif camera == '1':
+        queueRight.put(data)
+    else:
+        print('Camera unknown!')
+    print('OK put')

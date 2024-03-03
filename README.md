@@ -30,7 +30,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
     - [x] PRs
     - [ ] Picture
     - [ ] Country flag
-    - [ ] Previous round ranking and result
+    - [x] Previous round ranking and result
     - [ ] Live result: current ranking, BPA, WPA
 - [ ] Generate recap page for a group, showing who is interesting in the group (useful both for camera crew and commentary team)
 - [ ] Generate live results page

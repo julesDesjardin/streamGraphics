@@ -21,30 +21,24 @@ bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken,Secrets.interfaceCardCha
 # FUNCTIONS
 ##############################################################################
 
-def configureButton(button,event,camera,competitor,visible,row,column,bg,fg):
+def configureButton(button,event,round,camera,competitor,visible,row,column,bg,fg):
+    if int(round) > 1:
+        previousRound = int(round) - 1
+    else:
+        previousRound = None
     id = competitor[0]
     seed = competitor[1]
     name = competitor[2]
-    rank = competitor[3]
+    previousRank = WCIFParse.getRoundRank(localSettings.wcif,id,event,round)
     extraButtonText = f'Seed {seed}'
-    if rank is not None:
-        extraButtonText = extraButtonText + f', Placed {rank}'
+    if previousRank is not None:
+        extraButtonText = extraButtonText + f', Placed {previousRank}'
     cardData = localSettings.cardText
     cardData = cardData.replace('%name',f"{name}")
     prSingleInt = WCIFParse.getPb(localSettings.wcif,id,event,'single')
     prAverageInt = WCIFParse.getPb(localSettings.wcif,id,event,'average')
-    if prSingleInt is None:
-        cardData = cardData.replace('%prSingle','No result')
-    elif prSingleInt >= 6000:
-        cardData = cardData.replace('%prSingle',f"{int(prSingleInt / 6000)}:{((prSingleInt % 6000) / 100):05.2f}")
-    else:
-        cardData = cardData.replace('%prSingle',f"{((prSingleInt % 6000) / 100):05.2f}")
-    if prAverageInt is None:
-        cardData = cardData.replace('%prAverage','No result')
-    elif prAverageInt >= 6000:
-        cardData = cardData.replace('%prAverage',f"{int(prAverageInt / 6000)}:{((prAverageInt % 6000) / 100):05.2f}")
-    else:
-        cardData = cardData.replace('%prAverage',f"{((prAverageInt % 6000) / 100):05.2f}")
+    cardData = cardData.replace('%prSingle',dataWrite.resultToString(prSingleInt))
+    cardData = cardData.replace('%prAverage',dataWrite.resultToString(prAverageInt))
     cardData = cardData.replace('%nrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
     cardData = cardData.replace('%nrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
     cardData = cardData.replace('%crSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
@@ -52,7 +46,9 @@ def configureButton(button,event,camera,competitor,visible,row,column,bg,fg):
     cardData = cardData.replace('%wrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
     cardData = cardData.replace('%wrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
     cardData = cardData.replace('%seed',f"{seed}")
-    cardData = cardData.replace('%previousRank',f"{rank}")
+    cardData = cardData.replace('%previousRank',f"{previousRank}")
+    cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
+    cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
     button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(bot,camera,cardData),bg=bg,fg=fg)
     if visible:
         button.grid(row=row,column=column)
@@ -69,12 +65,8 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
         bg = stage.backgroundColor
         fg = stage.textColor
         activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
-        if int(round) > 1:
-            previousRound = int(round) - 1
-        else:
-            previousRound = None
         competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
-        fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name'], WCIFParse.getRoundRank(settings.wcif, id, event, previousRound)) for (id, seed) in competitors]
+        fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
         fullCompetitors.sort(key=lambda x:x[2])
         for i in range(0,BUTTONS_ROWS):
             for j in range(0,BUTTONS_COLS):
@@ -82,12 +74,12 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
                 while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
                     index = index + 1
                 if index < len(fullCompetitors):
-                    configureButton(buttonsLeft[buttonIndex], event, 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
-                    configureButton(buttonsRight[buttonIndex], event, 1, fullCompetitors[index], True, i + 1, j, bg, fg)
+                    configureButton(buttonsLeft[buttonIndex], event, round, 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
+                    configureButton(buttonsRight[buttonIndex], event, round, 1, fullCompetitors[index], True, i + 1, j, bg, fg)
                     index = index + 1
                 else:
-                    configureButton(buttonsLeft[buttonIndex], event, 0, (0, 0, '', 0), False, i, j, bg, fg)
-                    configureButton(buttonsRight[buttonIndex], event, 1, (0, 0, '', 0), False, i + 1, j, bg, fg)
+                    configureButton(buttonsLeft[buttonIndex], event, round, 0, (0, 0, ''), False, i, j, bg, fg)
+                    configureButton(buttonsRight[buttonIndex], event, round, 1, (0, 0, ''), False, i + 1, j, bg, fg)
 
 ##############################################################################
 # ROOT

@@ -86,6 +86,8 @@ This supports the following characters to be replaced by the appropriate value:
 %wrAverage: World ranking average/mean
 %seed: Seed (based on PRs before the competition)
 %previousRank: Place on the previous round (when applicable)
+%previousSingle: Single on the previous round (when applicable)
+%previousAverage: Average on the previous round (when applicable)
 '''
         cardTextLabel = tk.Label(cardTextWindow,text=cardTextDescription,justify='left')
         cardTextLabel.pack(padx=20,pady=5)

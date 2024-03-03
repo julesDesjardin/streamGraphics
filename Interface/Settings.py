@@ -17,6 +17,7 @@ class Settings:
         self.groups = {}
         self.maxSeed = constants.MAX_SEED
         self.stages = []
+        self.cardText = ''
     
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
@@ -65,6 +66,34 @@ class Settings:
         self.stages = [stage]
         stage.showStage()
 
+    def updateCardTextCloseButton(self,cardText,window):
+        self.cardText = cardText
+        window.destroy()
+
+    def updateCardText(self):
+        cardTextWindow = tk.Toplevel(self.root)
+        cardTextDescription = '''
+Please enter the text to show on the card
+This supports the following characters to be replaced by the appropriate value:
+%name: Name of the competitor
+%prSingle: PR single
+%prAverage: PR average/mean
+%nrSingle: National ranking single
+%nrAverage: National ranking average/mean
+%crSingle: Continental ranking single
+%crAverage: Continental ranking average/mean
+%wrSingle: World ranking single
+%wrAverage: World ranking average/mean
+%seed: Seed (based on PRs before the competition)
+%previousRank: Place on the previous round (when applicable)
+'''
+        cardTextLabel = tk.Label(cardTextWindow,text=cardTextDescription,justify='left')
+        cardTextLabel.pack(padx=20,pady=5)
+        cardTextEntry = tk.Text(cardTextWindow)
+        cardTextEntry.pack(padx=20,pady=5)
+        cardTextCloseButton = tk.Button(cardTextWindow,text='Save card text',command=lambda:self.updateCardTextCloseButton(cardTextEntry.get('1.0','end-1c'),cardTextWindow))
+        cardTextCloseButton.pack(padx=20,pady=5)
+
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)
         settingsLabel = tk.Label(frame,text='Settings',bg=self.BG_COLOR)
@@ -77,6 +106,8 @@ class Settings:
         maxSeedButton.grid(column=0,row=3)
         stagesButton = tk.Button(frame,text='Setup stages',command=self.updateStages)
         stagesButton.grid(column=0,row=4)
+        cardTextButton = tk.Button(frame,text='Change text on card',command=self.updateCardText)
+        cardTextButton.grid(column=0, row=5)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -84,4 +115,5 @@ class Settings:
         frame.rowconfigure(2, pad=20)
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
+        frame.rowconfigure(5, pad=20)
 

@@ -21,7 +21,7 @@ bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken,Secrets.interfaceCardCha
 # FUNCTIONS
 ##############################################################################
 
-def configureButton(button,camera,competitor,visible,row,column,bg,fg):
+def configureButton(button,event,camera,competitor,visible,row,column,bg,fg):
     id = competitor[0]
     seed = competitor[1]
     name = competitor[2]
@@ -29,7 +29,30 @@ def configureButton(button,camera,competitor,visible,row,column,bg,fg):
     extraButtonText = f'Seed {seed}'
     if rank is not None:
         extraButtonText = extraButtonText + f', Placed {rank}'
-    cardData = name
+    cardData = localSettings.cardText
+    cardData = cardData.replace('%name',f"{name}")
+    prSingleInt = WCIFParse.getPb(localSettings.wcif,id,event,'single')
+    prAverageInt = WCIFParse.getPb(localSettings.wcif,id,event,'average')
+    if prSingleInt is None:
+        cardData = cardData.replace('%prSingle','No result')
+    elif prSingleInt >= 6000:
+        cardData = cardData.replace('%prSingle',f"{int(prSingleInt / 6000)}:{((prSingleInt % 6000) / 100):05.2f}")
+    else:
+        cardData = cardData.replace('%prSingle',f"{((prSingleInt % 6000) / 100):05.2f}")
+    if prAverageInt is None:
+        cardData = cardData.replace('%prAverage','No result')
+    elif prAverageInt >= 6000:
+        cardData = cardData.replace('%prAverage',f"{int(prAverageInt / 6000)}:{((prAverageInt % 6000) / 100):05.2f}")
+    else:
+        cardData = cardData.replace('%prAverage',f"{((prAverageInt % 6000) / 100):05.2f}")
+    cardData = cardData.replace('%nrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
+    cardData = cardData.replace('%nrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
+    cardData = cardData.replace('%crSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
+    cardData = cardData.replace('%crAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
+    cardData = cardData.replace('%wrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
+    cardData = cardData.replace('%wrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
+    cardData = cardData.replace('%seed',f"{seed}")
+    cardData = cardData.replace('%previousRank',f"{rank}")
     button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(bot,camera,cardData),bg=bg,fg=fg)
     if visible:
         button.grid(row=row,column=column)
@@ -59,12 +82,12 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
                 while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
                     index = index + 1
                 if index < len(fullCompetitors):
-                    configureButton(buttonsLeft[buttonIndex], 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
-                    configureButton(buttonsRight[buttonIndex], 1, fullCompetitors[index], True, i + 1, j, bg, fg)
+                    configureButton(buttonsLeft[buttonIndex], event, 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
+                    configureButton(buttonsRight[buttonIndex], event, 1, fullCompetitors[index], True, i + 1, j, bg, fg)
                     index = index + 1
                 else:
-                    configureButton(buttonsLeft[buttonIndex], 0, ('', 0, 0, 0), False, i, j, bg, fg)
-                    configureButton(buttonsRight[buttonIndex], 1, ('', 0, 0, 0), False, i + 1, j, bg, fg)
+                    configureButton(buttonsLeft[buttonIndex], event, 0, (0, 0, '', 0), False, i, j, bg, fg)
+                    configureButton(buttonsRight[buttonIndex], event, 1, (0, 0, '', 0), False, i + 1, j, bg, fg)
 
 ##############################################################################
 # ROOT

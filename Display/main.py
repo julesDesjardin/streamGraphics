@@ -21,8 +21,8 @@ fontSize = 100
 
 canvasLeft = tk.Canvas(main, width=width, height=height, background='#ff00ff')
 canvasRight = tk.Canvas(main, width=width, height=height, background='#ff00ff')
-textLeft = canvasLeft.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='w')
-textRight = canvasRight.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='w')
+textLeft = canvasLeft.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='nw')
+textRight = canvasRight.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='nw')
 
 queueLeft = queue.Queue()
 queueRight = queue.Queue()

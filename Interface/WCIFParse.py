@@ -9,10 +9,16 @@ def getActivities(wcif):
                     activities[childActivity['id']] = childActivity["activityCode"]
     return activities
 
-def getRanking(wcif,competitor,event):
+def getPb(wcif,competitor,event,singleOrAverage):
     for pb in wcif['persons'][competitor]['personalBests']:
-        if pb['eventId'] == constants.EVENTS[event] and pb['type'] == constants.SEED_TYPE[constants.EVENTS[event]]:
-            return pb['worldRanking']
+        if pb['eventId'] == constants.EVENTS[event] and pb['type'] == singleOrAverage:
+            return pb['best']
+    return None
+
+def getRanking(wcif,competitor,event,singleOrAverage,scale):
+    for pb in wcif['persons'][competitor]['personalBests']:
+        if pb['eventId'] == constants.EVENTS[event] and pb['type'] == singleOrAverage:
+            return pb[f'{scale}Ranking']
     return constants.MAX_RANKING
 
 def getRoundRank(wcif,competitor,event,round):
@@ -40,7 +46,7 @@ def getAllCompetitorsRanked(wcif,event):
         for assignment in wcif['persons'][i]['assignments']:
             if assignment['assignmentCode'] == 'competitor' and assignment['activityId'] in eventActivities:
                 competitors.append(i)
-    competitors.sort(key=lambda x:getRanking(wcif,x,event))
+    competitors.sort(key=lambda x:getRanking(wcif,x,event,constants.SEED_TYPE[constants.EVENTS[event]],'world'))
     return competitors
 
 def getCompetitors(wcif,activityId,event):

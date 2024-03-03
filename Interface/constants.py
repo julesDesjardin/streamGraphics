@@ -38,5 +38,5 @@ SEED_TYPE = dict([
     ('333mbf','average'),
 ])
 
-MAX_RANKING = 1000000
+MAX_RANKING = 999999
 MAX_SEED = 10000

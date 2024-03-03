@@ -25,9 +25,9 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
     - [ ] One menu line per stage
     - [ ] Display buttons for each stage
 - [ ] Support a customizable number of cameras
-- [ ] Choose what info to display for the selected cuber
+- [x] Choose what info to display for the selected cuber
 - [ ] Fetch said info
-    - [ ] PRs
+    - [x] PRs
     - [ ] Picture
     - [ ] Country flag
     - [ ] Previous round ranking and result

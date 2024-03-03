@@ -24,6 +24,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
     - [ ] Configurable colors for each stage
     - [ ] One menu line per stage
     - [ ] Display buttons for each stage
+- [ ] Support a customizable number of cameras
 - [ ] Choose what info to display for the selected cuber
 - [ ] Fetch said info
     - [ ] PRs

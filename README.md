@@ -35,7 +35,7 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
 - [ ] Generate recap page for a group, showing who is interesting in the group (useful both for camera crew and commentary team)
 - [ ] Generate live results page
 - [x] Make it work on different computers: Use a Telegram Channel
-    - [ ] Make the Telegram channel ID and bot tokens a part of Settings instead of hardcoded in a Common/Secrets.py
+    - [x] Make the Telegram channel ID and bot tokens a part of Settings instead of hardcoded in a Common/Secrets.py
 - [ ] Make a scoretaking program because we can't fetch data from WCA Live
     - [ ] A checker view, with a list of competitors and their times
     - [ ] A scoretaker view, with people on their correct positions

@@ -5,6 +5,10 @@ import json, urllib.request
 import Stage
 import constants
 
+import sys
+sys.path.append('.')
+from Common import TelegramBot
+
 class Settings:
 
     BG_COLOR = '#F4ECE1'
@@ -18,6 +22,7 @@ class Settings:
         self.maxSeed = constants.MAX_SEED
         self.stages = []
         self.cardText = ''
+        self.bot = None
     
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
@@ -96,6 +101,25 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextCloseButton = tk.Button(cardTextWindow,text='Save card text',command=lambda:self.updateCardTextCloseButton(cardTextEntry.get('1.0','end-1c'),cardTextWindow))
         cardTextCloseButton.pack(padx=20,pady=5)
 
+    def updateTelegramSettingsCloseButton(self,token,id,window):
+        self.bot = TelegramBot.TelegramBot(token,id)
+        window.destroy()
+
+    def updateTelegramSettings(self):
+        telegramWindow = tk.Toplevel(self.root)
+        telegramLabel = tk.Label(telegramWindow,text='Please enter Telegram settings')
+        telegramLabel.pack(pady=20)
+        tokenLabel = tk.Label(telegramWindow,text='Interface bot token')
+        tokenLabel.pack(pady=5)
+        tokenEntry = tk.Entry(telegramWindow,width=50)
+        tokenEntry.pack(pady=5)
+        idLabel = tk.Label(telegramWindow,text='Channel ID between interface and card bots')
+        idLabel.pack(pady=5)
+        idEntry = tk.Entry(telegramWindow,width=50)
+        idEntry.pack(pady=5)
+        telegramCloseButton = tk.Button(telegramWindow,text='Save Telegram Settings',command=lambda:self.updateTelegramSettingsCloseButton(tokenEntry.get(),idEntry.get(),telegramWindow))
+        telegramCloseButton.pack(pady=20)
+
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black',highlightthickness=1)
         settingsLabel = tk.Label(frame,text='Settings',bg=self.BG_COLOR)
@@ -110,6 +134,8 @@ This supports the following characters to be replaced by the appropriate value:
         stagesButton.grid(column=0,row=4)
         cardTextButton = tk.Button(frame,text='Change text on card',command=self.updateCardText)
         cardTextButton.grid(column=0, row=5)
+        telegramButton = tk.Button(frame,text='Change Telegram Settings',command=self.updateTelegramSettings)
+        telegramButton.grid(column=0,row=6)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -118,4 +144,5 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
         frame.rowconfigure(5, pad=20)
+        frame.rowconfigure(6, pad=20)
 

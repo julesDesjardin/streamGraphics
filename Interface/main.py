@@ -3,19 +3,9 @@ from tkinter import ttk
 import json
 import dataWrite, WCIFParse, Settings, constants
 
-import sys
-sys.path.append('.')
-from Common import TelegramBot, Secrets
-
 BUTTONS_ROWS = 10
 BUTTONS_COLS = 5
 BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
-
-##############################################################################
-# TELEGRAM BOT
-##############################################################################
-
-bot = TelegramBot.TelegramBot(Secrets.interfaceBotToken,Secrets.interfaceCardChannelId)
 
 ##############################################################################
 # FUNCTIONS
@@ -49,7 +39,7 @@ def configureButton(button,event,round,camera,competitor,visible,row,column,bg,f
     cardData = cardData.replace('%previousRank',f"{previousRank}")
     cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
     cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
-    button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(bot,camera,cardData),bg=bg,fg=fg)
+    button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(localSettings.bot,camera,cardData),bg=bg,fg=fg)
     if visible:
         button.grid(row=row,column=column)
     else:

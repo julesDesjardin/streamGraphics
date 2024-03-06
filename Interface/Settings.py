@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
+import tkinter.filedialog
 from tkinter import ttk
 import json, urllib.request
 import Stage
@@ -22,8 +23,43 @@ class Settings:
         self.maxSeed = constants.MAX_SEED
         self.stages = []
         self.cardText = ''
+        self.botToken = ''
+        self.botChannelId = ''
         self.bot = None
     
+    def saveSettings(self):
+        saveFile = tkinter.filedialog.asksaveasfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
+        saveSettingsJson = {
+            'compId' : self.compId,
+            'maxSeed' : self.maxSeed,
+            'stages' : [(stage.backgroundColor, stage.textColor) for stage in self.stages],
+            'cardText' : self.cardText,
+            'botToken' : self.botToken,
+            'botChannelId' : self.botChannelId
+        }
+        saveFile.write(json.dumps(saveSettingsJson, indent=4))
+    
+    def loadSettings(self):
+        loadFile = tkinter.filedialog.askopenfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
+        loadSettingsJson = json.loads(loadFile.read())
+
+        self.compId = loadSettingsJson['compId']
+        self.reloadWCIF()
+        self.maxSeed = loadSettingsJson['maxSeed']
+
+        for stage in self.stages:
+            stage.hideStage()
+        self.stages = []
+        for (stageBackgroundColor, stageTextColor) in loadSettingsJson['stages']:
+            self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor))
+        for stage in self.stages:
+            stage.showStage()
+        
+        self.cardText = loadSettingsJson['cardText']
+        self.botToken = loadSettingsJson['botToken']
+        self.botChannelId = loadSettingsJson['botChannelId']
+        self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
+
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId
         try:
@@ -102,6 +138,8 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextCloseButton.pack(padx=20,pady=5)
 
     def updateTelegramSettingsCloseButton(self,token,id,window):
+        self.botToken = token
+        self.botChannelId = id
         self.bot = TelegramBot.TelegramBot(token,id)
         window.destroy()
 
@@ -136,6 +174,10 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextButton.grid(column=0, row=5)
         telegramButton = tk.Button(frame,text='Change Telegram Settings',command=self.updateTelegramSettings)
         telegramButton.grid(column=0,row=6)
+        saveButton = tk.Button(frame,text='Save Settings...',command=self.saveSettings)
+        saveButton.grid(column=0,row=7)
+        saveButton = tk.Button(frame,text='Load Settings...',command=self.loadSettings)
+        saveButton.grid(column=0,row=8)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -145,4 +187,6 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(4, pad=20)
         frame.rowconfigure(5, pad=20)
         frame.rowconfigure(6, pad=20)
+        frame.rowconfigure(7, pad=20)
+        frame.rowconfigure(8, pad=20)
 

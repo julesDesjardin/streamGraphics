@@ -10,7 +10,7 @@ import sys
 sys.path.append('.')
 from Common import TelegramBot
 
-class Settings:
+class InterfaceSettings:
 
     BG_COLOR = '#F4ECE1'
 

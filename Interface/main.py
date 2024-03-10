@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-import dataWrite, WCIFParse, Settings, constants
+import dataWrite, WCIFParse, InterfaceSettings, constants
 
 BUTTONS_ROWS = 10
 BUTTONS_COLS = 5
@@ -82,7 +82,7 @@ root.title('Stream Interface')
 # SETTINGS
 ##############################################################################
 
-localSettings = Settings.Settings(root)
+localSettings = InterfaceSettings.InterfaceSettings(root)
 localSettings.showFrame()
 
 ##############################################################################

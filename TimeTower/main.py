@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-import TimeTowerSettings, TimeTowerContent
+import TimeTowerSettings, TimeTowerContent, utils
 
 ##############################################################################
 # ROOT
@@ -23,4 +23,8 @@ localSettings.showFrame()
 localSettings.compId = 2865
 localSettings.roundId = 40414
 
-test = TimeTowerContent.TimeTowerContent(localSettings.roundId)
+test = TimeTowerContent.TimeTowerContent(localSettings.roundId, 'average')
+test.updateResults()
+
+for line in test.lines:
+    print(f'{line.fullName} ({line.smallName}) : {line.ranking}')

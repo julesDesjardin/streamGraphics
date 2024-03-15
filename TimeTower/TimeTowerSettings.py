@@ -3,8 +3,7 @@ import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk
 import json
-from gql import gql, Client
-from gql.transport.aiohttp import AIOHTTPTransport
+import utils
 
 import sys
 sys.path.append('.')
@@ -29,28 +28,23 @@ class TimeTowerSettings:
         event = fullMessageSplit[0]
         number = int(fullMessageSplit[1])
 
-        transport = AIOHTTPTransport(url="https://live.worldcubeassociation.org/api")
-
-        client = Client(transport=transport, fetch_schema_from_transport=True)
-
-        query = gql(f'''
-query MyQuery {{
-    competition(id: "{compId}") {{
-        competitionEvents {{
-            event {{
-                id
-            }}
-            rounds {{
-                id
-                number
+        query = f'''
+        query MyQuery {{
+            competition(id: "{compId}") {{
+                competitionEvents {{
+                    event {{
+                        id
+                    }}
+                    rounds {{
+                        id
+                        number
+                    }}
+                }}
             }}
         }}
-    }}
-}}
         '''
-        )
 
-        result = client.execute(query)
+        result = utils.getQueryResult(query)
         for competitionEvent in result['competition']['competitionEvents']:
             if(competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:

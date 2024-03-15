@@ -1,14 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 
-import TimeTowerSettings, timeTowerRead
+import TimeTowerSettings, TimeTowerContent
 
 ##############################################################################
 # ROOT
 ##############################################################################
 
 root = tk.Tk()
-root.title('Stream Interface')
+root.title('Stream Time Tower')
 
 ##############################################################################
 # SETTINGS
@@ -19,4 +19,8 @@ localSettings.showFrame()
 
 ##############################################################################
 
-root.mainloop()
+# root.mainloop()
+localSettings.compId = 2865
+localSettings.roundId = 40414
+
+test = TimeTowerContent.TimeTowerContent(localSettings.roundId)

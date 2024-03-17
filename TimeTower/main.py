@@ -19,7 +19,7 @@ localSettings.showFrame()
 
 ##############################################################################
 
-timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue, 150, 50, 50, 16)
+timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue, 150, 100, 50, 16)
 timeTower.updateResults()
 timeTower.showFrame()
 

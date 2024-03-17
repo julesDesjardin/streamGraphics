@@ -27,3 +27,11 @@ def getQueryResult(query):
     transport = AIOHTTPTransport(url="https://live.worldcubeassociation.org/api")
     client = Client(transport=transport, fetch_schema_from_transport=True)
     return client.execute(gql(query))
+
+def getReadableResult(result):
+    output = ''
+    if(result >= 6000):
+        output = output + f'{int(result / 6000)}:'
+    result = result % 6000
+    output = output + f'{int(result / 100):02}.{result % 100:02}'
+    return output

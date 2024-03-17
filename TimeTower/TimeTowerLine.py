@@ -5,10 +5,15 @@ import utils
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, widthName, widthResults, height, roundId, competitorId, country, name, criteria):
+    def __init__(self, canvas, widthName, widthCount, widthResult, fontName, fontCount, fontIncompleteResult, fontResult, height, roundId, competitorId, country, name, criteria):
         self.canvas = canvas
         self.widthName = widthName
-        self.widthResults = widthResults
+        self.widthCount = widthCount
+        self.widthResult = widthResult
+        self.fontName = fontName
+        self.fontCount = fontCount
+        self.fontIncompleteResult = fontIncompleteResult
+        self.fontResult = fontResult
         self.height = height
         self.roundId = roundId
         self.competitorId = competitorId
@@ -17,6 +22,10 @@ class TimeTowerLine:
         fullNameSplit = self.fullName.split(' ')
         self.smallName = (fullNameSplit[0][0] + '. ' + fullNameSplit[-1][0:3]).upper()
         self.criteria = criteria
+        if criteria == 'average':
+            self.maxResults = 5
+        else:
+            self.maxResults = 3
         self.results = []
         self.currentResult = 0
         self.ranking = 0
@@ -53,8 +62,17 @@ class TimeTowerLine:
                     self.currentResult = min(self.results)
 
     def showLine(self):
+        # Empty rectangles
         self.canvas.create_rectangle(0, (self.ranking - 1) * self.height, self.widthName, self.ranking * self.height, fill='#000', outline='')
-        self.canvas.create_rectangle(self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthResults, self.ranking * self.height, fill='#DDD', outline='')
+        self.canvas.create_rectangle(self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthCount + self.widthResult, self.ranking * self.height, fill='#DDD', outline='')
 
-        self.canvas.create_text(self.widthName / 2, (self.ranking - 1) * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=('Helvetica 15 bold'))
-        self.canvas.create_text(self.widthName + self.widthResults / 2, (self.ranking - 1) * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=('Helvetica 15 bold'))
+        # Name
+        self.canvas.create_text(self.widthName / 2, (self.ranking - 1) * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=(self.fontName))
+        # Count
+        self.canvas.create_text(self.widthName + self.widthCount / 2, (self.ranking - 1) * self.height + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill='#000', font=(self.fontCount))
+        # Result
+        if len(self.results) == self.maxResults:
+            fontResult = self.fontResult
+        else:
+            fontResult = self.fontIncompleteResult
+        self.canvas.create_text(self.widthName + self.widthCount + self.widthResult / 2, (self.ranking - 1) * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=(fontResult))

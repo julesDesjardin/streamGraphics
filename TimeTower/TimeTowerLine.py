@@ -53,8 +53,8 @@ class TimeTowerLine:
                     self.currentResult = min(self.results)
 
     def showLine(self):
-        self.canvas.create_rectangle(0, self.ranking * self.height, self.widthName, (self.ranking + 1) * self.height, fill='#000', outline='')
-        self.canvas.create_rectangle(self.widthName, self.ranking * self.height, self.widthName + self.widthResults, (self.ranking + 1) * self.height, fill='#DDD', outline='')
+        self.canvas.create_rectangle(0, (self.ranking - 1) * self.height, self.widthName, self.ranking * self.height, fill='#000', outline='')
+        self.canvas.create_rectangle(self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthResults, self.ranking * self.height, fill='#DDD', outline='')
 
-        self.canvas.create_text(self.widthName / 2, self.ranking * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=('Helvetica 15 bold'))
-        self.canvas.create_text(self.widthName + self.widthResults / 2, self.ranking * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=('Helvetica 15 bold'))
+        self.canvas.create_text(self.widthName / 2, (self.ranking - 1) * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=('Helvetica 15 bold'))
+        self.canvas.create_text(self.widthName + self.widthResults / 2, (self.ranking - 1) * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=('Helvetica 15 bold'))

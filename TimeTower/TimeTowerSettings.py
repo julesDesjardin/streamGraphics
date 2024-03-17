@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk
-import json
+import json, queue, threading
 import utils
 
 import sys
@@ -16,10 +16,10 @@ class TimeTowerSettings:
     def __init__(self,root):
         self.root = root
         self.compId = 0
-        self.roundId = 0
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
+        self.queue = queue.Queue()
 
     def botCallback(self,message,compId):
 
@@ -49,7 +49,7 @@ class TimeTowerSettings:
             if(competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:
                     if(round['number'] == number):
-                        self.roundId = int(round['id'])
+                        self.queue.put((int(round['id']), utils.CRITERIA[event]))
                         return
 
     def saveSettings(self):
@@ -70,7 +70,10 @@ class TimeTowerSettings:
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
-        self.bot.startPolling()
+        print('toto')
+        self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.start()
+        print('toto')
     
     def updateCompIdCloseButton(self,compId,window):
         try:
@@ -94,7 +97,8 @@ class TimeTowerSettings:
         self.botChannelId = id
         self.bot = TelegramBot.TelegramBot(token,id)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
-        self.bot.startPolling()
+        self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.start()
 
         window.destroy()
 

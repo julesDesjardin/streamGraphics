@@ -33,11 +33,10 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
     - [x] Previous round ranking and result
 - [ ] Get live results from a cuber + BPA, WPA, ranking (potential rankings ?)
 - [ ] Generate recap page for a group, showing who is interesting in the group (useful both for camera crew and commentary team)
-- [ ] Generate live results page
 - [x] Make it work on different computers: Use a Telegram Channel
     - [x] Make the Telegram channel ID and bot tokens a part of Settings instead of hardcoded in a Common/Secrets.py
 - [ ] Make a TimeTower
-    - [ ] Get name, results, and rank them
+    - [x] Get name, results, and rank them
     - [ ] Get flags
     - [ ] Filter by country/region
     - [ ] Animate ?

@@ -10,26 +10,26 @@ class TimeTowerContent:
         self.roundId = roundId
         self.criteria = criteria
         self.lines = []
-
-        query = f'''
-        query MyQuery {{
-        round(id: "{roundId}") {{
-            results {{
-            person {{
-                name
-                id
-                country {{
-                iso2
+        if(roundId != 0):
+            query = f'''
+            query MyQuery {{
+            round(id: "{roundId}") {{
+                results {{
+                person {{
+                    name
+                    id
+                    country {{
+                    iso2
+                    }}
+                }}
                 }}
             }}
             }}
-        }}
-        }}
-        '''
+            '''
 
-        queryResult = utils.getQueryResult(query)
-        for person in queryResult['round']['results']:
-            self.lines.append(TimeTowerLine.TimeTowerLine(roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
+            queryResult = utils.getQueryResult(query)
+            for person in queryResult['round']['results']:
+                self.lines.append(TimeTowerLine.TimeTowerLine(roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
 
     def updateResults(self):
 

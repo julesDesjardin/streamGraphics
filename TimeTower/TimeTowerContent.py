@@ -71,7 +71,7 @@ class TimeTowerContent:
             unorderedResults = []
             for line in self.lines:
                 line.updateResults(queryResult)
-                bestResult = utils.MAX_RESULT
+                bestResult = utils.DNF_ATTEMPT
                 if len(line.results) > 0:
                     bestResult = min(line.results)
                 unorderedResults.append((line.competitorId, line.currentResult, bestResult))

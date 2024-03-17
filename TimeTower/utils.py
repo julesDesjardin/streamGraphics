@@ -1,7 +1,8 @@
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
-MAX_RESULT = 10*60*100 # 10 min result
+DNF_ATTEMPT = 30*60*100 # 30 min, so an avg5/mo3 goes higher than 10 min
+DNF_RESULT = 10*60*100 # 10 min
 
 CRITERIA = dict([
     ('333','average'),
@@ -29,6 +30,8 @@ def getQueryResult(query):
     return client.execute(gql(query))
 
 def getReadableResult(result):
+    if(result >= DNF_RESULT):
+        return 'DNF'
     output = ''
     if(result >= 6000):
         output = output + f'{int(result / 6000)}:'

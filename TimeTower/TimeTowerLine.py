@@ -27,14 +27,14 @@ class TimeTowerLine:
                 self.results = []
                 for attempt in result['attempts']:
                     if attempt['result'] < 0:
-                        nonDNFResult = utils.MAX_RESULT
+                        nonDNFResult = utils.DNF_ATTEMPT
                     else:
                         nonDNFResult = attempt['result']
                     self.results.append(nonDNFResult)
         
         # Update currentResult
         if len(self.results) == 0:
-            self.currentResult = utils.MAX_RESULT
+            self.currentResult = utils.DNF_ATTEMPT
         else:
             match self.criteria:
                 case 'average':

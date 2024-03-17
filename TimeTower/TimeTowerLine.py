@@ -5,7 +5,11 @@ import utils
 
 class TimeTowerLine:
 
-    def __init__(self, roundId, competitorId, country, name, criteria):
+    def __init__(self, canvas, widthName, widthResults, height, roundId, competitorId, country, name, criteria):
+        self.canvas = canvas
+        self.widthName = widthName
+        self.widthResults = widthResults
+        self.height = height
         self.roundId = roundId
         self.competitorId = competitorId
         self.country = country
@@ -47,3 +51,10 @@ class TimeTowerLine:
                     self.currentResult = round(sum(self.results) / (len(self.results)))
                 case 'single':
                     self.currentResult = min(self.results)
+
+    def showLine(self):
+        self.canvas.create_rectangle(0, self.ranking * self.height, self.widthName, (self.ranking + 1) * self.height, fill='#000', outline='')
+        self.canvas.create_rectangle(self.widthName, self.ranking * self.height, self.widthName + self.widthResults, (self.ranking + 1) * self.height, fill='#DDD', outline='')
+
+        self.canvas.create_text(self.widthName / 2, self.ranking * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=('Helvetica 15 bold'))
+        self.canvas.create_text(self.widthName + self.widthResults / 2, self.ranking * self.height + self.height / 2, text=self.currentResult, fill='#000', font=('Helvetica 15 bold'))

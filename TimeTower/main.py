@@ -19,7 +19,8 @@ localSettings.showFrame()
 
 ##############################################################################
 
-timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue)
+timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue, 150, 50, 50, 16)
 timeTower.updateResults()
+timeTower.showFrame()
 
 root.mainloop()

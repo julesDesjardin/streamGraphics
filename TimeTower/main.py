@@ -3,28 +3,6 @@ from tkinter import ttk
 
 import TimeTowerSettings, TimeTowerContent, utils
 
-timeTower = TimeTowerContent.TimeTowerContent(0, '')
-
-##############################################################################
-# FUNCTIONS
-##############################################################################
-
-def updateResults(root, queue):
-    global timeTower
-    while True:
-        try:
-            (roundId, criteria) = queue.get(timeout=0.1)
-        except:
-            break
-        timeTower = TimeTowerContent.TimeTowerContent(roundId, criteria)
-
-    if(timeTower.roundId != 0):
-        timeTower.updateResults()
-        for line in timeTower.lines:
-            print(f'{line.fullName} ({line.smallName}) : {line.ranking}')
-
-    root.after(5000, lambda:updateResults(root, queue))
-
 ##############################################################################
 # ROOT
 ##############################################################################
@@ -41,5 +19,7 @@ localSettings.showFrame()
 
 ##############################################################################
 
-updateResults(root, localSettings.queue)
+timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue)
+timeTower.updateResults()
+
 root.mainloop()

@@ -6,9 +6,10 @@ import TimeTowerLine
 
 class TimeTowerContent:
 
-    def __init__(self, root, queue, widthName, widthCount, widthResult, fontName, fontCount, fontIncompleteResult, fontResult, height, maxNumber):
+    def __init__(self, root, queue, widthFlag, widthName, widthCount, widthResult, fontName, fontCount, fontIncompleteResult, fontResult, height, maxNumber):
         self.root = root
         self.frame = tk.Frame(root)
+        self.widthFlag = widthFlag
         self.widthName = widthName
         self.widthCount = widthCount
         self.widthResult = widthResult
@@ -17,7 +18,7 @@ class TimeTowerContent:
         self.fontIncompleteResult  = fontIncompleteResult
         self.fontResult = fontResult
         self.height = height
-        self.canvas = tk.Canvas(self.frame, width=widthName+widthCount+widthResult, height=maxNumber*height)
+        self.canvas = tk.Canvas(self.frame, width=widthFlag+widthName+widthCount+widthResult, height=maxNumber*height)
         self.queue = queue
         self.roundId = 0
         self.criteria = ''
@@ -45,7 +46,7 @@ class TimeTowerContent:
 
         queryResult = utils.getQueryResult(query)
         for person in queryResult['round']['results']:
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, self.widthName, self.widthCount, self.widthResult, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.height, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, self.widthFlag, self.widthName, self.widthCount, self.widthResult, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.height, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
 
     def updateResults(self):
 

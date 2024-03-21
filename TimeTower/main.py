@@ -19,7 +19,7 @@ localSettings.showFrame()
 
 ##############################################################################
 
-timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue, 150, 50, 100, 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 16)
+timeTower = TimeTowerContent.TimeTowerContent(root, localSettings.queue, 100, 150, 50, 100, 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 16)
 timeTower.updateResults()
 timeTower.showFrame()
 

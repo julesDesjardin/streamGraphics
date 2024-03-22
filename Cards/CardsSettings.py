@@ -47,7 +47,9 @@ class CardsSettings:
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
-        self.bot.startPolling()
+        self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.daemon = True
+        self.threadBot.start()
 
     def updateTelegramSettingsCloseButton(self,token,id,window):
         self.botToken = token
@@ -55,6 +57,7 @@ class CardsSettings:
         self.bot = TelegramBot.TelegramBot(token,id)
         self.bot.setMessageHandler(['cardData'], self.botCallback)
         self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.daemon = True
         self.threadBot.start()
         window.destroy()
 

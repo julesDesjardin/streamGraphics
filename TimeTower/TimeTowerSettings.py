@@ -71,6 +71,7 @@ class TimeTowerSettings:
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.daemon = True
         self.threadBot.start()
     
     def updateCompIdCloseButton(self,compId,window):
@@ -96,6 +97,7 @@ class TimeTowerSettings:
         self.bot = TelegramBot.TelegramBot(token,id)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
+        self.threadBot.daemon = True
         self.threadBot.start()
 
         window.destroy()

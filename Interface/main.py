@@ -71,6 +71,13 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
                     configureButton(buttonsLeft[buttonIndex], event, round, 0, (0, 0, ''), False, i, j, bg, fg)
                     configureButton(buttonsRight[buttonIndex], event, round, 1, (0, 0, ''), False, i + 1, j, bg, fg)
 
+def OKButtonCommand(updateTimeTower,settings,buttonsLeft,buttonsRight):
+    if updateTimeTower:
+        event = settings.stages[0].eventVar.get()
+        round = settings.stages[0].roundVar.get()
+        dataWrite.sendTimeTowerEvent(settings.bot,constants.EVENTS[event],round)
+    updateCubers(settings,buttonsLeft,buttonsRight)
+
 ##############################################################################
 # ROOT
 ##############################################################################
@@ -121,7 +128,10 @@ for i in range(0,BUTTONS_COUNT):
 
 OKFrame = tk.Frame(root)
 OKFrame.pack(side=tk.BOTTOM,pady=20)
-OKButton = tk.Button(OKFrame, text="OK", command=lambda:updateCubers(localSettings,buttonsLeft,buttonsRight))
+TimeTowerVariable = tk.IntVar()
+TimeTowerCheckbox = tk.Checkbutton(OKFrame, text="Update TimeTower", variable=TimeTowerVariable)
+TimeTowerCheckbox.pack()
+OKButton = tk.Button(OKFrame, text="OK", command=lambda:OKButtonCommand(TimeTowerVariable.get(),localSettings,buttonsLeft,buttonsRight))
 OKButton.pack()
 
 ##############################################################################

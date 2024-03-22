@@ -7,3 +7,6 @@ def resultToString(result):
 
 def sendCardData(bot,camera,data):
     bot.sendMessage(f'/cardData {camera} {data}')
+
+def sendTimeTowerEvent(bot,event,round):
+    bot.sendMessage(f'/timeTowerEvent {event} {round}')

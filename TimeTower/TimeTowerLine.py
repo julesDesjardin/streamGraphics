@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import json
+import os
 import utils
 from urllib.request import urlopen
 
@@ -70,9 +70,12 @@ class TimeTowerLine:
         self.canvas.create_rectangle(self.widthFlag + self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthName + self.widthCount + self.widthResult, self.ranking * self.height, fill='#DDD', outline='')
 
         # Flag
-        image_url = f'https://flagcdn.com/w320/{self.country.lower()}.png'
-        image_byt = urlopen(image_url).read()
-        flagImageFull = tk.PhotoImage(data=image_byt)
+        if utils.DEBUG_MODE_LOCAL_FLAG:
+            flagImageFull = tk.PhotoImage(file=f'{os.path.dirname(__file__)}/us.png')
+        else:
+            image_url = f'https://flagcdn.com/w320/{self.country.lower()}.png'
+            image_byt = urlopen(image_url).read()
+            flagImageFull = tk.PhotoImage(data=image_byt)
         flagFullWidth = flagImageFull.width()
         flagFullHeight = flagImageFull.height()
         self.flagImage = flagImageFull.zoom(self.widthFlag, self.height).subsample(flagFullWidth, flagFullHeight) # Resize

@@ -1,6 +1,15 @@
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
+##############################################################################
+# DEBUG
+##############################################################################
+
+DEBUG_MODE_LOCAL_FLAG = False # Default : False, put to True to use local USA flag as placeholder to reduce data usage
+DEBUG_MODE_LOCALHOST_LIVE = False # Default : False, put to True to use a local WCA Live for testing/developing
+
+##############################################################################
+
 DNF_ATTEMPT = 30*60*100 # 30 min, so an avg5/mo3 goes higher than 10 min
 DNF_RESULT = 10*60*100 # 10 min
 
@@ -25,7 +34,11 @@ CRITERIA = dict([
 ])
 
 def getQueryResult(query):
-    transport = AIOHTTPTransport(url="https://live.worldcubeassociation.org/api")
+    if(DEBUG_MODE_LOCALHOST_LIVE):
+        url = 'localhost:4000'
+    else:
+        url = 'https://live.worldcubeassociation.org/api'
+    transport = AIOHTTPTransport(url=url)
     client = Client(transport=transport, fetch_schema_from_transport=True)
     return client.execute(gql(query))
 

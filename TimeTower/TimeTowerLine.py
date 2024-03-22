@@ -6,10 +6,12 @@ from urllib.request import urlopen
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, widthFlag, widthName, widthCount, widthResult, fontName, fontCount, fontIncompleteResult, fontResult, height, roundId, competitorId, country, name, criteria):
+    def __init__(self, canvas, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontName, fontCount, fontIncompleteResult, fontResult, height, roundId, competitorId, country, name, criteria):
         self.canvas = canvas
         self.flagImage = None
+        self.widthFlagRectangle = widthFlagRectangle
         self.widthFlag = widthFlag
+        self.heightFlag = heightFlag
         self.widthName = widthName
         self.widthCount = widthCount
         self.widthResult = widthResult
@@ -66,8 +68,8 @@ class TimeTowerLine:
 
     def showLine(self):
         # Empty rectangles
-        self.canvas.create_rectangle(0, (self.ranking - 1) * self.height, self.widthFlag + self.widthName, self.ranking * self.height, fill='#000', outline='')
-        self.canvas.create_rectangle(self.widthFlag + self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthName + self.widthCount + self.widthResult, self.ranking * self.height, fill='#DDD', outline='')
+        self.canvas.create_rectangle(0, (self.ranking - 1) * self.height, self.widthFlagRectangle + self.widthName, self.ranking * self.height, fill='#000', outline='')
+        self.canvas.create_rectangle(self.widthFlagRectangle + self.widthName, (self.ranking - 1) * self.height, self.widthName + self.widthName + self.widthCount + self.widthResult, self.ranking * self.height, fill='#DDD', outline='')
 
         # Flag
         if utils.DEBUG_MODE_LOCAL_FLAG:
@@ -78,16 +80,16 @@ class TimeTowerLine:
             flagImageFull = tk.PhotoImage(data=image_byt)
         flagFullWidth = flagImageFull.width()
         flagFullHeight = flagImageFull.height()
-        self.flagImage = flagImageFull.zoom(self.widthFlag, self.height).subsample(flagFullWidth, flagFullHeight) # Resize
-        self.canvas.create_image(self.widthFlag / 2, (self.ranking - 1) * self.height + self.height / 2, image=self.flagImage)
+        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight) # Resize
+        self.canvas.create_image(self.widthFlagRectangle / 2, (self.ranking - 1) * self.height + self.height / 2, image=self.flagImage)
 
         # Name
-        self.canvas.create_text(self.widthFlag + self.widthName / 2, (self.ranking - 1) * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=(self.fontName))
+        self.canvas.create_text(self.widthFlagRectangle + self.widthName / 2, (self.ranking - 1) * self.height + self.height / 2, text=self.smallName, fill='#FFF', font=(self.fontName))
         # Count
-        self.canvas.create_text(self.widthFlag + self.widthName + self.widthCount / 2, (self.ranking - 1) * self.height + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill='#000', font=(self.fontCount))
+        self.canvas.create_text(self.widthFlagRectangle + self.widthName + self.widthCount / 2, (self.ranking - 1) * self.height + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill='#000', font=(self.fontCount))
         # Result
         if len(self.results) == self.maxResults:
             fontResult = self.fontResult
         else:
             fontResult = self.fontIncompleteResult
-        self.canvas.create_text(self.widthFlag + self.widthName + self.widthCount + self.widthResult / 2, (self.ranking - 1) * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=(fontResult))
+        self.canvas.create_text(self.widthFlagRectangle + self.widthName + self.widthCount + self.widthResult / 2, (self.ranking - 1) * self.height + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=(fontResult))

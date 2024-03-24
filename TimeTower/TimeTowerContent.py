@@ -6,7 +6,7 @@ import TimeTowerLine
 
 class TimeTowerContent:
 
-    def __init__(self, root, queue, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, maxNumber):
+    def __init__(self, root, queue, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, maxNumber, reloadDelay):
         self.root = root
         self.frame = tk.Frame(root)
         self.widthRanking = widthRanking
@@ -28,6 +28,7 @@ class TimeTowerContent:
         self.roundId = 0
         self.criteria = ''
         self.lines = []
+        self.reloadDelay = reloadDelay
     
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
@@ -94,7 +95,7 @@ class TimeTowerContent:
         self.canvas.delete('all')
         for line in self.lines:
             line.showLine()
-        self.root.after(5000, lambda:self.updateResults())
+        self.root.after(self.reloadDelay, lambda:self.updateResults())
 
     def showFrame(self):
         self.canvas.pack()

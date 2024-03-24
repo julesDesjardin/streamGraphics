@@ -46,7 +46,7 @@ class CardsSettings:
         self.botToken = loadSettingsJson['botToken']
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
-        self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
+        self.bot.setMessageHandler(['cardData'], lambda message:self.botCallback(message, self.compId))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()

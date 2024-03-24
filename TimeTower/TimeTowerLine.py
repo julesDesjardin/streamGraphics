@@ -38,6 +38,16 @@ class TimeTowerLine:
         self.currentResult = 0
         self.ranking = 0
 
+        if utils.DEBUG_MODE_LOCAL_FLAG:
+            flagImageFull = tk.PhotoImage(file=f'{os.path.dirname(__file__)}/us.png')
+        else:
+            image_url = f'https://flagcdn.com/w320/{self.country.lower()}.png'
+            image_byt = urlopen(image_url).read()
+            flagImageFull = tk.PhotoImage(data=image_byt)
+        flagFullWidth = flagImageFull.width()
+        flagFullHeight = flagImageFull.height()
+        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight) # Resize
+
     def updateResults(self, queryResult):
         for result in queryResult['round']['results']:
             if result['person']['id'] == self.competitorId:
@@ -80,15 +90,6 @@ class TimeTowerLine:
 
         # Flag
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFlagRectangle, currentY + self.height, fill='#000', outline='')
-        if utils.DEBUG_MODE_LOCAL_FLAG:
-            flagImageFull = tk.PhotoImage(file=f'{os.path.dirname(__file__)}/us.png')
-        else:
-            image_url = f'https://flagcdn.com/w320/{self.country.lower()}.png'
-            image_byt = urlopen(image_url).read()
-            flagImageFull = tk.PhotoImage(data=image_byt)
-        flagFullWidth = flagImageFull.width()
-        flagFullHeight = flagImageFull.height()
-        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight) # Resize
         self.canvas.create_image(currentX + self.widthFlagRectangle / 2, currentY + self.height / 2, image=self.flagImage)
         currentX = currentX + self.widthFlagRectangle
 

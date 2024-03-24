@@ -35,7 +35,7 @@ CRITERIA = dict([
 
 def getQueryResult(query):
     if(DEBUG_MODE_LOCALHOST_LIVE):
-        url = 'localhost:4000'
+        url = 'http://localhost:4000/api'
     else:
         url = 'https://live.worldcubeassociation.org/api'
     transport = AIOHTTPTransport(url=url)

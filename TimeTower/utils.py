@@ -23,7 +23,7 @@ CRITERIA = dict([
     ('333bf','single'),
     ('333fm','mean'),
     ('333oh','average'),
-    ('clk','average'),
+    ('clock','average'),
     ('minx','average'),
     ('pyram','average'),
     ('skewb','average'),

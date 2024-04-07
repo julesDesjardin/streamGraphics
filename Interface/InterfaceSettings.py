@@ -6,8 +6,8 @@ import json, urllib.request
 import Stage
 import constants
 
-import sys
-sys.path.append('.')
+import sys, os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
 
 class InterfaceSettings:

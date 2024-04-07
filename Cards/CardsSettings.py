@@ -6,8 +6,8 @@ import json, queue, threading
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
-import sys
-sys.path.append('.')
+import sys, os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
 
 class CardsSettings:

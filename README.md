@@ -10,6 +10,8 @@ This is firstly aimed towards Euro 2024, but I hope to be able to quickly publis
 
 ### Todo-list
 
+[Google Sheets with deadlines](https://docs.google.com/spreadsheets/d/1NyOFqkn8wd3MUwsVURFHJPGzXx22HR3kDGemK3fnU-s/edit?usp=sharing)
+
 - [x] Prototype with a few cubers
 - [x] Ability to fetch WCIF from the WCA with a given comp ID
 - [x] Automatically update menus to show available rounds and groups for each event

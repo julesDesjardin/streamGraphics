@@ -14,22 +14,21 @@ class CardsSettings:
 
     BG_COLOR = '#F4ECE1'
 
-    def __init__(self,root):
+    def __init__(self,root,camerasCount):
         self.root = root
+        self.camerasCount = camerasCount
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
-        self.queueLeft = queue.Queue()
-        self.queueRight = queue.Queue()
+        self.queues = []
+        for i in range(0, camerasCount):
+            self.queues.append(queue.Queue())
 
     def botCallback(self, message):
         fullMessage = message.text.removeprefix('/cardData ')
-        camera = fullMessage[0]
+        camera = int(fullMessage[0])
         data = fullMessage[2:]
-        if camera == '0':
-            self.queueLeft.put(data)
-        elif camera == '1':
-            self.queueRight.put(data)
+        self.queues[camera].put(data)
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')

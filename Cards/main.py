@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import CardsSettings
 
+CAMERAS_COUNT = 4
+
 ##############################################################################
 # FUNCTIONS
 ##############################################################################
@@ -15,9 +17,9 @@ def checkQueue(root, queue, canvas, text):
         canvas.itemconfig(text, text=data)
     root.after(1000, lambda:checkQueue(root, queue, canvas, text))
 
-def checkBothQueues(root, queueLeft, queueRight, canvasLeft, canvasRight, textLeft, textRight):
-    checkQueue(root, queueLeft, canvasLeft, textLeft)
-    checkQueue(root, queueRight, canvasRight, textRight)
+def checkAllQueues(root, queues, canvases, texts):
+    for i in range(0, CAMERAS_COUNT):
+        checkQueue(root, queues[i], canvases[i], texts[i])
 
 ##############################################################################
 # ROOT
@@ -30,7 +32,7 @@ root.title('Stream Cards')
 # SETTINGS
 ##############################################################################
 
-localSettings = CardsSettings.CardsSettings(root)
+localSettings = CardsSettings.CardsSettings(root, CAMERAS_COUNT)
 localSettings.showFrame()
 
 ##############################################################################
@@ -44,15 +46,15 @@ width = 1000
 height = 3000
 fontSize = 100
 
-canvasLeft = tk.Canvas(main, width=width, height=height, background='#ff00ff')
-canvasRight = tk.Canvas(main, width=width, height=height, background='#ff00ff')
-textLeft = canvasLeft.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='nw')
-textRight = canvasRight.create_text(100, 100, font=f'Helvetica {fontSize}', text='Bonjour', anchor='nw')
-canvasLeft.pack(side=tk.LEFT)
-canvasRight.pack(side=tk.LEFT)
+canvases = []
+texts = []
+for i in range(0, CAMERAS_COUNT):
+    canvases.append(tk.Canvas(main, width=width, height=height, background='#ff00ff'))
+    texts.append(canvases[i].create_text(100, 100, font=f'Helvetica {fontSize}', text=f'Camera {i+1} text', anchor='nw'))
+    canvases[i].pack(side=tk.LEFT)
 
 ##############################################################################
 
-checkBothQueues(root, localSettings.queueLeft, localSettings.queueRight, canvasLeft, canvasRight, textLeft, textRight)
+checkAllQueues(root, localSettings.queues, canvases, texts)
 
 root.mainloop()

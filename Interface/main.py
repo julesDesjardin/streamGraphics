@@ -6,6 +6,9 @@ import dataWrite, WCIFParse, InterfaceSettings, constants
 BUTTONS_ROWS = 10
 BUTTONS_COLS = 5
 BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
+CAMERAS_ROWS = 2
+CAMERAS_COLS = 2
+CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
 
 ##############################################################################
 # FUNCTIONS
@@ -45,7 +48,7 @@ def configureButton(button,event,round,camera,competitor,visible,row,column,bg,f
     else:
         button.grid_forget()
 
-def updateCubers(settings,buttonsLeft,buttonsRight):
+def updateCubers(settings,buttons):
     activities = WCIFParse.getActivities(settings.wcif)
     index = 0
     for stage in settings.stages:
@@ -64,19 +67,19 @@ def updateCubers(settings,buttonsLeft,buttonsRight):
                 while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
                     index = index + 1
                 if index < len(fullCompetitors):
-                    configureButton(buttonsLeft[buttonIndex], event, round, 0, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
-                    configureButton(buttonsRight[buttonIndex], event, round, 1, fullCompetitors[index], True, i + 1, j, bg, fg)
+                    for camera in range(0,CAMERAS_COUNT):
+                        configureButton(buttons[camera][buttonIndex], event, round, camera, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
                     index = index + 1
                 else:
-                    configureButton(buttonsLeft[buttonIndex], event, round, 0, (0, 0, ''), False, i, j, bg, fg)
-                    configureButton(buttonsRight[buttonIndex], event, round, 1, (0, 0, ''), False, i + 1, j, bg, fg)
+                    for camera in range(0,CAMERAS_COUNT):
+                        configureButton(buttons[camera][buttonIndex], event, round, camera, (0, 0, ''), False, i, j, bg, fg)
 
-def OKButtonCommand(updateTimeTower,settings,buttonsLeft,buttonsRight):
+def OKButtonCommand(updateTimeTower,settings,buttons):
     if updateTimeTower:
         event = settings.stages[0].eventVar.get()
         round = settings.stages[0].roundVar.get()
         dataWrite.sendTimeTowerEvent(settings.bot,constants.EVENTS[event],round)
-    updateCubers(settings,buttonsLeft,buttonsRight)
+    updateCubers(settings,buttons)
 
 ##############################################################################
 # ROOT
@@ -99,28 +102,27 @@ localSettings.showFrame()
 main = tk.Frame(root)
 main.pack(side=tk.TOP,padx=50,pady=50)
 
-frameLeft = tk.Frame(main,highlightbackground='black',highlightthickness=2)
-frameRight = tk.Frame(main,highlightbackground='black',highlightthickness=2)
-for i in range(0,BUTTONS_COLS):
-    frameLeft.columnconfigure(i, pad=5)
-    frameRight.columnconfigure(i, pad=5)
-for i in range(0,BUTTONS_ROWS):
-    frameLeft.rowconfigure(i, pad=5)
-    frameRight.rowconfigure(i, pad=5)
-frameLeft.pack(side=tk.LEFT)
-frameRight.pack(side=tk.LEFT)
+framesButtons = []
+labelsButtons = []
+buttons = []
+for camera in range(0, CAMERAS_COUNT):
+    framesButtons.append(tk.Frame(main,highlightbackground='black',highlightthickness=2))
+    labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
+    labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
+    buttons.append([])
+    for button in range(0,BUTTONS_COLS):
+        framesButtons[camera].columnconfigure(button, pad=5)
+    for button in range(0,BUTTONS_ROWS):
+        framesButtons[camera].rowconfigure(button, pad=5)
+
+    for button in range(0,BUTTONS_COUNT):
+        buttons[camera].append(tk.Button(framesButtons[camera],height=3,width=15,anchor=tk.W,justify=tk.LEFT))
+
+for cameraRow in range(0,CAMERAS_ROWS):
+    for cameraCol in range(0,CAMERAS_COLS):
+        framesButtons[cameraRow*CAMERAS_COLS + cameraCol].grid(column=cameraCol, row=cameraRow)
 
 ttk.Style().configure("TButton", padding=6, relief="flat", background="#ccc")
-
-labelLeft = tk.Label(frameLeft,text='Cuber on left camera')
-labelLeft.grid(column=0, row=0, columnspan=BUTTONS_COLS)
-labelRight = tk.Label(frameRight,text='Cuber on right camera')
-labelRight.grid(column=0, row=0, columnspan=BUTTONS_COLS)
-buttonsLeft = []
-buttonsRight = []
-for i in range(0,BUTTONS_COUNT):
-    buttonsLeft.append(tk.Button(frameLeft,height=3,width=15,anchor=tk.W,justify=tk.LEFT))
-    buttonsRight.append(tk.Button(frameRight,height=3,width=15,anchor=tk.W,justify=tk.LEFT))
 
 ##############################################################################
 # CHOOSE GROUP
@@ -131,7 +133,7 @@ OKFrame.pack(side=tk.BOTTOM,pady=20)
 TimeTowerVariable = tk.IntVar()
 TimeTowerCheckbox = tk.Checkbutton(OKFrame, text="Update TimeTower", variable=TimeTowerVariable)
 TimeTowerCheckbox.pack()
-OKButton = tk.Button(OKFrame, text="OK", command=lambda:OKButtonCommand(TimeTowerVariable.get(),localSettings,buttonsLeft,buttonsRight))
+OKButton = tk.Button(OKFrame, text="OK", command=lambda:OKButtonCommand(TimeTowerVariable.get(),localSettings,buttons))
 OKButton.pack()
 
 ##############################################################################

@@ -68,11 +68,11 @@ def updateCubers(settings,buttons):
                     index = index + 1
                 if index < len(fullCompetitors):
                     for camera in range(0,CAMERAS_COUNT):
-                        configureButton(buttons[camera][buttonIndex], event, round, camera, fullCompetitors[index], True, i + 1, j, bg, fg) # + 1 because row 0 is for label
+                        configureButton(buttons[camera][buttonIndex], event, round, camera, fullCompetitors[index], True, i + 2, j, bg, fg) # + 2 because row 0 is for label and row 1 is for clean
                     index = index + 1
                 else:
                     for camera in range(0,CAMERAS_COUNT):
-                        configureButton(buttons[camera][buttonIndex], event, round, camera, (0, 0, ''), False, i, j, bg, fg)
+                        configureButton(buttons[camera][buttonIndex], event, round, camera, (0, 0, ''), False, i + 2, j, bg, fg)
 
 def OKButtonCommand(updateTimeTower,settings,buttons):
     if updateTimeTower:
@@ -105,12 +105,16 @@ main.pack(side=tk.TOP,padx=50,pady=50)
 framesButtons = []
 labelsButtons = []
 buttons = []
+cleanButtons = []
 for camera in range(0, CAMERAS_COUNT):
     framesButtons.append(tk.Frame(main,highlightbackground='black',highlightthickness=2))
     labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
     labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
+    cleanButtons.append(tk.Button(framesButtons[camera]))
+    cleanButtons[camera].configure(text=f'Clean',command=lambda localCamera=camera:dataWrite.sendCardData(localSettings.bot,localCamera,'')) # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
+    cleanButtons[camera].grid(column=0, row=1, columnspan=BUTTONS_COLS)
     buttons.append([])
-    for button in range(0,BUTTONS_COLS):
+    for button in range(0,BUTTONS_COLS+2):
         framesButtons[camera].columnconfigure(button, pad=5)
     for button in range(0,BUTTONS_ROWS):
         framesButtons[camera].rowconfigure(button, pad=5)

@@ -1,10 +1,11 @@
 ### Stream Graphics
 
-This python project is composed of 2 programs:
+This python project is composed of 3 programs:
 - An interface program
-- A display program
+- A cards program
+- A time tower program
 
-The goal is to be able to show info (name, PRs, results, previous round...) while streaming a solve, either online or on a screen. This will also include a program to show the live results of a whole round.
+The goal is to be able to show info (name, PRs, results, previous round...) while streaming a solve, either online or on a screen. The time tower shows the live results of a whole round, mostly for live scoretaken finals (also works for first rounds results).
 
 This is firstly aimed towards Euro 2024, but I hope to be able to quickly publish it so anyone can use it in their comps. I am also making it as configurable as possible to help achieve this.
 

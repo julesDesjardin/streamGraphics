@@ -6,7 +6,7 @@ import TimeTowerLine
 
 class TimeTowerContent:
 
-    def __init__(self, root, queue, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, maxNumber, reloadDelay):
+    def __init__(self, root, queue, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
         self.root = root
         self.frame = tk.Frame(root)
         self.widthRanking = widthRanking
@@ -25,10 +25,11 @@ class TimeTowerContent:
         self.heightSeparator = heightSeparator
         self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthName + widthCount + widthResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
         self.queue = queue
-        self.roundId = 0
-        self.criteria = ''
+        self.roundId = roundId
+        self.criteria = criteria
         self.lines = []
         self.reloadDelay = reloadDelay
+        self.stop = 0
     
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
@@ -95,7 +96,8 @@ class TimeTowerContent:
         self.canvas.delete('all')
         for line in self.lines:
             line.showLine()
-        self.root.after(self.reloadDelay, lambda:self.updateResults())
+        if self.stop == 0:
+            self.root.after(self.reloadDelay, lambda:self.updateResults())
 
     def showFrame(self):
         self.canvas.pack()

@@ -8,6 +8,7 @@ import utils
 import sys, os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
+import TimeTowerContent
 
 class TimeTowerSettings:
 
@@ -16,10 +17,12 @@ class TimeTowerSettings:
     def __init__(self,root):
         self.root = root
         self.compId = 0
+        self.delay = 0
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
         self.queue = queue.Queue()
+        self.content = None
 
     def botCallback(self,message,compId):
 
@@ -56,6 +59,7 @@ class TimeTowerSettings:
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
             'compId' : self.compId,
+            'delay' : self.delay,
             'botToken' : self.botToken,
             'botChannelId' : self.botChannelId
         }
@@ -66,6 +70,7 @@ class TimeTowerSettings:
         loadSettingsJson = json.loads(loadFile.read())
 
         self.compId = loadSettingsJson['compId']
+        self.delay = loadSettingsJson['delay']
         self.botToken = loadSettingsJson['botToken']
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
@@ -73,6 +78,15 @@ class TimeTowerSettings:
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()
+        roundId = 0
+        criteria = ''
+        if self.content is not None:
+            self.content.stop = 1
+            roundId = self.content.roundId
+            criteria = self.content.criteria
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 10, 16, self.delay, roundId, criteria)
+        self.content.updateResults()
+        self.content.showFrame()
     
     def updateCompIdCloseButton(self,compId,window):
         try:
@@ -91,6 +105,33 @@ class TimeTowerSettings:
         compIdEntry.pack(padx=20,pady=5)
         compIdCloseButton = tk.Button(compIdWindow,text='Update ID',command=lambda:self.updateCompIdCloseButton(compIdEntry.get(),compIdWindow))
         compIdCloseButton.pack(padx=20,pady=5)
+
+    def updateDelayCloseButton(self,delay,window):
+        try:
+            self.delay = int(delay)
+        except:
+             tkinter.messagebox.showerror(title='Delay Error !', message='The delay must be a whole number ! (No units needed)')
+        else:
+            roundId = 0
+            criteria = ''
+            if self.content is not None:
+                self.content.stop = 1
+                roundId = self.content.roundId
+                criteria = self.content.criteria
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 10, 16, self.delay, roundId, criteria)
+            self.content.updateResults()
+            self.content.showFrame()
+            window.destroy()
+
+    def updateDelay(self):
+        delayWindow = tk.Toplevel(self.root)
+        delayLabel = tk.Label(delayWindow,text='Please enter the delay (in ms) between 2 consecutive fetches to Live.\nPlease take into account that this does NOT include the time needed to retrieve data from Live and display it.')
+        delayLabel.pack(padx=20,pady=5)
+        delayEntry = tk.Entry(delayWindow,width=50)
+        delayEntry.insert(0, self.delay)
+        delayEntry.pack(padx=20,pady=5)
+        delayCloseButton = tk.Button(delayWindow,text='Update delay',command=lambda:self.updateDelayCloseButton(delayEntry.get(),delayWindow))
+        delayCloseButton.pack(padx=20,pady=5)
 
     def updateTelegramSettingsCloseButton(self,token,id,window):
         self.botToken = token
@@ -126,12 +167,14 @@ class TimeTowerSettings:
         settingsLabel.grid(column=0,row=0)
         compIdButton = tk.Button(frame,text='Update competition ID',command=self.updateCompId)
         compIdButton.grid(column=0,row=1)
+        delayButton = tk.Button(frame,text='Update refresh delay',command=self.updateDelay)
+        delayButton.grid(column=0,row=2)
         telegramButton = tk.Button(frame,text='Change Telegram Settings',command=self.updateTelegramSettings)
-        telegramButton.grid(column=0,row=2)
+        telegramButton.grid(column=0,row=3)
         saveButton = tk.Button(frame,text='Save Settings...',command=self.saveSettings)
-        saveButton.grid(column=0,row=3)
-        saveButton = tk.Button(frame,text='Load Settings...',command=self.loadSettings)
         saveButton.grid(column=0,row=4)
+        saveButton = tk.Button(frame,text='Load Settings...',command=self.loadSettings)
+        saveButton.grid(column=0,row=5)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -139,3 +182,4 @@ class TimeTowerSettings:
         frame.rowconfigure(2, pad=20)
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
+        frame.rowconfigure(5, pad=20)

@@ -22,7 +22,7 @@ def configureButton(button,event,round,camera,competitor,visible,row,column,bg,f
     id = competitor[0]
     seed = competitor[1]
     name = competitor[2]
-    previousRank = WCIFParse.getRoundRank(localSettings.wcif,id,event,round)
+    previousRank = WCIFParse.getRoundRank(localSettings.wcif,id,event,previousRound)
     extraButtonText = f'Seed {seed}'
     if previousRank is not None:
         extraButtonText = extraButtonText + f', Placed {previousRank}'

@@ -6,8 +6,10 @@ from urllib.request import urlopen
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, roundId, competitorId, country, name, criteria):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, country, name, criteria):
         self.canvas = canvas
+        self.bgName = bgName
+        self.bgResult = bgResult
         self.flagImage = None
         self.widthRanking = widthRanking
         self.widthFlagRectangle = widthFlagRectangle
@@ -21,6 +23,8 @@ class TimeTowerLine:
         self.fontCount = fontCount
         self.fontIncompleteResult = fontIncompleteResult
         self.fontResult = fontResult
+        self.colorName = colorName
+        self.colorResult = colorResult
         self.height = height
         self.heightSeparator = heightSeparator
         self.roundId = roundId
@@ -84,23 +88,23 @@ class TimeTowerLine:
         currentY = (self.ranking - 1) * (self.height + self.heightSeparator)
         
         # Ranking
-        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthRanking, currentY + self.height, fill='#000', outline='')
-        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2, text=self.ranking, fill='#FFF', font=(self.fontRanking))
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthRanking, currentY + self.height, fill=self.bgName, outline='')
+        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2, text=self.ranking, fill=self.colorName, font=(self.fontRanking))
         currentX = currentX + self.widthRanking
 
         # Flag
-        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFlagRectangle, currentY + self.height, fill='#000', outline='')
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFlagRectangle, currentY + self.height, fill=self.bgName, outline='')
         self.canvas.create_image(currentX + self.widthFlagRectangle / 2, currentY + self.height / 2, image=self.flagImage)
         currentX = currentX + self.widthFlagRectangle
 
         # Name
-        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill='#000', outline='')
-        self.canvas.create_text(currentX + self.widthName / 2, currentY + self.height / 2, text=self.smallName, fill='#FFF', font=(self.fontName))
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill=self.bgName, outline='')
+        self.canvas.create_text(currentX + self.widthName / 2, currentY + self.height / 2, text=self.smallName, fill=self.colorName, font=(self.fontName))
         currentX = currentX + self.widthName
 
         # Count
-        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthCount, currentY + self.height, fill='#AAA', outline='')
-        self.canvas.create_text(currentX + self.widthCount / 2, currentY + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill='#000', font=(self.fontCount))
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthCount, currentY + self.height, fill=self.bgResult, outline='')
+        self.canvas.create_text(currentX + self.widthCount / 2, currentY + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill=self.colorResult, font=(self.fontCount))
         currentX = currentX + self.widthCount
 
         # Result
@@ -108,6 +112,6 @@ class TimeTowerLine:
             fontResult = self.fontResult
         else:
             fontResult = self.fontIncompleteResult
-        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthResult, currentY + self.height, fill='#AAA', outline='')
-        self.canvas.create_text(currentX + self.widthResult / 2, currentY + self.height / 2, text=utils.getReadableResult(self.currentResult), fill='#000', font=(fontResult))
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthResult, currentY + self.height, fill=self.bgResult, outline='')
+        self.canvas.create_text(currentX + self.widthResult / 2, currentY + self.height / 2, text=utils.getReadableResult(self.currentResult), fill=self.colorResult, font=(fontResult))
         currentX = currentX + self.widthResult

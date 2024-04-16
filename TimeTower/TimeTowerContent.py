@@ -2,13 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 import json
 import utils
-import TimeTowerLine
+import TimeTowerLine, constants
 
 class TimeTowerContent:
 
-    def __init__(self, root, queue, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
+    def __init__(self, root, queue, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
         self.root = root
         self.frame = tk.Frame(root)
+        self.region = region
+        self.bgLocalName = bgLocalName
+        self.bgLocalResult = bgLocalResult
+        self.bgForeignerName = bgForeignerName
+        self.bgForeignerResult = bgForeignerResult
         self.widthRanking = widthRanking
         self.widthFlagRectangle = widthFlagRectangle
         self.widthFlag = widthFlag
@@ -21,6 +26,10 @@ class TimeTowerContent:
         self.fontCount = fontCount
         self.fontIncompleteResult  = fontIncompleteResult
         self.fontResult = fontResult
+        self.colorLocalName = colorLocalName
+        self.colorLocalResult = colorLocalResult
+        self.colorForeignerName = colorForeignerName
+        self.colorForeignerResult = colorForeignerResult
         self.height = height
         self.heightSeparator = heightSeparator
         self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthName + widthCount + widthResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
@@ -53,7 +62,17 @@ class TimeTowerContent:
 
         queryResult = utils.getQueryResult(query)
         for person in queryResult['round']['results']:
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
+            if self.region == 'World' or self.region in constants.COUNTRIES[person['person']['country']['iso2']]:
+                bgName = self.bgLocalName
+                bgResult = self.bgLocalResult
+                colorName = self.colorLocalName
+                colorResult = self.colorLocalResult
+            else:
+                bgName = self.bgForeignerName
+                bgResult = self.bgForeignerResult
+                colorName = self.colorForeignerName
+                colorResult = self.colorForeignerResult
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
 
     def updateResults(self):
 

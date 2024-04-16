@@ -8,7 +8,7 @@ import utils
 import sys, os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
-import TimeTowerContent
+import TimeTowerContent, constants
 
 class TimeTowerSettings:
 
@@ -18,6 +18,7 @@ class TimeTowerSettings:
         self.root = root
         self.compId = 0
         self.delay = 0
+        self.region = 'World'
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -60,6 +61,7 @@ class TimeTowerSettings:
         saveSettingsJson = {
             'compId' : self.compId,
             'delay' : self.delay,
+            'region' : self.region,
             'botToken' : self.botToken,
             'botChannelId' : self.botChannelId
         }
@@ -71,6 +73,7 @@ class TimeTowerSettings:
 
         self.compId = loadSettingsJson['compId']
         self.delay = loadSettingsJson['delay']
+        self.region = loadSettingsJson['region']
         self.botToken = loadSettingsJson['botToken']
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
@@ -84,7 +87,7 @@ class TimeTowerSettings:
             self.content.stop = 1
             roundId = self.content.roundId
             criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 10, 16, self.delay, roundId, criteria)
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#AAA', '#666', '#DDD', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
         self.content.updateResults()
         self.content.showFrame()
     
@@ -118,7 +121,7 @@ class TimeTowerSettings:
                 self.content.stop = 1
                 roundId = self.content.roundId
                 criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 50, 10, 16, self.delay, roundId, criteria)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#AAA', '#666', '#DDD', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
             self.content.updateResults()
             self.content.showFrame()
             window.destroy()
@@ -132,6 +135,27 @@ class TimeTowerSettings:
         delayEntry.pack(padx=20,pady=5)
         delayCloseButton = tk.Button(delayWindow,text='Update delay',command=lambda:self.updateDelayCloseButton(delayEntry.get(),delayWindow))
         delayCloseButton.pack(padx=20,pady=5)
+
+    def checkRegionSeparator(self,regionBox):
+        if regionBox.get() == constants.SEPARATOR:
+            regionBox.set('World')
+
+    def updateRegionCloseButton(self,region,window):
+        self.region = region
+        window.destroy()
+
+    def updateRegion(self):
+        regionWindow = tk.Toplevel(self.root)
+        regionLabel = tk.Label(regionWindow,text='Please choose a region (country or continent) if you want local competitors to be highlighted, so you can see the local results more easily.\nThe "World" option highlights everyone the same.')
+        regionLabel.pack(padx=20,pady=5)
+        regionBox = ttk.Combobox(regionWindow)
+        regionBox['values'] = constants.REGION_OPTIONS
+        regionBox.set(self.region)
+        regionBox['state'] = 'readonly'
+        regionBox.bind('<<ComboboxSelected>>', lambda event:self.checkRegionSeparator(regionBox))
+        regionBox.pack(padx=20,pady=5)
+        regionCloseButton = tk.Button(regionWindow,text='Update region', command=lambda:self.updateRegionCloseButton(regionBox.get(), regionWindow)) 
+        regionCloseButton.pack(padx=20,pady=5)
 
     def updateTelegramSettingsCloseButton(self,token,id,window):
         self.botToken = token
@@ -169,12 +193,14 @@ class TimeTowerSettings:
         compIdButton.grid(column=0,row=1)
         delayButton = tk.Button(frame,text='Update refresh delay',command=self.updateDelay)
         delayButton.grid(column=0,row=2)
+        regionButton = tk.Button(frame,text='Update championship region',command=self.updateRegion)
+        regionButton.grid(column=0,row=3)
         telegramButton = tk.Button(frame,text='Change Telegram Settings',command=self.updateTelegramSettings)
-        telegramButton.grid(column=0,row=3)
+        telegramButton.grid(column=0,row=4)
         saveButton = tk.Button(frame,text='Save Settings...',command=self.saveSettings)
-        saveButton.grid(column=0,row=4)
-        saveButton = tk.Button(frame,text='Load Settings...',command=self.loadSettings)
         saveButton.grid(column=0,row=5)
+        saveButton = tk.Button(frame,text='Load Settings...',command=self.loadSettings)
+        saveButton.grid(column=0,row=6)
         frame.pack(side=tk.LEFT,fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -183,3 +209,4 @@ class TimeTowerSettings:
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
         frame.rowconfigure(5, pad=20)
+        frame.rowconfigure(6, pad=20)

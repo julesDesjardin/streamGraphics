@@ -14,7 +14,15 @@ CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
 # FUNCTIONS
 ##############################################################################
 
-def configureButton(button,event,round,camera,competitor,visible,row,column,bg,fg):
+def buttonCommand(camera,buttonIndex,bot,cardData):
+    for index in range(len(buttons[camera])):
+        if index == buttonIndex:
+            buttons[camera][index].configure(relief=tk.SUNKEN)
+        else:
+            buttons[camera][index].configure(relief=tk.RAISED)
+    dataWrite.sendCardData(bot, camera, cardData)
+
+def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column,bg,fg):
     if int(round) > 1:
         previousRound = int(round) - 1
     else:
@@ -42,11 +50,11 @@ def configureButton(button,event,round,camera,competitor,visible,row,column,bg,f
     cardData = cardData.replace('%previousRank',f"{previousRank}")
     cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
     cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
-    button.configure(text=f'{name}\n{extraButtonText}',command=lambda:dataWrite.sendCardData(localSettings.bot,camera,cardData),bg=bg,fg=fg)
+    buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}',command=lambda:buttonCommand(camera,buttonIndex,localSettings.bot,cardData),bg=bg,fg=fg)
     if visible:
-        button.grid(row=row,column=column)
+        buttons[camera][buttonIndex].grid(row=row,column=column)
     else:
-        button.grid_forget()
+        buttons[camera][buttonIndex].grid_forget()
 
 def updateCubers(settings,buttons):
     activities = WCIFParse.getActivities(settings.wcif)
@@ -68,11 +76,11 @@ def updateCubers(settings,buttons):
                     index = index + 1
                 if index < len(fullCompetitors):
                     for camera in range(0,CAMERAS_COUNT):
-                        configureButton(buttons[camera][buttonIndex], event, round, camera, fullCompetitors[index], True, i + 2, j, bg, fg) # + 2 because row 0 is for label and row 1 is for clean
+                        configureButton(camera, buttonIndex, event, round, fullCompetitors[index], True, i + 2, j, bg, fg) # + 2 because row 0 is for label and row 1 is for clean
                     index = index + 1
                 else:
                     for camera in range(0,CAMERAS_COUNT):
-                        configureButton(buttons[camera][buttonIndex], event, round, camera, (0, 0, ''), False, i + 2, j, bg, fg)
+                        configureButton(camera, buttonIndex, event, round, (0, 0, ''), False, i + 2, j, bg, fg)
 
 def OKButtonCommand(updateTimeTower,settings,buttons):
     if updateTimeTower:
@@ -111,7 +119,7 @@ for camera in range(0, CAMERAS_COUNT):
     labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
     labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
     cleanButtons.append(tk.Button(framesButtons[camera]))
-    cleanButtons[camera].configure(text=f'Clean',command=lambda localCamera=camera:dataWrite.sendCardData(localSettings.bot,localCamera,'')) # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
+    cleanButtons[camera].configure(text=f'Clean',command=lambda localCamera=camera:buttonCommand(localCamera,-1,localSettings.bot,'')) # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
     cleanButtons[camera].grid(column=0, row=1, columnspan=BUTTONS_COLS)
     buttons.append([])
     for button in range(0,BUTTONS_COLS+2):

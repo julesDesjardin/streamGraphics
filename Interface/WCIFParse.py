@@ -1,12 +1,14 @@
 import constants
 
-def getActivities(wcif):
+def getActivities(wcif,venueId,roomId):
     activities = {}
     for venue in wcif['schedule']['venues']:
-        for room in venue['rooms']:
-            for activity in room['activities']:
-                for childActivity in activity['childActivities']:
-                    activities[childActivity['id']] = childActivity["activityCode"]
+        if venueId == -1 or venue['id'] == venueId:
+            for room in venue['rooms']:
+                if roomId == -1 or room['id'] == roomId:
+                    for activity in room['activities']:
+                        for childActivity in activity['childActivities']:
+                            activities[childActivity['id']] = childActivity["activityCode"]
     return activities
 
 def getPb(wcif,competitor,event,singleOrAverage):
@@ -51,7 +53,7 @@ def getRoundRank(wcif,competitor,event,round):
 
 def getAllCompetitorsRanked(wcif,event):
     competitors = []
-    activities = getActivities(wcif)
+    activities = getActivities(wcif, -1, -1)
     eventActivities = []
     for activity in activities:
         activitySplit = activities[activity].split('-')

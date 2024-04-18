@@ -4,11 +4,13 @@ import constants, WCIFParse
 
 class Stage:
 
-    def __init__(self,root,wcif,backgroundColor,textColor):
+    def __init__(self,root,wcif,backgroundColor,textColor,venue,room):
         self.root = root
         self.wcif = wcif
         self.backgroundColor = backgroundColor
         self.textColor = textColor
+        self.venue = venue
+        self.room = room
         self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black',highlightthickness=1, padx=50, pady=20)
         self.eventLabel = tk.Label(self.frame,text='Event:', bg=self.backgroundColor, fg=self.textColor)
         self.eventLabel.grid(column=0,row=0,sticky=tk.E)
@@ -31,34 +33,34 @@ class Stage:
 
 
     def updateGroups(self):
-        activities = WCIFParse.getActivities(self.wcif)
-        maxGroup = 0
+        activities = WCIFParse.getActivities(self.wcif, self.venue, self.room)
+        groups = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
             if activitySplit[0] == constants.EVENTS[self.eventVar.get()] and activitySplit[1] == f'r{self.roundVar.get()}':
-                maxGroup = max(maxGroup,int(activitySplit[2][1:]))
+                groups.append(int(activitySplit[2][1:]))
         menu = self.groupMenu["menu"]
         menu.delete(0, "end")
-        if maxGroup > 0:
-            for i in range(1,maxGroup+1):
-                menu.add_command(label=f'{i}',command=lambda value=f'{i}': self.groupVar.set(value))
+        if len(groups) > 0:
+            for group in sorted(groups):
+                menu.add_command(label=f'{group}',command=lambda value=f'{group}': self.groupVar.set(value))
             self.groupVar.set(1)
         else:
             menu.add_command(label='No group',command=lambda value=0:self.roundVar.set(value))
             self.groupVar.set(0)
 
     def updateRounds(self):
-        activities = WCIFParse.getActivities(self.wcif)
-        maxRound = 0
+        activities = WCIFParse.getActivities(self.wcif, self.venue, self.room)
+        rounds = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
             if activitySplit[0] == constants.EVENTS[self.eventVar.get()]:
-                maxRound = max(maxRound,int(activitySplit[1][1:]))
+                rounds.append(int(activitySplit[1][1:]))
         menu = self.roundMenu["menu"]
         menu.delete(0, "end")
-        if maxRound > 0:
-            for i in range(1,maxRound+1):
-                menu.add_command(label=f'{i}',command=lambda value=f'{i}': self.roundVar.set(value))
+        if len(rounds) > 0:
+            for rounds in rounds:
+                menu.add_command(label=f'{round}',command=lambda value=f'{round}': self.roundVar.set(value))
             self.roundVar.set(1)
         else:
             menu.add_command(label='No round',command=lambda value=0:self.roundVar.set(value))

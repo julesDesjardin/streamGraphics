@@ -57,9 +57,9 @@ def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column
         buttons[camera][buttonIndex].grid_forget()
 
 def updateCubers(settings,buttons):
-    activities = WCIFParse.getActivities(settings.wcif)
     index = 0
     for stage in settings.stages:
+        activities = WCIFParse.getActivities(settings.wcif, stage.venue, stage.room)
         event = stage.eventVar.get()
         round = stage.roundVar.get()
         group = stage.groupVar.get()

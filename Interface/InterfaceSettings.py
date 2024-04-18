@@ -32,7 +32,7 @@ class InterfaceSettings:
         saveSettingsJson = {
             'compId' : self.compId,
             'maxSeed' : self.maxSeed,
-            'stages' : [(stage.backgroundColor, stage.textColor) for stage in self.stages],
+            'stages' : [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
             'cardText' : self.cardText,
             'botToken' : self.botToken,
             'botChannelId' : self.botChannelId
@@ -50,8 +50,8 @@ class InterfaceSettings:
         for stage in self.stages:
             stage.hideStage()
         self.stages = []
-        for (stageBackgroundColor, stageTextColor) in loadSettingsJson['stages']:
-            self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor))
+        for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
+            self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
         for stage in self.stages:
             stage.showStage()
         

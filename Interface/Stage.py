@@ -30,6 +30,7 @@ class Stage:
 
         self.roundVar.trace_add('write',lambda var,index,mode :self.updateGroups())
         self.eventVar.trace_add('write',lambda var,index,mode :self.updateRounds())
+        self.eventVar.set('3x3x3')
 
 
     def updateGroups(self):

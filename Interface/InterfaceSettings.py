@@ -3,7 +3,7 @@ import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk
 import json, urllib.request
-import Stage
+import Stage, WCIFParse
 import constants
 
 import sys, os
@@ -101,13 +101,68 @@ class InterfaceSettings:
         maxSeedCloseButton = tk.Button(maxSeedWindow,text='Save max seed',command=lambda:self.updateMaxSeedCloseButton(maxSeedEntry.get(),maxSeedWindow))
         maxSeedCloseButton.pack(padx=20,pady=5)
 
+    def stageSwitch(self, a, b, frame):
+        oldStage = self.stages[a]
+        self.stages[a] = self.stages[b]
+        self.stages[b] = oldStage
+        self.reloadStages(frame)
+    
+    def reloadStages(self, frame):
+        frame.grid_forget()
+        frame.columnconfigure(0, pad=10)
+        frame.columnconfigure(1, pad=10)
+        frame.columnconfigure(2, pad=10)
+        frame.columnconfigure(3, pad=10)
+        frame.columnconfigure(4, pad=10)
+        for widget in frame.winfo_children():
+            widget.destroy()
+        row = 0
+        stageLabels = []
+        stageUpButtons = []
+        stageDownButtons = []
+        stageEditButtons = []
+        stageDeleteButtons = []
+        for stage in self.stages:
+            stageLabels.append(tk.Label(frame, text=f'{WCIFParse.getVenueName(self.wcif, stage.venue)}, {WCIFParse.getRoomName(self.wcif, stage.venue, stage.room)}', fg=stage.textColor, bg=stage.backgroundColor))
+            stageLabels[-1].grid(row=row, column=0)
+            stageUpButtons.append(tk.Button(frame, text='↑', command=lambda a=row-1, b=row:self.stageSwitch(a, b, frame)))
+            stageUpButtons[-1].grid(row=row, column=1)
+            if row == 0:
+                stageUpButtons[-1]['state'] = 'disabled'
+            stageDownButtons.append(tk.Button(frame, text='↓', command=lambda a=row, b=row+1:self.stageSwitch(a, b, frame)))
+            stageDownButtons[-1].grid(row=row, column=2)
+            if row == len(self.stages) - 1:
+                stageDownButtons[-1]['state'] = 'disabled'
+            stageEditButtons.append(tk.Button(frame, text='Edit'))
+            stageEditButtons[-1].grid(row=row, column=3)
+            stageDeleteButtons.append(tk.Button(frame, text='Delete'))
+            stageDeleteButtons[-1].grid(row=row, column=4)
+            row = row + 1
+        frame.grid(row=1, column=0)
+
+    def updateStagesCloseWindow(self, window):
+        window.destroy()
+        for stage in self.stages:
+            stage.showStage()
+
     def updateStages(self):
-        # TODO
+        # Hide all stages to prepare for update
         for stage in self.stages:
             stage.hideStage()
-        stage = Stage.Stage(self.root, self.wcif, '#FFFFFF', '#000000')
-        self.stages = [stage]
-        stage.showStage()
+
+        stagesWindow = tk.Toplevel(self.root)
+        stagesWindow.rowconfigure(0, pad=10)
+        stagesWindow.rowconfigure(1, pad=10)
+        stagesWindow.rowconfigure(2, pad=10)
+        stagesWindow.rowconfigure(3, pad=10)
+        stagesLabel = tk.Label(stagesWindow, text='Update stages. You can assign a stage to any room (as declared on the WCA).\nMultiple stages can be assigned to the same room (if you didn\'t specify stages when making the schedule and assignments for example).')
+        stagesLabel.grid(row=0, column=0)
+        stagesFrame = tk.Frame(stagesWindow)
+        self.reloadStages(stagesFrame)
+        addButton = tk.Button(stagesWindow, text='Add stage')
+        addButton.grid(row=2, column=0)
+        OKButton = tk.Button(stagesWindow, text='OK', command=lambda:self.updateStagesCloseWindow(stagesWindow))
+        OKButton.grid(row=3, column=0)
 
     def updateCardTextCloseButton(self,cardText,window):
         self.cardText = cardText

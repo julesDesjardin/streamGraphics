@@ -1,5 +1,19 @@
 import constants
 
+def getVenueName(wcif,venueId):
+    for venue in wcif['schedule']['venues']:
+        if venue['id'] == venueId:
+            return venue['name']
+    return 'VENUE NOT FOUND'
+
+def getRoomName(wcif,venueId,roomId):
+    for venue in wcif['schedule']['venues']:
+        if venue['id'] == venueId:
+            for room in venue['rooms']:
+                if room['id'] == roomId:
+                    return room['name']
+    return 'ROOM NOT FOUND'
+
 def getActivities(wcif,venueId,roomId):
     activities = {}
     for venue in wcif['schedule']['venues']:

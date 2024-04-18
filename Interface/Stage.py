@@ -45,7 +45,7 @@ class Stage:
         if len(groups) > 0:
             for group in sorted(groups):
                 menu.add_command(label=f'{group}',command=lambda value=f'{group}': self.groupVar.set(value))
-            self.groupVar.set(1)
+            self.groupVar.set(sorted(groups)[0])
         else:
             menu.add_command(label='No group',command=lambda value=0:self.roundVar.set(value))
             self.groupVar.set(0)
@@ -56,13 +56,15 @@ class Stage:
         for activity in activities:
             activitySplit = activities[activity].split('-')
             if activitySplit[0] == constants.EVENTS[self.eventVar.get()]:
-                rounds.append(int(activitySplit[1][1:]))
+                newRound = int(activitySplit[1][1:])
+                if newRound not in rounds:
+                    rounds.append(newRound)
         menu = self.roundMenu["menu"]
         menu.delete(0, "end")
         if len(rounds) > 0:
-            for rounds in rounds:
+            for round in sorted(rounds):
                 menu.add_command(label=f'{round}',command=lambda value=f'{round}': self.roundVar.set(value))
-            self.roundVar.set(1)
+            self.roundVar.set(sorted(rounds)[0])
         else:
             menu.add_command(label='No round',command=lambda value=0:self.roundVar.set(value))
             self.roundVar.set(0)

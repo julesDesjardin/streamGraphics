@@ -58,29 +58,35 @@ def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column
 
 def updateCubers(settings,buttons):
     index = 0
+    fullCompetitors = []
+    bg = []
+    fg = []
     for stage in settings.stages:
         activities = WCIFParse.getActivities(settings.wcif, stage.venue, stage.room)
         event = stage.eventVar.get()
         round = stage.roundVar.get()
         group = stage.groupVar.get()
-        bg = stage.backgroundColor
-        fg = stage.textColor
-        activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
-        competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
-        fullCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
-        fullCompetitors.sort(key=lambda x:x[2])
-        for i in range(0,BUTTONS_ROWS):
-            for j in range(0,BUTTONS_COLS):
-                buttonIndex = i*BUTTONS_COLS + j
-                while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
-                    index = index + 1
-                if index < len(fullCompetitors):
-                    for camera in range(0,CAMERAS_COUNT):
-                        configureButton(camera, buttonIndex, event, round, fullCompetitors[index], True, i + 2, j, bg, fg) # + 2 because row 0 is for label and row 1 is for clean
-                    index = index + 1
-                else:
-                    for camera in range(0,CAMERAS_COUNT):
-                        configureButton(camera, buttonIndex, event, round, (0, 0, ''), False, i + 2, j, bg, fg)
+        if group != '0':
+            activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
+            competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
+            newCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
+            newCompetitors.sort(key=lambda x:x[2])
+            for competitor in newCompetitors:
+                fullCompetitors.append(competitor)
+                bg.append(stage.backgroundColor)
+                fg.append(stage.textColor)
+    for i in range(0,BUTTONS_ROWS):
+        for j in range(0,BUTTONS_COLS):
+            buttonIndex = i*BUTTONS_COLS + j
+            while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed: # Search next competitor within max seed
+                index = index + 1
+            if index < len(fullCompetitors):
+                for camera in range(0,CAMERAS_COUNT):
+                    configureButton(camera, buttonIndex, event, round, fullCompetitors[index], True, i + 2, j, bg[index], fg[index]) # + 2 because row 0 is for label and row 1 is for clean
+                index = index + 1
+            else:
+                for camera in range(0,CAMERAS_COUNT):
+                    configureButton(camera, buttonIndex, event, round, (0, 0, ''), False, i + 2, j, '#000000', '#000000')
 
 def OKButtonCommand(updateTimeTower,settings,buttons):
     if updateTimeTower:

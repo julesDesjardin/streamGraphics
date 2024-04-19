@@ -107,7 +107,21 @@ class InterfaceSettings:
         self.stages[b] = oldStage
         self.reloadStages(frame)
     
-    def reloadStages(self, frame):
+    def addStage(self, window, frame):
+        venue = WCIFParse.getVenueId(self.wcif, WCIFParse.getVenues(self.wcif)[0])
+        room = WCIFParse.getRoomId(self.wcif, venue, WCIFParse.getRooms(self.wcif, venue)[0])
+        stage = Stage.Stage(self.root, self.wcif, '#FFFFFF', '#000000', venue, room)
+        self.stages.append(stage)
+        stageWindow = stage.updateWindow(window, True)
+        window.wait_window(stageWindow)
+        self.reloadStages(window, frame)
+
+    def editStage(self, window, frame, stage):
+        stageWindow = stage.updateWindow(window, False)
+        window.wait_window(stageWindow)
+        self.reloadStages(window, frame)
+        
+    def reloadStages(self, window, frame):
         frame.grid_forget()
         frame.columnconfigure(0, pad=10)
         frame.columnconfigure(1, pad=10)
@@ -133,7 +147,7 @@ class InterfaceSettings:
             stageDownButtons[-1].grid(row=row, column=2)
             if row == len(self.stages) - 1:
                 stageDownButtons[-1]['state'] = 'disabled'
-            stageEditButtons.append(tk.Button(frame, text='Edit'))
+            stageEditButtons.append(tk.Button(frame, text='Edit', command=lambda localStage=stage:self.editStage(window, frame, localStage)))
             stageEditButtons[-1].grid(row=row, column=3)
             stageDeleteButtons.append(tk.Button(frame, text='Delete'))
             stageDeleteButtons[-1].grid(row=row, column=4)
@@ -158,8 +172,8 @@ class InterfaceSettings:
         stagesLabel = tk.Label(stagesWindow, text='Update stages. You can assign a stage to any room (as declared on the WCA).\nMultiple stages can be assigned to the same room (if you didn\'t specify stages when making the schedule and assignments for example).')
         stagesLabel.grid(row=0, column=0)
         stagesFrame = tk.Frame(stagesWindow)
-        self.reloadStages(stagesFrame)
-        addButton = tk.Button(stagesWindow, text='Add stage')
+        self.reloadStages(stagesWindow, stagesFrame)
+        addButton = tk.Button(stagesWindow, text='Add stage', command=lambda:self.addStage(stagesWindow, stagesFrame))
         addButton.grid(row=2, column=0)
         OKButton = tk.Button(stagesWindow, text='OK', command=lambda:self.updateStagesCloseWindow(stagesWindow))
         OKButton.grid(row=3, column=0)

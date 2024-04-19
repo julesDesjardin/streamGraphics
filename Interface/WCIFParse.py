@@ -14,6 +14,34 @@ def getRoomName(wcif,venueId,roomId):
                     return room['name']
     return 'ROOM NOT FOUND'
 
+def getVenueId(wcif,venueName):
+    for venue in wcif['schedule']['venues']:
+        if venue['name'] == venueName:
+            return venue['id']
+    return 'VENUE NOT FOUND'
+
+def getRoomId(wcif,venueId,roomName):
+    for venue in wcif['schedule']['venues']:
+        if venue['id'] == venueId:
+            for room in venue['rooms']:
+                if room['name'] == roomName:
+                    return room['id']
+    return 'ROOM NOT FOUND'
+
+def getVenues(wcif):
+    result = []
+    for venue in wcif['schedule']['venues']:
+        result.append(venue['name'])
+    return result
+
+def getRooms(wcif,venueId):
+    result = []
+    for venue in wcif['schedule']['venues']:
+        if venue['id'] == venueId:
+            for room in venue['rooms']:
+                result.append(room['name'])
+    return result
+
 def getActivities(wcif,venueId,roomId):
     activities = {}
     for venue in wcif['schedule']['venues']:

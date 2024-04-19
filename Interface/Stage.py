@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.colorchooser import askcolor
 import constants, WCIFParse
 
 class Stage:
@@ -80,3 +81,80 @@ class Stage:
 
     def setRound(self,round):
         self.roundVar.set(round)
+
+    def updateBgColor(self, sampleUnclickedButton, sampleClickedButton):
+        colors = askcolor(self.backgroundColor, title='Background color')
+        self.backgroundColor = colors[1]
+        self.frame.configure(bg=self.backgroundColor)
+        self.eventLabel.configure(bg=self.backgroundColor)
+        self.roundLabel.configure(bg=self.backgroundColor)
+        self.groupLabel.configure(bg=self.backgroundColor)
+        sampleUnclickedButton.configure(bg=self.backgroundColor)
+        sampleClickedButton.configure(bg=self.backgroundColor)
+
+    def updateTextColor(self, sampleUnclickedButton, sampleClickedButton):
+        colors = askcolor(self.textColor, title='Text color')
+        self.textColor = colors[1]
+        self.eventLabel.configure(fg=self.textColor)
+        self.roundLabel.configure(fg=self.textColor)
+        self.groupLabel.configure(fg=self.textColor)
+        sampleUnclickedButton.configure(fg=self.textColor)
+        sampleClickedButton.configure(fg=self.textColor)
+
+    def updateRoomMenu(self, venueVar, roomMenu, roomVar):
+        menu = roomMenu['menu']
+        menu.delete(0, 'end')
+        rooms = WCIFParse.getRooms(self.wcif, WCIFParse.getVenueId(self.wcif, venueVar.get()))
+        for room in rooms:
+            menu.add_command(label=room, command=lambda value=room:roomVar.set(value))
+        roomVar.set(rooms[0])
+
+    def updateWindowCloseButton(self, venue, room, window):
+        self.venue = WCIFParse.getVenueId(self.wcif, venue)
+        self.room = WCIFParse.getRoomId(self.wcif, self.venue, room)
+        self.eventVar.set('3x3x3') # Will reload rounds and groups in the display
+        window.destroy()
+
+    def updateWindow(self,root,addNewStage):
+        window = tk.Toplevel(root)
+        window.grab_set()
+        if addNewStage:
+            titleLabel = tk.Label(window, text='Configure new stage')
+        else:
+            titleLabel = tk.Label(window, text='Edit stage')
+        titleLabel.grid(row=0, column=0, columnspan=2)
+        venueLabel = tk.Label(window, text='Venue')
+        venueLabel.grid(sticky='E', row=1, column=0)
+        venueVar = tk.StringVar()
+        venueMenu = ttk.OptionMenu(window, venueVar, WCIFParse.getVenueName(self.wcif, self.venue), *WCIFParse.getVenues(self.wcif))
+        venueMenu.grid(sticky='W', row=1, column=1)
+        roomLabel = tk.Label(window, text='Room')
+        roomLabel.grid(sticky='E', row=2, column=0)
+        roomVar = tk.StringVar()
+        roomMenu = ttk.OptionMenu(window, roomVar, WCIFParse.getRoomName(self.wcif, self.venue, self.room), *WCIFParse.getRooms(self.wcif, self.venue))
+        roomMenu.grid(sticky='W', row=2, column=1)
+        venueVar.trace_add('write',lambda var,index,mode :self.updateRoomMenu(venueVar, roomMenu, roomVar))
+        # Defining sample buttons before edit buttons because they are needed for the callback
+        sampleUnclickedButton = tk.Button(window, text='Sample unclicked button', bg=self.backgroundColor, fg=self.textColor)
+        sampleUnclickedButton.configure(relief=tk.RAISED)
+        sampleUnclickedButton.grid(sticky='E', row=5, column=0)
+        sampleClickedButton = tk.Button(window, text='Sample clicked button', bg=self.backgroundColor, fg=self.textColor)
+        sampleClickedButton.configure(relief=tk.SUNKEN)
+        sampleClickedButton.grid(sticky='W', row=5, column=1)
+        bgColorButton = tk.Button(window, text='Choose background color', command=lambda:self.updateBgColor(sampleUnclickedButton, sampleClickedButton))
+        bgColorButton.grid(row=3, column=0, columnspan=2)
+        textColorButton = tk.Button(window, text='Choose text color', command=lambda:self.updateTextColor(sampleUnclickedButton, sampleClickedButton))
+        textColorButton.grid(row=4, column=0, columnspan=2)
+        OKButton = tk.Button(window, text='OK', command=lambda:self.updateWindowCloseButton(venueVar.get(), roomVar.get(), window))
+        OKButton.grid(row=6, column=0, columnspan=2)
+
+        window.rowconfigure(0, pad=20)
+        window.rowconfigure(1, pad=20)
+        window.rowconfigure(2, pad=20)
+        window.rowconfigure(3, pad=20)
+        window.rowconfigure(4, pad=20)
+        window.rowconfigure(5, pad=20)
+        window.rowconfigure(6, pad=20)
+        window.columnconfigure(0, pad=50)
+        window.columnconfigure(1, pad=50)
+        return window

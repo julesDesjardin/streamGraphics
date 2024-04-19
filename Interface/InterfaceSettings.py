@@ -71,6 +71,7 @@ class InterfaceSettings:
 
     def updateCompId(self):
         compIdWindow = tk.Toplevel(self.root)
+        compIdWindow.grab_set()
         compIdLabel = tk.Label(compIdWindow,text='Please enter competition ID to fetch the correct WCIF')
         compIdLabel.pack(padx=20,pady=5)
         compIdEntry = tk.Entry(compIdWindow,width=50)
@@ -93,6 +94,7 @@ class InterfaceSettings:
 
     def updateMaxSeed(self):
         maxSeedWindow = tk.Toplevel(self.root)
+        maxSeedWindow.grab_set()
         maxSeedLabel = tk.Label(maxSeedWindow,text='Please enter the maximum seed to be shown on stream')
         maxSeedLabel.pack(padx=20,pady=5)
         maxSeedEntry = tk.Entry(maxSeedWindow,width=20)
@@ -165,6 +167,7 @@ class InterfaceSettings:
             stage.hideStage()
 
         stagesWindow = tk.Toplevel(self.root)
+        stagesWindow.grab_set()
         stagesWindow.rowconfigure(0, pad=10)
         stagesWindow.rowconfigure(1, pad=10)
         stagesWindow.rowconfigure(2, pad=10)
@@ -184,6 +187,7 @@ class InterfaceSettings:
 
     def updateCardText(self):
         cardTextWindow = tk.Toplevel(self.root)
+        cardTextWindow.grab_set()
         cardTextDescription = '''
 Please enter the text to show on the card
 This supports the following characters to be replaced by the appropriate value:
@@ -217,6 +221,7 @@ This supports the following characters to be replaced by the appropriate value:
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)
+        telegramWindow.grab_set()
         telegramLabel = tk.Label(telegramWindow,text='Please enter Telegram settings')
         telegramLabel.pack(pady=20)
         tokenLabel = tk.Label(telegramWindow,text='Interface bot token')

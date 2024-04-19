@@ -101,6 +101,7 @@ class TimeTowerSettings:
 
     def updateCompId(self):
         compIdWindow = tk.Toplevel(self.root)
+        compIdWindow.grab_set()
         compIdLabel = tk.Label(compIdWindow,text='Please enter competition ID to fetch the correct WCIF\nThis is NOT the WCA ID but the Live ID (4 digits)')
         compIdLabel.pack(padx=20,pady=5)
         compIdEntry = tk.Entry(compIdWindow,width=50)
@@ -128,6 +129,7 @@ class TimeTowerSettings:
 
     def updateDelay(self):
         delayWindow = tk.Toplevel(self.root)
+        delayWindow.grab_set()
         delayLabel = tk.Label(delayWindow,text='Please enter the delay (in ms) between 2 consecutive fetches to Live.\nPlease take into account that this does NOT include the time needed to retrieve data from Live and display it.')
         delayLabel.pack(padx=20,pady=5)
         delayEntry = tk.Entry(delayWindow,width=50)
@@ -146,6 +148,7 @@ class TimeTowerSettings:
 
     def updateRegion(self):
         regionWindow = tk.Toplevel(self.root)
+        regionWindow.grab_set()
         regionLabel = tk.Label(regionWindow,text='Please choose a region (country or continent) if you want local competitors to be highlighted, so you can see the local results more easily.\nThe "World" option highlights everyone the same.')
         regionLabel.pack(padx=20,pady=5)
         regionBox = ttk.Combobox(regionWindow)
@@ -170,6 +173,7 @@ class TimeTowerSettings:
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)
+        telegramWindow.grab_set()
         telegramLabel = tk.Label(telegramWindow,text='Please enter Telegram settings')
         telegramLabel.pack(pady=20)
         tokenLabel = tk.Label(telegramWindow,text='TimeTower bot token')

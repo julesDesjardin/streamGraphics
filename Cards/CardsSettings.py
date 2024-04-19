@@ -62,6 +62,7 @@ class CardsSettings:
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)
+        telegramWindow.grab_set()
         telegramLabel = tk.Label(telegramWindow,text='Please enter Telegram settings')
         telegramLabel.pack(pady=20)
         tokenLabel = tk.Label(telegramWindow,text='TimeTower bot token')

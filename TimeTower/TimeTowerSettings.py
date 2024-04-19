@@ -95,7 +95,7 @@ class TimeTowerSettings:
         try:
             self.compId = int(compId)
         except:
-             tkinter.messagebox.showerror(title='Competition ID Error !', message='The ID must be a number! This is the WCA Live ID, not the WCA competition ID.')
+            tkinter.messagebox.showerror(title='Competition ID Error !', message='The ID must be a number! This is the WCA Live ID, not the WCA competition ID.')
         else:
             window.destroy()
 
@@ -114,7 +114,7 @@ class TimeTowerSettings:
         try:
             self.delay = int(delay)
         except:
-             tkinter.messagebox.showerror(title='Delay Error !', message='The delay must be a whole number ! (No units needed)')
+            tkinter.messagebox.showerror(title='Delay Error !', message='The delay must be a whole number ! (No units needed)')
         else:
             roundId = 0
             criteria = ''

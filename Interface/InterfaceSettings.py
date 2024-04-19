@@ -65,7 +65,7 @@ class InterfaceSettings:
         try:
             self.reloadWCIF()
         except:
-             tkinter.messagebox.showerror(title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
+            tkinter.messagebox.showerror(title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
         else:
             window.destroy()
 
@@ -88,7 +88,7 @@ class InterfaceSettings:
         try:
             self.maxSeed = int(maxSeed)
         except:
-             tkinter.messagebox.showerror(title='Max Seed Error !', message='Error ! Please make sure the seed is a number')
+            tkinter.messagebox.showerror(title='Max Seed Error !', message='Error ! Please make sure the seed is a number')
         else:
             window.destroy()
 

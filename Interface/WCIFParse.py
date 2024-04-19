@@ -28,6 +28,14 @@ def getRoomId(wcif,venueId,roomName):
                     return room['id']
     return 'ROOM NOT FOUND'
 
+def getRoomColor(wcif,venueId,roomId):
+    for venue in wcif['schedule']['venues']:
+        if venue['id'] == venueId:
+            for room in venue['rooms']:
+                if room['id'] == roomId:
+                    return room['color']
+    return 'ROOM NOT FOUND'
+
 def getVenues(wcif):
     result = []
     for venue in wcif['schedule']['venues']:

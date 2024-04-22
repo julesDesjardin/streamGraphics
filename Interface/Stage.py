@@ -82,10 +82,16 @@ class Stage:
     def setRound(self,round):
         self.roundVar.set(round)
 
-    def getColorSchedule(self, sampleUnclickedButton, sampleClickedButton):
-        color = WCIFParse.getRoomColor(self.wcif, self.venue, self.room)
-        self.backgroundColor = color
-        self.textColor = '#FFFFFF'
+    def updateTextColorFromBackground(self):
+        red = int(self.backgroundColor[1:3], 16)
+        green = int(self.backgroundColor[3:5], 16)
+        blue = int(self.backgroundColor[5:7], 16)
+        if (red*0.299 + green*0.587 + blue*0.114) > 186:
+            self.textColor = '#000000'
+        else:
+            self.textColor = '#ffffff'
+
+    def updateButtonsAndFrame(self, sampleUnclickedButton, sampleClickedButton):
         self.frame.configure(bg=self.backgroundColor)
         self.eventLabel.configure(bg=self.backgroundColor, fg=self.textColor)
         self.roundLabel.configure(bg=self.backgroundColor, fg=self.textColor)
@@ -93,24 +99,17 @@ class Stage:
         sampleUnclickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
         sampleClickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
 
-    def updateBgColor(self, sampleUnclickedButton, sampleClickedButton):
+    def getColorSchedule(self, sampleUnclickedButton, sampleClickedButton):
+        color = WCIFParse.getRoomColor(self.wcif, self.venue, self.room)
+        self.backgroundColor = color
+        self.updateTextColorFromBackground()
+        self.updateButtonsAndFrame(sampleUnclickedButton, sampleClickedButton)
+
+    def updateColor(self, sampleUnclickedButton, sampleClickedButton):
         colors = askcolor(self.backgroundColor, title='Background color')
         self.backgroundColor = colors[1]
-        self.frame.configure(bg=self.backgroundColor)
-        self.eventLabel.configure(bg=self.backgroundColor)
-        self.roundLabel.configure(bg=self.backgroundColor)
-        self.groupLabel.configure(bg=self.backgroundColor)
-        sampleUnclickedButton.configure(bg=self.backgroundColor)
-        sampleClickedButton.configure(bg=self.backgroundColor)
-
-    def updateTextColor(self, sampleUnclickedButton, sampleClickedButton):
-        colors = askcolor(self.textColor, title='Text color')
-        self.textColor = colors[1]
-        self.eventLabel.configure(fg=self.textColor)
-        self.roundLabel.configure(fg=self.textColor)
-        self.groupLabel.configure(fg=self.textColor)
-        sampleUnclickedButton.configure(fg=self.textColor)
-        sampleClickedButton.configure(fg=self.textColor)
+        self.updateTextColorFromBackground()
+        self.updateButtonsAndFrame(sampleUnclickedButton, sampleClickedButton)
 
     def updateRoomMenu(self, venueVar, roomMenu, roomVar):
         menu = roomMenu['menu']
@@ -148,18 +147,16 @@ class Stage:
         # Defining sample buttons before edit buttons because they are needed for the callback
         sampleUnclickedButton = tk.Button(window, text='Sample unclicked button', bg=self.backgroundColor, fg=self.textColor)
         sampleUnclickedButton.configure(relief=tk.RAISED)
-        sampleUnclickedButton.grid(sticky='E', row=6, column=0)
+        sampleUnclickedButton.grid(sticky='E', row=5, column=0)
         sampleClickedButton = tk.Button(window, text='Sample clicked button', bg=self.backgroundColor, fg=self.textColor)
         sampleClickedButton.configure(relief=tk.SUNKEN)
-        sampleClickedButton.grid(sticky='W', row=6, column=1)
+        sampleClickedButton.grid(sticky='W', row=5, column=1)
         getColorScheduleButton = tk.Button(window, text='Get color from schedule', command=lambda:self.getColorSchedule(sampleUnclickedButton, sampleClickedButton))
         getColorScheduleButton.grid(row=3, column=0, columnspan=2)
-        bgColorButton = tk.Button(window, text='Choose background color', command=lambda:self.updateBgColor(sampleUnclickedButton, sampleClickedButton))
+        bgColorButton = tk.Button(window, text='Choose color', command=lambda:self.updateColor(sampleUnclickedButton, sampleClickedButton))
         bgColorButton.grid(row=4, column=0, columnspan=2)
-        textColorButton = tk.Button(window, text='Choose text color', command=lambda:self.updateTextColor(sampleUnclickedButton, sampleClickedButton))
-        textColorButton.grid(row=5, column=0, columnspan=2)
         OKButton = tk.Button(window, text='OK', command=lambda:self.updateWindowCloseButton(venueVar.get(), roomVar.get(), window))
-        OKButton.grid(row=7, column=0, columnspan=2)
+        OKButton.grid(row=6, column=0, columnspan=2)
 
         window.rowconfigure(0, pad=20)
         window.rowconfigure(1, pad=20)
@@ -168,7 +165,6 @@ class Stage:
         window.rowconfigure(4, pad=20)
         window.rowconfigure(5, pad=20)
         window.rowconfigure(6, pad=20)
-        window.rowconfigure(7, pad=20)
         window.columnconfigure(0, pad=50)
         window.columnconfigure(1, pad=50)
         return window

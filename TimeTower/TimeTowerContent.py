@@ -3,10 +3,11 @@ from tkinter import ttk
 import json
 import utils
 import TimeTowerLine, constants
+import threading, queue, time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queue, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
+    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -33,13 +34,17 @@ class TimeTowerContent:
         self.height = height
         self.heightSeparator = heightSeparator
         self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthName + widthCount + widthResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
-        self.queue = queue
+        self.queueRound = queueRound
+        self.queueRanking = queue.Queue()
         self.roundId = roundId
         self.criteria = criteria
         self.lines = []
         self.reloadDelay = reloadDelay
         self.stop = 0
-    
+        self.threadResults = threading.Thread(target=self.resultsLoop)
+        self.threadResults.daemon = True
+        self.threadResults.start()
+
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
         self.criteria = criteria
@@ -74,49 +79,71 @@ class TimeTowerContent:
                 colorResult = self.colorForeignerResult
             self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
 
-    def updateResults(self):
+    def resultsLoop(self):
 
         while True:
-            try:
-                (roundId, criteria) = self.queue.get(timeout=0.1)
-            except:
-                break
-            self.updateRound(roundId, criteria)
-
-        if(self.roundId != 0):
-            query = f'''
-            query MyQuery {{
-                round(id: "{self.roundId}") {{
-                    results {{
-                        person {{
-                            id
-                        }}
-                        attempts {{
-                            result
+            if(self.roundId != 0):
+                query = f'''
+                query MyQuery {{
+                    round(id: "{self.roundId}") {{
+                        id
+                        results {{
+                            person {{
+                                id
+                            }}
+                            attempts {{
+                                result
+                            }}
                         }}
                     }}
                 }}
-            }}
-            '''
+                '''
 
-            queryResult = utils.getQueryResult(query)
-            unorderedResults = []
-            for line in self.lines:
-                line.updateResults(queryResult)
-                bestResult = utils.DNF_ATTEMPT
-                if len(line.results) > 0:
-                    bestResult = min(line.results)
-                unorderedResults.append((line.competitorId, line.currentResult, bestResult))
+                queryResult = utils.getQueryResult(query)
+                self.queueRanking.put(queryResult)
+            time.sleep(self.reloadDelay/1000)
+            if self.stop == 1:
+                break
 
-            orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
-            for line in self.lines:
-                line.ranking = [result[0] for result in orderedResults].index(line.competitorId) + 1 # +1 because first index is 0
+    def mainLoop(self):
 
-        self.canvas.delete('all')
-        for line in self.lines:
-            line.showLine()
-        if self.stop == 0:
-            self.root.after(self.reloadDelay, lambda:self.updateResults())
+        # Update round
+        while True:
+            try:
+                (roundId, criteria) = self.queueRound.get(timeout=0.1)
+            except:
+                break
+            self.updateRound(roundId, criteria)
+        
+        # TODO: Expand lines
+
+        # Update results
+
+        while True:
+            try:
+                queryResult = self.queueRanking.get(timeout=0.1)
+            except:
+                break
+
+            if int(queryResult['round']['id']) == self.roundId:
+                unorderedResults = []
+                for line in self.lines:
+                    line.updateResults(queryResult)
+                    bestResult = utils.DNF_ATTEMPT
+                    if len(line.results) > 0:
+                        bestResult = min(line.results)
+                    unorderedResults.append((line.competitorId, line.currentResult, bestResult))
+
+                orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
+                for line in self.lines:
+                    line.ranking = [result[0] for result in orderedResults].index(line.competitorId) + 1 # +1 because first index is 0
+
+                self.canvas.delete('all')
+                for line in self.lines:
+                    line.showLine()
+
+        # End of loop, loop again after 1 second
+        self.root.after(1000, lambda:self.mainLoop())
 
     def showFrame(self):
         self.canvas.pack()

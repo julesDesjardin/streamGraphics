@@ -87,7 +87,7 @@ class TimeTowerSettings:
             self.content.stop = 1
             roundId = self.content.roundId
             criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#AAA', '#666', '#DDD', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
         self.content.updateResults()
         self.content.showFrame()
     
@@ -122,7 +122,7 @@ class TimeTowerSettings:
                 self.content.stop = 1
                 roundId = self.content.roundId
                 criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#AAA', '#666', '#DDD', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
             self.content.updateResults()
             self.content.showFrame()
             window.destroy()

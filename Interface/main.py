@@ -23,44 +23,46 @@ def buttonCommand(camera,buttonIndex,bot,cardData):
     dataWrite.sendCardData(bot, camera, cardData)
 
 def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column,bg,fg):
-    if int(round) > 1:
-        previousRound = int(round) - 1
-    else:
-        previousRound = None
-    id = competitor[0]
-    seed = competitor[1]
-    name = competitor[2]
-    previousRank = WCIFParse.getRoundRank(localSettings.wcif,id,event,previousRound)
-    extraButtonText = f'Seed {seed}'
-    if previousRank is not None:
-        extraButtonText = extraButtonText + f', Placed {previousRank}'
-    cardData = localSettings.cardText
-    cardData = cardData.replace('%name',f"{name}")
-    prSingleInt = WCIFParse.getPb(localSettings.wcif,id,event,'single')
-    prAverageInt = WCIFParse.getPb(localSettings.wcif,id,event,'average')
-    cardData = cardData.replace('%prSingle',dataWrite.resultToString(prSingleInt))
-    cardData = cardData.replace('%prAverage',dataWrite.resultToString(prAverageInt))
-    cardData = cardData.replace('%nrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
-    cardData = cardData.replace('%nrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
-    cardData = cardData.replace('%crSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
-    cardData = cardData.replace('%crAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
-    cardData = cardData.replace('%wrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
-    cardData = cardData.replace('%wrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
-    cardData = cardData.replace('%seed',f"{seed}")
-    cardData = cardData.replace('%previousRank',f"{previousRank}")
-    cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
-    cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
-    buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}',command=lambda:buttonCommand(camera,buttonIndex,localSettings.bot,cardData),bg=bg,fg=fg)
-    if visible:
-        buttons[camera][buttonIndex].grid(row=row,column=column)
-    else:
+    if not visible:
         buttons[camera][buttonIndex].grid_forget()
+    else:
+        if int(round) > 1:
+            previousRound = int(round) - 1
+        else:
+            previousRound = None
+        id = competitor[0]
+        seed = competitor[1]
+        name = competitor[2]
+        previousRank = WCIFParse.getRoundRank(localSettings.wcif,id,event,previousRound)
+        extraButtonText = f'Seed {seed}'
+        if previousRank is not None:
+            extraButtonText = extraButtonText + f', Placed {previousRank}'
+        cardData = localSettings.cardText
+        cardData = cardData.replace('%name',f"{name}")
+        prSingleInt = WCIFParse.getPb(localSettings.wcif,id,event,'single')
+        prAverageInt = WCIFParse.getPb(localSettings.wcif,id,event,'average')
+        cardData = cardData.replace('%prSingle',dataWrite.resultToString(prSingleInt))
+        cardData = cardData.replace('%prAverage',dataWrite.resultToString(prAverageInt))
+        cardData = cardData.replace('%nrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
+        cardData = cardData.replace('%nrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
+        cardData = cardData.replace('%crSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
+        cardData = cardData.replace('%crAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
+        cardData = cardData.replace('%wrSingle',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
+        cardData = cardData.replace('%wrAverage',f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
+        cardData = cardData.replace('%seed',f"{seed}")
+        cardData = cardData.replace('%previousRank',f"{previousRank}")
+        cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
+        cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
+        buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}',command=lambda:buttonCommand(camera,buttonIndex,localSettings.bot,cardData),bg=bg,fg=fg)
+        buttons[camera][buttonIndex].grid(row=row,column=column)
 
 def updateCubers(settings,buttons):
     index = 0
     fullCompetitors = []
     bg = []
     fg = []
+    events = []
+    rounds = []
     for stage in settings.stages:
         if stage.stageEnabled:
             activities = WCIFParse.getActivities(settings.wcif, stage.venue, stage.room)
@@ -76,6 +78,8 @@ def updateCubers(settings,buttons):
                     fullCompetitors.append(competitor)
                     bg.append(stage.backgroundColor)
                     fg.append(stage.textColor)
+                    events.append(event)
+                    rounds.append(round)
     for i in range(0,BUTTONS_ROWS):
         for j in range(0,BUTTONS_COLS):
             buttonIndex = i*BUTTONS_COLS + j
@@ -83,11 +87,11 @@ def updateCubers(settings,buttons):
                 index = index + 1
             if index < len(fullCompetitors):
                 for camera in range(0,CAMERAS_COUNT):
-                    configureButton(camera, buttonIndex, event, round, fullCompetitors[index], True, i + 2, j, bg[index], fg[index]) # + 2 because row 0 is for label and row 1 is for clean
+                    configureButton(camera, buttonIndex, events[index], rounds[index], fullCompetitors[index], True, i + 2, j, bg[index], fg[index]) # + 2 because row 0 is for label and row 1 is for clean
                 index = index + 1
             else:
                 for camera in range(0,CAMERAS_COUNT):
-                    configureButton(camera, buttonIndex, event, round, (0, 0, ''), False, i + 2, j, '#000000', '#000000')
+                    configureButton(camera, buttonIndex, '', '', (0, 0, ''), False, i + 2, j, '#000000', '#000000')
 
 def OKButtonCommand(updateTimeTower,settings,buttons):
     if updateTimeTower:

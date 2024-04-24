@@ -13,26 +13,48 @@ class Stage:
         self.venue = venue
         self.room = room
         self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black',highlightthickness=1, padx=50, pady=20)
-        self.eventLabel = tk.Label(self.frame,text='Event:', bg=self.backgroundColor, fg=self.textColor)
-        self.eventLabel.grid(column=0,row=0,sticky=tk.E)
+        self.disableButton = tk.Button(self.frame, text='Disable stage', command=self.disableStageToggle)
+        self.disableButton.grid(column=0,row=0)
+        self.eventLabel = tk.Label(self.frame,text='Event:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.eventLabel.grid(column=1,row=0,sticky=tk.E)
         self.eventVar = tk.StringVar()
         self.eventMenu = ttk.OptionMenu(self.frame,self.eventVar,list(constants.EVENTS.keys())[0],*list(constants.EVENTS.keys()))
-        self.eventMenu.grid(column=1,row=0,sticky=tk.W)
-        self.roundLabel = tk.Label(self.frame,text='Round:', bg=self.backgroundColor, fg=self.textColor)
-        self.roundLabel.grid(column=2,row=0,sticky=tk.E)
+        self.eventMenu.grid(column=2,row=0,sticky=tk.W)
+        self.roundLabel = tk.Label(self.frame,text='Round:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.roundLabel.grid(column=3,row=0,sticky=tk.E)
         self.roundVar = tk.StringVar()
         self.roundMenu = ttk.OptionMenu(self.frame,self.roundVar)
-        self.roundMenu.grid(column=3,row=0,sticky=tk.W)
-        self.groupLabel = tk.Label(self.frame,text='Group:', bg=self.backgroundColor, fg=self.textColor)
-        self.groupLabel.grid(column=4,row=0,sticky=tk.E)
+        self.roundMenu.grid(column=4,row=0,sticky=tk.W)
+        self.groupLabel = tk.Label(self.frame,text='Group:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.groupLabel.grid(column=5,row=0,sticky=tk.E)
         self.groupVar = tk.StringVar()
         self.groupMenu = ttk.OptionMenu(self.frame,self.groupVar)
-        self.groupMenu.grid(column=5,row=0,sticky=tk.W)
+        self.groupMenu.grid(column=6,row=0,sticky=tk.W)
+        self.stageEnabled = True
 
         self.roundVar.trace_add('write',lambda var,index,mode :self.updateGroups())
         self.eventVar.trace_add('write',lambda var,index,mode :self.updateRounds())
         self.eventVar.set('3x3x3')
 
+    def disableStageToggle(self):
+        if self.stageEnabled:
+            self.stageEnabled = False
+            self.disableButton.configure(relief=tk.SUNKEN)
+            self.eventLabel.configure(state='disabled')
+            self.eventMenu.configure(state='disabled')
+            self.roundLabel.configure(state='disabled')
+            self.roundMenu.configure(state='disabled')
+            self.groupLabel.configure(state='disabled')
+            self.groupMenu.configure(state='disabled')
+        else:
+            self.stageEnabled = True
+            self.disableButton.configure(relief=tk.RAISED)
+            self.eventLabel.configure(state='active')
+            self.eventMenu.configure(state='active')
+            self.roundLabel.configure(state='active')
+            self.roundMenu.configure(state='active')
+            self.groupLabel.configure(state='active')
+            self.groupMenu.configure(state='active')
 
     def updateGroups(self):
         activities = WCIFParse.getActivities(self.wcif, self.venue, self.room)

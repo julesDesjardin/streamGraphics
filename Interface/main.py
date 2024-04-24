@@ -62,19 +62,20 @@ def updateCubers(settings,buttons):
     bg = []
     fg = []
     for stage in settings.stages:
-        activities = WCIFParse.getActivities(settings.wcif, stage.venue, stage.room)
-        event = stage.eventVar.get()
-        round = stage.roundVar.get()
-        group = stage.groupVar.get()
-        if group != '0':
-            activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
-            competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
-            newCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
-            newCompetitors.sort(key=lambda x:x[2])
-            for competitor in newCompetitors:
-                fullCompetitors.append(competitor)
-                bg.append(stage.backgroundColor)
-                fg.append(stage.textColor)
+        if stage.stageEnabled:
+            activities = WCIFParse.getActivities(settings.wcif, stage.venue, stage.room)
+            event = stage.eventVar.get()
+            round = stage.roundVar.get()
+            group = stage.groupVar.get()
+            if group != '0':
+                activityId = list(activities.keys())[list(activities.values()).index((f'{constants.EVENTS[event]}-r{round}-g{group}'))] # Get key from value in the dictionary
+                competitors = WCIFParse.getCompetitors(settings.wcif,activityId,event)
+                newCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
+                newCompetitors.sort(key=lambda x:x[2])
+                for competitor in newCompetitors:
+                    fullCompetitors.append(competitor)
+                    bg.append(stage.backgroundColor)
+                    fg.append(stage.textColor)
     for i in range(0,BUTTONS_ROWS):
         for j in range(0,BUTTONS_COLS):
             buttonIndex = i*BUTTONS_COLS + j

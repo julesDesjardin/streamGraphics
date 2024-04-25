@@ -25,7 +25,7 @@ class TimeTowerSettings:
         self.queue = queue.Queue()
         self.content = None
 
-    def botCallback(self,message,compId):
+    def timeTowerEventCallback(self,message):
 
         fullMessage = message.text.removeprefix('/timeTowerEvent ')
         fullMessageSplit = fullMessage.split()
@@ -34,7 +34,7 @@ class TimeTowerSettings:
 
         query = f'''
         query MyQuery {{
-            competition(id: "{compId}") {{
+            competition(id: "{self.compId}") {{
                 competitionEvents {{
                     event {{
                         id
@@ -77,7 +77,7 @@ class TimeTowerSettings:
         self.botToken = loadSettingsJson['botToken']
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
-        self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
+        self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.timeTowerEventCallback(message))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()
@@ -165,7 +165,7 @@ class TimeTowerSettings:
         self.botToken = token
         self.botChannelId = id
         self.bot = TelegramBot.TelegramBot(token,id)
-        self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.botCallback(message, self.compId))
+        self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.timeTowerEventCallback(message))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()

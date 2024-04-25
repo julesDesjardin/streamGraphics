@@ -52,7 +52,7 @@ class InterfaceSettings:
         self.stages = []
         for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
             self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
-        for stage in self.stages:
+        for stage in reversed(self.stages):
             stage.showStage()
         
         self.cardText = loadSettingsJson['cardText']
@@ -158,7 +158,7 @@ class InterfaceSettings:
 
     def updateStagesCloseWindow(self, window):
         window.destroy()
-        for stage in self.stages:
+        for stage in reversed(self.stages):
             stage.showStage()
 
     def updateStages(self):

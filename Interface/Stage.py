@@ -96,7 +96,7 @@ class Stage:
         self.frame.pack_forget()
 
     def showStage(self):
-        self.frame.pack()
+        self.frame.pack(side=tk.BOTTOM)
 
     def setEvent(self,event):
         self.eventVar.set(event)

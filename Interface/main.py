@@ -14,13 +14,17 @@ CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
 # FUNCTIONS
 ##############################################################################
 
-def buttonCommand(camera,buttonIndex,bot,cardData):
+def buttonCommand(camera,buttonIndex,bot,cardData,competitorId):
     for index in range(len(buttons[camera])):
         if index == buttonIndex:
             buttons[camera][index].configure(relief=tk.SUNKEN)
         else:
             buttons[camera][index].configure(relief=tk.RAISED)
     dataWrite.sendCardData(bot, camera, cardData)
+    if timeTowerVariables[camera].get() == 1:
+        dataWrite.sendTimeTowerExpand(bot, activeCubers[camera], 0)
+        dataWrite.sendTimeTowerExpand(bot, competitorId, 1)
+    activeCubers[camera] = competitorId
 
 def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column,bg,fg):
     if not visible:
@@ -53,7 +57,7 @@ def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column
         cardData = cardData.replace('%previousRank',f"{previousRank}")
         cardData = cardData.replace('%previousSingle',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'single')))
         cardData = cardData.replace('%previousAverage',dataWrite.resultToString(WCIFParse.getRoundResult(localSettings.wcif,id,event,round,'average')))
-        buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}',command=lambda:buttonCommand(camera,buttonIndex,localSettings.bot,cardData),bg=bg,fg=fg)
+        buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}',command=lambda:buttonCommand(camera,buttonIndex,localSettings.bot,cardData,id),bg=bg,fg=fg)
         buttons[camera][buttonIndex].grid(row=row,column=column)
 
 def updateCubers(settings,buttons):
@@ -100,6 +104,9 @@ def OKButtonCommand(updateTimeTower,settings,buttons):
         dataWrite.sendTimeTowerEvent(settings.bot,constants.EVENTS[event],round)
     updateCubers(settings,buttons)
 
+def timeTowerCommand(bot, camera):
+    dataWrite.sendTimeTowerExpand(bot, activeCubers[camera], timeTowerVariables[camera].get())
+
 ##############################################################################
 # ROOT
 ##############################################################################
@@ -124,14 +131,21 @@ main.pack(side=tk.TOP,padx=50,pady=50)
 framesButtons = []
 labelsButtons = []
 buttons = []
+activeCubers = []
+timeTowerVariables = []
+timeTowerButtons = []
 cleanButtons = []
 for camera in range(0, CAMERAS_COUNT):
+    activeCubers.append(-1)
     framesButtons.append(tk.Frame(main,highlightbackground='black',highlightthickness=2))
     labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
     labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
+    timeTowerVariables.append(tk.IntVar())
+    timeTowerButtons.append(tk.Checkbutton(framesButtons[camera], text='Expand TimeTower line', variable=timeTowerVariables[camera], command=lambda localCamera=camera:timeTowerCommand(localSettings.bot, localCamera)))
+    timeTowerButtons[camera].grid(column=0, row=1, columnspan=2)
     cleanButtons.append(tk.Button(framesButtons[camera]))
-    cleanButtons[camera].configure(text=f'Clean',command=lambda localCamera=camera:buttonCommand(localCamera,-1,localSettings.bot,'')) # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
-    cleanButtons[camera].grid(column=0, row=1, columnspan=BUTTONS_COLS)
+    cleanButtons[camera].configure(text=f'Clean',command=lambda localCamera=camera:buttonCommand(localCamera,-1,localSettings.bot,'',-1)) # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
+    cleanButtons[camera].grid(column=2, row=1)
     buttons.append([])
     for button in range(0,BUTTONS_COLS+2):
         framesButtons[camera].columnconfigure(button, pad=5)

@@ -10,3 +10,6 @@ def sendCardData(bot,camera,data):
 
 def sendTimeTowerEvent(bot,event,round):
     bot.sendMessage(f'/timeTowerEvent {event} {round}')
+
+def sendTimeTowerExpand(bot,id,enable):
+    bot.sendMessage(f'/timeTowerExpand {id} {enable}')

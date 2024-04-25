@@ -113,6 +113,7 @@ def timeTowerCommand(bot, camera):
 
 root = tk.Tk()
 root.title('Stream Interface')
+root.state('zoomed')
 
 ##############################################################################
 # SETTINGS

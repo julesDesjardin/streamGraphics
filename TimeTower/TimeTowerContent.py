@@ -7,7 +7,7 @@ import threading, queue, time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthCount, widthResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
+    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -20,8 +20,10 @@ class TimeTowerContent:
         self.widthFlag = widthFlag
         self.heightFlag = heightFlag
         self.widthName = widthName
+        self.widthFullName = widthFullName
         self.widthCount = widthCount
         self.widthResult = widthResult
+        self.widthFullResult = widthFullResult
         self.fontRanking = fontRanking
         self.fontName = fontName
         self.fontCount = fontCount
@@ -33,7 +35,7 @@ class TimeTowerContent:
         self.colorForeignerResult = colorForeignerResult
         self.height = height
         self.heightSeparator = heightSeparator
-        self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthName + widthCount + widthResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
+        self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthFullName + widthCount + widthResult + widthFullResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
         self.queueRound = queueRound
         self.queueRanking = queue.Queue()
         self.roundId = roundId
@@ -56,6 +58,7 @@ class TimeTowerContent:
             person {{
                 name
                 id
+                registrantId
                 country {{
                 iso2
                 }}
@@ -77,7 +80,7 @@ class TimeTowerContent:
                 bgResult = self.bgForeignerResult
                 colorName = self.colorForeignerName
                 colorResult = self.colorForeignerResult
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['country']['iso2'], person['person']['name'], criteria))
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria))
 
     def resultsLoop(self):
 
@@ -138,9 +141,9 @@ class TimeTowerContent:
                 for line in self.lines:
                     line.ranking = [result[0] for result in orderedResults].index(line.competitorId) + 1 # +1 because first index is 0
 
-                self.canvas.delete('all')
-                for line in self.lines:
-                    line.showLine()
+        self.canvas.delete('all')
+        for line in self.lines:
+            line.showLine()
 
         # End of loop, loop again after 1 second
         self.root.after(1000, lambda:self.mainLoop())

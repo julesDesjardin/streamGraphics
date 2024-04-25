@@ -204,3 +204,5 @@ CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South Ame
 
 SEPARATOR = '-----'
 REGION_OPTIONS = ['World'] + [SEPARATOR] + CONTINENTS + [SEPARATOR] + [country[0] for country in COUNTRIES.values()]
+
+DEFAULT_TIMETOWER_PARAMETERS = ['#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 500, 50, 100, 500, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16]

@@ -51,3 +51,21 @@ def getReadableResult(result):
     result = result % 6000
     output = output + f'{int(result / 100):02}.{result % 100:02}'
     return output
+
+def getAllResults(results, criteria):
+    outputArray = []
+    minFound = False
+    maxFound = False
+    if len(results) <= 3 or criteria != 'average':
+        minFound = True
+        maxFound = True
+    for result in results:
+        if not maxFound and (result == max(results) or result >= DNF_RESULT):
+            maxFound = True
+            outputArray.append(f'({getReadableResult(result)})')
+        elif not minFound and (result == min(results)):
+            minFound = True
+            outputArray.append(f'({getReadableResult(result)})')
+        else:
+            outputArray.append(f'{getReadableResult(result)}')
+    return ' '.join(outputArray)

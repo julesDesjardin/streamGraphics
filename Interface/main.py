@@ -22,8 +22,8 @@ def buttonCommand(camera,buttonIndex,bot,cardData,competitorId):
             buttons[camera][index].configure(relief=tk.RAISED)
     dataWrite.sendCardData(bot, camera, cardData)
     if timeTowerVariables[camera].get() == 1:
-        dataWrite.sendTimeTowerExpand(bot, activeCubers[camera], 0)
-        dataWrite.sendTimeTowerExpand(bot, competitorId, 1)
+        dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), 0)
+        dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, competitorId), 1)
     activeCubers[camera] = competitorId
 
 def configureButton(camera,buttonIndex,event,round,competitor,visible,row,column,bg,fg):
@@ -105,7 +105,7 @@ def OKButtonCommand(updateTimeTower,settings,buttons):
     updateCubers(settings,buttons)
 
 def timeTowerCommand(bot, camera):
-    dataWrite.sendTimeTowerExpand(bot, activeCubers[camera], timeTowerVariables[camera].get())
+    dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), timeTowerVariables[camera].get())
 
 ##############################################################################
 # ROOT

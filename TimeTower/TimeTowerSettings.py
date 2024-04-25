@@ -56,6 +56,21 @@ class TimeTowerSettings:
                         self.queue.put((int(round['id']), utils.CRITERIA[event]))
                         return
 
+    def timeTowerExpandCallback(self,message):
+        fullMessage = message.text.removeprefix('/timeTowerExpand ')
+        fullMessageSplit = fullMessage.split()
+        competitor = int(fullMessageSplit[0])
+        enable = fullMessageSplit[1]
+        for line in self.content.lines:
+            print(f'ID : {line.competitorRegistrantId}')
+            if competitor == line.competitorRegistrantId:
+                if enable == '1':
+                    print(f'Expand {line.fullName}')
+                    line.expanded = True
+                else:
+                    print(f'Reduce {line.fullName}')
+                    line.expanded = False
+
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
@@ -78,6 +93,7 @@ class TimeTowerSettings:
         self.botChannelId = loadSettingsJson['botChannelId']
         self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.timeTowerEventCallback(message))
+        self.bot.setMessageHandler(['timeTowerExpand'], lambda message:self.timeTowerExpandCallback(message))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()
@@ -87,7 +103,7 @@ class TimeTowerSettings:
             self.content.stop = 1
             roundId = self.content.roundId
             criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria)
         self.content.showFrame()
         self.content.mainLoop()
     
@@ -123,7 +139,7 @@ class TimeTowerSettings:
                 self.content.threadResults.join()
                 roundId = self.content.roundId
                 criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, '#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 50, 100, 'Helvetica 15 bold', 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16, self.delay, roundId, criteria)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria)
             self.content.showFrame()
             self.content.mainLoop()
             window.destroy()
@@ -166,6 +182,7 @@ class TimeTowerSettings:
         self.botChannelId = id
         self.bot = TelegramBot.TelegramBot(token,id)
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message:self.timeTowerEventCallback(message))
+        self.bot.setMessageHandler(['timeTowerExpand'], lambda message:self.timeTowerExpandCallback(message))
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True
         self.threadBot.start()

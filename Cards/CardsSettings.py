@@ -40,15 +40,30 @@ class CardsSettings:
     
     def loadSettings(self):
         loadFile = tkinter.filedialog.askopenfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
-        loadSettingsJson = json.loads(loadFile.read())
+        try:
+            loadSettingsJson = json.loads(loadFile.read())
+        except:
+            if loadFile is not None:
+                tkinter.messagebox.showerror(title='File Error !', message='File is not a json file')
+            return
 
-        self.botToken = loadSettingsJson['botToken']
-        self.botChannelId = loadSettingsJson['botChannelId']
-        self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
-        self.bot.setMessageHandler(['cardData'], lambda message:self.botCallback(message))
-        self.threadBot = threading.Thread(target=self.bot.startPolling)
-        self.threadBot.daemon = True
-        self.threadBot.start()
+        try:
+            self.botToken = loadSettingsJson['botToken']
+            self.botChannelId = loadSettingsJson['botChannelId']
+        except:
+            tkinter.messagebox.showerror(title='Settings Error !', message='Error in the Settings file, please make sure you selected the correct file and try to load again')
+            return
+        
+        try:
+            self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
+            self.bot.sendMessage('Bot Cards ready')
+            self.bot.setMessageHandler(['cardData'], lambda message:self.botCallback(message))
+            self.threadBot = threading.Thread(target=self.bot.startPolling)
+            self.threadBot.daemon = True
+            self.threadBot.start()
+        except:
+            tkinter.messagebox.showerror(title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
+            return
 
     def updateTelegramSettingsCloseButton(self,token,id,window):
         self.botToken = token

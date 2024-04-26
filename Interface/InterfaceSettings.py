@@ -41,24 +41,46 @@ class InterfaceSettings:
     
     def loadSettings(self):
         loadFile = tkinter.filedialog.askopenfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
-        loadSettingsJson = json.loads(loadFile.read())
+        try:
+            loadSettingsJson = json.loads(loadFile.read())
+        except:
+            if loadFile is not None:
+                tkinter.messagebox.showerror(title='File Error !', message='File is not a json file')
+            return
 
-        self.compId = loadSettingsJson['compId']
-        self.reloadWCIF()
-        self.maxSeed = loadSettingsJson['maxSeed']
+        try:
+            self.compId = loadSettingsJson['compId']
+            try:
+                self.reloadWCIF()
+            except:
+                tkinter.messagebox.showerror(title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
+                return
+            self.maxSeed = loadSettingsJson['maxSeed']
 
-        for stage in self.stages:
-            stage.hideStage()
-        self.stages = []
-        for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
-            self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
+            for stage in self.stages:
+                stage.hideStage()
+            self.stages = []
+            for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
+                self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
+            self.cardText = loadSettingsJson['cardText']
+            self.botToken = loadSettingsJson['botToken']
+            self.botChannelId = loadSettingsJson['botChannelId']
+        except:
+            tkinter.messagebox.showerror(title='Settings Error !', message='Error in the Settings file, please make sure you selected the correct file and try to load again')
+            return
+        
+
         for stage in reversed(self.stages):
             stage.showStage()
-        
-        self.cardText = loadSettingsJson['cardText']
-        self.botToken = loadSettingsJson['botToken']
-        self.botChannelId = loadSettingsJson['botChannelId']
-        self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
+            
+        try:
+            self.bot = TelegramBot.TelegramBot(self.botToken,self.botChannelId)
+            self.bot.sendMessage('Bot interface ready')
+        except:
+            tkinter.messagebox.showerror(title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
+            return
+
+
 
     def updateCompIdCloseButton(self,compId,window):
         self.compId = compId

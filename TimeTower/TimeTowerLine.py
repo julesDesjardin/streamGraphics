@@ -6,7 +6,7 @@ from urllib.request import urlopen
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria):
         self.canvas = canvas
         self.bgName = bgName
         self.bgResult = bgResult
@@ -25,6 +25,7 @@ class TimeTowerLine:
         self.fontCount = fontCount
         self.fontIncompleteResult = fontIncompleteResult
         self.fontResult = fontResult
+        self.fontFullResult = fontFullResult
         self.colorName = colorName
         self.colorResult = colorResult
         self.height = height
@@ -104,11 +105,11 @@ class TimeTowerLine:
         # Name
         if self.expanded:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX + self.widthFullName / 2, currentY + self.height / 2, text=self.fullName, fill=self.colorName, font=(self.fontName))
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.fullName, fill=self.colorName, font=(self.fontName), anchor='w')
             currentX = currentX + self.widthFullName
         else:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX + self.widthName / 2, currentY + self.height / 2, text=self.smallName, fill=self.colorName, font=(self.fontName))
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.smallName, fill=self.colorName, font=(self.fontName), anchor='w')
             currentX = currentX + self.widthName
 
         # Count
@@ -128,5 +129,5 @@ class TimeTowerLine:
         # Full result
         if self.expanded:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullResult, currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX + self.widthFullResult / 2, currentY + self.height / 2, text=utils.getAllResults(self.results, self.criteria), fill=self.colorResult, font=(fontResult))
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results, self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
             currentX = currentX + self.widthFullResult

@@ -62,13 +62,10 @@ class TimeTowerSettings:
         competitor = int(fullMessageSplit[0])
         enable = fullMessageSplit[1]
         for line in self.content.lines:
-            print(f'ID : {line.competitorRegistrantId}')
             if competitor == line.competitorRegistrantId:
                 if enable == '1':
-                    print(f'Expand {line.fullName}')
                     line.expanded = True
                 else:
-                    print(f'Reduce {line.fullName}')
                     line.expanded = False
 
     def saveSettings(self):

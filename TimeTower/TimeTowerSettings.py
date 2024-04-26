@@ -24,6 +24,7 @@ class TimeTowerSettings:
         self.bot = None
         self.queue = queue.Queue()
         self.content = None
+        self.stepXmax = constants.DEFAULT_STEPS_X
 
     def timeTowerEventCallback(self,message):
 
@@ -64,9 +65,9 @@ class TimeTowerSettings:
         for line in self.content.lines:
             if competitor == line.competitorRegistrantId:
                 if enable == '1':
-                    line.expanded = True
+                    line.expandRequest = True
                 else:
-                    line.expanded = False
+                    line.reduceRequest = True
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./',filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")), defaultextension='.json')
@@ -100,7 +101,7 @@ class TimeTowerSettings:
             self.content.stop = 1
             roundId = self.content.roundId
             criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria)
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax)
         self.content.showFrame()
         self.content.mainLoop()
     
@@ -136,7 +137,7 @@ class TimeTowerSettings:
                 self.content.threadResults.join()
                 roundId = self.content.roundId
                 criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax)
             self.content.showFrame()
             self.content.mainLoop()
             window.destroy()

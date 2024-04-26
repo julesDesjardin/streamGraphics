@@ -7,7 +7,7 @@ import threading, queue, time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria):
+    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria, stepXmax):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -47,6 +47,7 @@ class TimeTowerContent:
         self.threadResults = threading.Thread(target=self.resultsLoop)
         self.threadResults.daemon = True
         self.threadResults.start()
+        self.stepXmax = stepXmax
 
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
@@ -81,7 +82,7 @@ class TimeTowerContent:
                 bgResult = self.bgForeignerResult
                 colorName = self.colorForeignerName
                 colorResult = self.colorForeignerResult
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria))
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria, self.stepXmax))
 
     def resultsLoop(self):
 
@@ -118,8 +119,28 @@ class TimeTowerContent:
             except:
                 break
             self.updateRound(roundId, criteria)
-        
-        # TODO: Expand lines
+
+        # Update lines
+
+        updateLines = False
+        for line in self.lines:
+            if line.expandRequest or line.reduceRequest:
+                updateLines = True
+
+        if updateLines:
+            for stepX in range(0, self.stepXmax + 1):
+                self.canvas.delete('all')
+                for line in self.lines:
+                    line.showLine(stepX)
+                self.canvas.update()
+                time.sleep(1 / self.stepXmax)
+            for line in self.lines:
+                if line.expandRequest:
+                    line.expanded = True
+                    line.expandRequest = False
+                if line.reduceRequest:
+                    line.expanded = False
+                    line.reduceRequest = False
 
         # Update results
 
@@ -141,10 +162,6 @@ class TimeTowerContent:
                 orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
                 for line in self.lines:
                     line.ranking = [result[0] for result in orderedResults].index(line.competitorId) + 1 # +1 because first index is 0
-
-        self.canvas.delete('all')
-        for line in self.lines:
-            line.showLine()
 
         # End of loop, loop again after 1 second
         self.root.after(1000, lambda:self.mainLoop())

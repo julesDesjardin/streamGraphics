@@ -25,6 +25,9 @@ class TimeTowerSettings:
         self.queue = queue.Queue()
         self.content = None
         self.stepXmax = constants.DEFAULT_STEPS_X
+        self.stepYmax = constants.DEFAULT_STEPS_Y
+        self.durationX = constants.DEFAULT_DURATION_X
+        self.durationY = constants.DEFAULT_DURATION_Y
 
     def timeTowerEventCallback(self,message):
 
@@ -116,7 +119,7 @@ class TimeTowerSettings:
             self.content.stop = 1
             roundId = self.content.roundId
             criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax)
+        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax, self.stepYmax, self.durationX, self.durationY)
         self.content.showFrame()
         self.content.mainLoop()
     
@@ -152,7 +155,7 @@ class TimeTowerSettings:
                 self.content.threadResults.join()
                 roundId = self.content.roundId
                 criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS, self.delay, roundId, criteria, self.stepXmax, self.stepYmax, self.durationX, self.durationY)
             self.content.showFrame()
             self.content.mainLoop()
             window.destroy()

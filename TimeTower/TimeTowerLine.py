@@ -6,7 +6,7 @@ from urllib.request import urlopen
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax, stepYmax):
         self.canvas = canvas
         self.bgName = bgName
         self.bgResult = bgResult
@@ -45,10 +45,12 @@ class TimeTowerLine:
         self.results = []
         self.currentResult = 0
         self.ranking = 0
+        self.nextRanking = 0
         self.expanded = False
         self.expandRequest = False
         self.reduceRequest = False
         self.stepXmax = stepXmax
+        self.stepYmax = stepYmax
 
         if utils.DEBUG_MODE_LOCAL_FLAG:
             flagImageFull = tk.PhotoImage(file=f'{os.path.dirname(__file__)}/us.png')
@@ -91,13 +93,14 @@ class TimeTowerLine:
                 case 'single':
                     self.currentResult = min(self.results)
 
-    def showLine(self, stepX):
+    def showLine(self, stepX, stepY):
         currentX = 0
-        currentY = (self.ranking - 1) * (self.height + self.heightSeparator)
+        currentRanking = self.ranking + (self.nextRanking - self.ranking) * (stepY / self.stepYmax)
+        currentY = int((currentRanking - 1) * (self.height + self.heightSeparator))
         
         # Ranking
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthRanking, currentY + self.height, fill=self.bgName, outline='')
-        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2, text=self.ranking, fill=self.colorName, font=(self.fontRanking))
+        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2, text=self.nextRanking, fill=self.colorName, font=(self.fontRanking))
         currentX = currentX + self.widthRanking
 
         # Flag

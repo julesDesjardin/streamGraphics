@@ -1,39 +1,44 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
-import constants, WCIFParse
+import constants
+import WCIFParse
+
 
 class Stage:
 
-    def __init__(self,root,wcif,backgroundColor,textColor,venue,room):
+    def __init__(self, root, wcif, backgroundColor, textColor, venue, room):
         self.root = root
         self.wcif = wcif
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.venue = venue
         self.room = room
-        self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black',highlightthickness=1, padx=50, pady=20)
+        self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black', highlightthickness=1, padx=50, pady=20)
         self.disableButton = tk.Button(self.frame, text='Disable stage', command=self.disableStageToggle)
-        self.disableButton.grid(column=0,row=0)
-        self.eventLabel = tk.Label(self.frame,text='Event:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
-        self.eventLabel.grid(column=1,row=0,sticky=tk.E)
+        self.disableButton.grid(column=0, row=0)
+        self.eventLabel = tk.Label(self.frame, text='Event:', bg=self.backgroundColor, fg=self.textColor,
+                                   activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.eventLabel.grid(column=1, row=0, sticky=tk.E)
         self.eventVar = tk.StringVar()
-        self.eventMenu = ttk.OptionMenu(self.frame,self.eventVar,list(constants.EVENTS.keys())[0],*list(constants.EVENTS.keys()))
-        self.eventMenu.grid(column=2,row=0,sticky=tk.W)
-        self.roundLabel = tk.Label(self.frame,text='Round:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
-        self.roundLabel.grid(column=3,row=0,sticky=tk.E)
+        self.eventMenu = ttk.OptionMenu(self.frame, self.eventVar, list(constants.EVENTS.keys())[0], *list(constants.EVENTS.keys()))
+        self.eventMenu.grid(column=2, row=0, sticky=tk.W)
+        self.roundLabel = tk.Label(self.frame, text='Round:', bg=self.backgroundColor, fg=self.textColor,
+                                   activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.roundLabel.grid(column=3, row=0, sticky=tk.E)
         self.roundVar = tk.StringVar()
-        self.roundMenu = ttk.OptionMenu(self.frame,self.roundVar)
-        self.roundMenu.grid(column=4,row=0,sticky=tk.W)
-        self.groupLabel = tk.Label(self.frame,text='Group:', bg=self.backgroundColor, fg=self.textColor, activebackground=self.backgroundColor, activeforeground=self.textColor)
-        self.groupLabel.grid(column=5,row=0,sticky=tk.E)
+        self.roundMenu = ttk.OptionMenu(self.frame, self.roundVar)
+        self.roundMenu.grid(column=4, row=0, sticky=tk.W)
+        self.groupLabel = tk.Label(self.frame, text='Group:', bg=self.backgroundColor, fg=self.textColor,
+                                   activebackground=self.backgroundColor, activeforeground=self.textColor)
+        self.groupLabel.grid(column=5, row=0, sticky=tk.E)
         self.groupVar = tk.StringVar()
-        self.groupMenu = ttk.OptionMenu(self.frame,self.groupVar)
-        self.groupMenu.grid(column=6,row=0,sticky=tk.W)
+        self.groupMenu = ttk.OptionMenu(self.frame, self.groupVar)
+        self.groupMenu.grid(column=6, row=0, sticky=tk.W)
         self.stageEnabled = True
 
-        self.roundVar.trace_add('write',lambda var,index,mode :self.updateGroups())
-        self.eventVar.trace_add('write',lambda var,index,mode :self.updateRounds())
+        self.roundVar.trace_add('write', lambda var, index, mode: self.updateGroups())
+        self.eventVar.trace_add('write', lambda var, index, mode: self.updateRounds())
         self.eventVar.set('3x3x3')
 
     def disableStageToggle(self):
@@ -67,10 +72,10 @@ class Stage:
         menu.delete(0, "end")
         if len(groups) > 0:
             for group in sorted(groups):
-                menu.add_command(label=f'{group}',command=lambda value=f'{group}': self.groupVar.set(value))
+                menu.add_command(label=f'{group}', command=lambda value=f'{group}': self.groupVar.set(value))
             self.groupVar.set(sorted(groups)[0])
         else:
-            menu.add_command(label='No group',command=lambda value=0:self.roundVar.set(value))
+            menu.add_command(label='No group', command=lambda value=0: self.roundVar.set(value))
             self.groupVar.set(0)
 
     def updateRounds(self):
@@ -86,10 +91,10 @@ class Stage:
         menu.delete(0, "end")
         if len(rounds) > 0:
             for round in sorted(rounds):
-                menu.add_command(label=f'{round}',command=lambda value=f'{round}': self.roundVar.set(value))
+                menu.add_command(label=f'{round}', command=lambda value=f'{round}': self.roundVar.set(value))
             self.roundVar.set(sorted(rounds)[0])
         else:
-            menu.add_command(label='No round',command=lambda value=0:self.roundVar.set(value))
+            menu.add_command(label='No round', command=lambda value=0: self.roundVar.set(value))
             self.roundVar.set(0)
 
     def hideStage(self):
@@ -98,17 +103,17 @@ class Stage:
     def showStage(self):
         self.frame.pack(side=tk.BOTTOM)
 
-    def setEvent(self,event):
+    def setEvent(self, event):
         self.eventVar.set(event)
 
-    def setRound(self,round):
+    def setRound(self, round):
         self.roundVar.set(round)
 
     def updateTextColorFromBackground(self):
         red = int(self.backgroundColor[1:3], 16)
         green = int(self.backgroundColor[3:5], 16)
         blue = int(self.backgroundColor[5:7], 16)
-        if (red*0.299 + green*0.587 + blue*0.114) > 186:
+        if (red * 0.299 + green * 0.587 + blue * 0.114) > 186:
             self.textColor = '#000000'
         else:
             self.textColor = '#ffffff'
@@ -138,16 +143,16 @@ class Stage:
         menu.delete(0, 'end')
         rooms = WCIFParse.getRooms(self.wcif, WCIFParse.getVenueId(self.wcif, venueVar.get()))
         for room in rooms:
-            menu.add_command(label=room, command=lambda value=room:roomVar.set(value))
+            menu.add_command(label=room, command=lambda value=room: roomVar.set(value))
         roomVar.set(rooms[0])
 
     def updateWindowCloseButton(self, venue, room, window):
         self.venue = WCIFParse.getVenueId(self.wcif, venue)
         self.room = WCIFParse.getRoomId(self.wcif, self.venue, room)
-        self.eventVar.set('3x3x3') # Will reload rounds and groups in the display
+        self.eventVar.set('3x3x3')  # Will reload rounds and groups in the display
         window.destroy()
 
-    def updateWindow(self,root,addNewStage):
+    def updateWindow(self, root, addNewStage):
         window = tk.Toplevel(root)
         window.grab_set()
         if addNewStage:
@@ -163,9 +168,10 @@ class Stage:
         roomLabel = tk.Label(window, text='Room')
         roomLabel.grid(sticky='E', row=2, column=0)
         roomVar = tk.StringVar()
-        roomMenu = ttk.OptionMenu(window, roomVar, WCIFParse.getRoomName(self.wcif, self.venue, self.room), *WCIFParse.getRooms(self.wcif, self.venue))
+        roomMenu = ttk.OptionMenu(window, roomVar, WCIFParse.getRoomName(
+            self.wcif, self.venue, self.room), *WCIFParse.getRooms(self.wcif, self.venue))
         roomMenu.grid(sticky='W', row=2, column=1)
-        venueVar.trace_add('write',lambda var,index,mode :self.updateRoomMenu(venueVar, roomMenu, roomVar))
+        venueVar.trace_add('write', lambda var, index, mode: self.updateRoomMenu(venueVar, roomMenu, roomVar))
         # Defining sample buttons before edit buttons because they are needed for the callback
         sampleUnclickedButton = tk.Button(window, text='Sample unclicked button', bg=self.backgroundColor, fg=self.textColor)
         sampleUnclickedButton.configure(relief=tk.RAISED)
@@ -173,11 +179,12 @@ class Stage:
         sampleClickedButton = tk.Button(window, text='Sample clicked button', bg=self.backgroundColor, fg=self.textColor)
         sampleClickedButton.configure(relief=tk.SUNKEN)
         sampleClickedButton.grid(sticky='W', row=5, column=1)
-        getColorScheduleButton = tk.Button(window, text='Get color from schedule', command=lambda:self.getColorSchedule(sampleUnclickedButton, sampleClickedButton))
+        getColorScheduleButton = tk.Button(window, text='Get color from schedule',
+                                           command=lambda: self.getColorSchedule(sampleUnclickedButton, sampleClickedButton))
         getColorScheduleButton.grid(row=3, column=0, columnspan=2)
-        bgColorButton = tk.Button(window, text='Choose color', command=lambda:self.updateColor(sampleUnclickedButton, sampleClickedButton))
+        bgColorButton = tk.Button(window, text='Choose color', command=lambda: self.updateColor(sampleUnclickedButton, sampleClickedButton))
         bgColorButton.grid(row=4, column=0, columnspan=2)
-        OKButton = tk.Button(window, text='OK', command=lambda:self.updateWindowCloseButton(venueVar.get(), roomVar.get(), window))
+        OKButton = tk.Button(window, text='OK', command=lambda: self.updateWindowCloseButton(venueVar.get(), roomVar.get(), window))
         OKButton.grid(row=6, column=0, columnspan=2)
 
         window.rowconfigure(0, pad=20)

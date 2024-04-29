@@ -8,6 +8,7 @@ CAMERAS_COUNT = 4
 # FUNCTIONS
 ##############################################################################
 
+
 def checkQueue(root, queue, canvas, text):
     while True:
         try:
@@ -15,11 +16,13 @@ def checkQueue(root, queue, canvas, text):
         except:
             break
         canvas.itemconfig(text, text=data)
-    root.after(1000, lambda:checkQueue(root, queue, canvas, text))
+    root.after(1000, lambda: checkQueue(root, queue, canvas, text))
+
 
 def checkAllQueues(root, queues, canvases, texts):
     for i in range(0, CAMERAS_COUNT):
         checkQueue(root, queues[i], canvases[i], texts[i])
+
 
 ##############################################################################
 # ROOT

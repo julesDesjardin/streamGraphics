@@ -2,8 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 import json
 import utils
-import TimeTowerLine, constants
-import threading, queue, time
+import TimeTowerLine
+import constants
+import threading
+import queue
+import time
+
 
 class TimeTowerContent:
 
@@ -27,7 +31,7 @@ class TimeTowerContent:
         self.fontRanking = fontRanking
         self.fontName = fontName
         self.fontCount = fontCount
-        self.fontIncompleteResult  = fontIncompleteResult
+        self.fontIncompleteResult = fontIncompleteResult
         self.fontResult = fontResult
         self.fontFullResult = fontFullResult
         self.colorLocalName = colorLocalName
@@ -36,7 +40,8 @@ class TimeTowerContent:
         self.colorForeignerResult = colorForeignerResult
         self.height = height
         self.heightSeparator = heightSeparator
-        self.canvas = tk.Canvas(self.frame, width = widthRanking + widthFlagRectangle + widthFullName + widthCount + widthResult + widthFullResult, height = maxNumber * (height + heightSeparator), bg='#FFF')
+        self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthFullName + widthCount +
+                                widthResult + widthFullResult, height=maxNumber * (height + heightSeparator), bg='#FFF')
         self.queueRound = queueRound
         self.queueRanking = queue.Queue()
         self.roundId = roundId
@@ -85,12 +90,13 @@ class TimeTowerContent:
                 bgResult = self.bgForeignerResult
                 colorName = self.colorForeignerName
                 colorResult = self.colorForeignerResult
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria, self.stepXmax, self.stepYmax))
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.widthFlag, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount,
+                              self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria, self.stepXmax, self.stepYmax))
 
     def resultsLoop(self):
 
         while True:
-            if(self.roundId != 0):
+            if (self.roundId != 0):
                 query = f'''
                 query MyQuery {{
                     round(id: "{self.roundId}") {{
@@ -109,7 +115,7 @@ class TimeTowerContent:
 
                 queryResult = utils.getQueryResult(query)
                 self.queueRanking.put(queryResult)
-            time.sleep(self.reloadDelay/1000)
+            time.sleep(self.reloadDelay / 1000)
             if self.stop == 1:
                 break
 
@@ -165,10 +171,10 @@ class TimeTowerContent:
                 orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
                 updateResults = False
                 for line in self.lines:
-                    line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1 # +1 because first index is 0
+                    line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1  # +1 because first index is 0
                     if line.nextRanking != line.ranking:
                         updateResults = True
-                
+
                 if updateResults:
                     for stepY in range(0, self.stepYmax + 1):
                         self.canvas.delete('all')
@@ -179,10 +185,9 @@ class TimeTowerContent:
                     for line in self.lines:
                         line.ranking = line.nextRanking
 
-
         # End of loop, loop again after 1 second
-        self.root.after(1000, lambda:self.mainLoop())
+        self.root.after(1000, lambda: self.mainLoop())
 
     def showFrame(self):
         self.canvas.pack()
-        self.frame.pack(padx = 20, pady = 20)
+        self.frame.pack(padx=20, pady=20)

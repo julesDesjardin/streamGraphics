@@ -4,6 +4,7 @@ import os
 import utils
 from urllib.request import urlopen
 
+
 class TimeTowerLine:
 
     def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax, stepYmax):
@@ -34,7 +35,8 @@ class TimeTowerLine:
         self.competitorId = competitorId
         self.competitorRegistrantId = competitorRegistrantId
         self.country = country
-        self.fullName = name.split('(')[0].strip().upper() # Removes part in parentheses (could mess up the display, + messes up the 3 letter name) + trailing space in this case
+        # Removes part in parentheses (could mess up the display, + messes up the 3 letter name) + trailing space in this case
+        self.fullName = name.split('(')[0].strip().upper()
         fullNameSplit = self.fullName.split(' ')
         self.smallName = (fullNameSplit[0][0] + '. ' + fullNameSplit[-1][0:3])
         self.criteria = criteria
@@ -60,7 +62,7 @@ class TimeTowerLine:
             flagImageFull = tk.PhotoImage(data=image_byt)
         flagFullWidth = flagImageFull.width()
         flagFullHeight = flagImageFull.height()
-        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight) # Resize
+        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight)  # Resize
 
     def updateResults(self, queryResult):
         for result in queryResult['round']['results']:
@@ -72,7 +74,7 @@ class TimeTowerLine:
                     else:
                         nonDNFResult = attempt['result']
                     self.results.append(nonDNFResult)
-        
+
         # Update currentResult
         if len(self.results) == 0:
             self.currentResult = utils.DNF_ATTEMPT
@@ -97,10 +99,11 @@ class TimeTowerLine:
         currentX = 0
         currentRanking = self.ranking + (self.nextRanking - self.ranking) * (stepY / self.stepYmax)
         currentY = int((currentRanking - 1) * (self.height + self.heightSeparator))
-        
+
         # Ranking
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthRanking, currentY + self.height, fill=self.bgName, outline='')
-        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2, text=self.nextRanking, fill=self.colorName, font=(self.fontRanking))
+        self.canvas.create_text(currentX + self.widthRanking / 2, currentY + self.height / 2,
+                                text=self.nextRanking, fill=self.colorName, font=(self.fontRanking))
         currentX = currentX + self.widthRanking
 
         # Flag
@@ -130,7 +133,8 @@ class TimeTowerLine:
 
         # Count
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthCount, currentY + self.height, fill=self.bgResult, outline='')
-        self.canvas.create_text(currentX + self.widthCount / 2, currentY + self.height / 2, text=f'({len(self.results)}/{self.maxResults})', fill=self.colorResult, font=(self.fontCount))
+        self.canvas.create_text(currentX + self.widthCount / 2, currentY + self.height / 2,
+                                text=f'({len(self.results)}/{self.maxResults})', fill=self.colorResult, font=(self.fontCount))
         currentX = currentX + self.widthCount
 
         # Result
@@ -139,20 +143,25 @@ class TimeTowerLine:
         else:
             fontResult = self.fontIncompleteResult
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthResult, currentY + self.height, fill=self.bgResult, outline='')
-        self.canvas.create_text(currentX + self.widthResult / 2, currentY + self.height / 2, text=utils.getReadableResult(self.currentResult), fill=self.colorResult, font=(fontResult))
+        self.canvas.create_text(currentX + self.widthResult / 2, currentY + self.height / 2,
+                                text=utils.getReadableResult(self.currentResult), fill=self.colorResult, font=(fontResult))
         currentX = currentX + self.widthResult
 
         # Full result
         if self.expandRequest:
             currentWidthFullResult = int(self.widthFullResult * (stepX / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult, currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results, self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult,
+                                         currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results,
+                                    self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
             currentX = currentX + currentWidthFullResult
         elif self.reduceRequest:
             currentWidthFullResult = int(self.widthFullResult * ((self.stepXmax - stepX) / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult, currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult,
+                                         currentY + self.height, fill=self.bgResult, outline='')
             currentX = currentX + currentWidthFullResult
         elif self.expanded:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullResult, currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results, self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results,
+                                    self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
             currentX = currentX + self.widthFullResult

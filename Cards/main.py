@@ -37,27 +37,10 @@ root.title('Stream Cards')
 
 localSettings = CardsSettings.CardsSettings(root, CAMERAS_COUNT)
 localSettings.showFrame()
-
-##############################################################################
-# MAIN
-##############################################################################
-
-main = tk.Frame(root)
-main.pack()
-
-width = 1000
-height = 3000
-fontSize = 100
-
-canvases = []
-texts = []
-for i in range(0, CAMERAS_COUNT):
-    canvases.append(tk.Canvas(main, width=width, height=height, background='#ff00ff'))
-    texts.append(canvases[i].create_text(100, 100, font=f'Helvetica {fontSize}', text=f'Camera {i+1} text', anchor='nw'))
-    canvases[i].pack(side=tk.LEFT)
+localSettings.mainFrame.pack()
 
 ##############################################################################
 
-checkAllQueues(root, localSettings.queues, canvases, texts)
+checkAllQueues(root, localSettings.queues, localSettings.canvases, localSettings.texts)
 
 root.mainloop()

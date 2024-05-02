@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
-import os
 import utils
 from urllib.request import urlopen
+
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+from Common import Flag
 
 
 class TimeTowerLine:
@@ -53,16 +58,11 @@ class TimeTowerLine:
         self.reduceRequest = False
         self.stepXmax = stepXmax
         self.stepYmax = stepYmax
-
         if utils.DEBUG_MODE_LOCAL_FLAG:
-            flagImageFull = tk.PhotoImage(file=f'{os.path.dirname(__file__)}/us.png')
+            country = 'local'
         else:
-            image_url = f'https://flagcdn.com/w320/{self.country.lower()}.png'
-            image_byt = urlopen(image_url).read()
-            flagImageFull = tk.PhotoImage(data=image_byt)
-        flagFullWidth = flagImageFull.width()
-        flagFullHeight = flagImageFull.height()
-        self.flagImage = flagImageFull.zoom(self.widthFlag, self.heightFlag).subsample(flagFullWidth, flagFullHeight)  # Resize
+            country = self.country
+        self.flagImage = Flag.getFlag(self.widthFlag, self.heightFlag, country)
 
     def updateResults(self, queryResult):
         for result in queryResult['round']['results']:

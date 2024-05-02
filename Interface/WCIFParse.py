@@ -143,3 +143,7 @@ def getCompetitors(wcif, activityId, event):
 
 def getRegistrantId(wcif, competitor):
     return wcif['persons'][competitor]['registrantId']
+
+
+def getCountry(wcif, competitor):
+    return wcif['persons'][competitor]['countryIso2']

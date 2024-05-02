@@ -46,7 +46,7 @@ def configureButton(camera, buttonIndex, event, round, competitor, visible, row,
         extraButtonText = f'Seed {seed}'
         if previousRank is not None:
             extraButtonText = extraButtonText + f', Placed {previousRank}'
-        cardData = localSettings.cardText
+        cardData = WCIFParse.getCountry(localSettings.wcif, id) + ' ' + localSettings.cardText
         cardData = cardData.replace('%name', f"{name}")
         prSingleInt = WCIFParse.getPb(localSettings.wcif, id, event, 'single')
         prAverageInt = WCIFParse.getPb(localSettings.wcif, id, event, 'average')

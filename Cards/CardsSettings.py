@@ -12,7 +12,7 @@ import constants
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot
+from Common import TelegramBot, Flag
 
 
 class CardsSettings:
@@ -29,6 +29,8 @@ class CardsSettings:
         self.queues = []
         self.canvases = []
         self.texts = []
+        self.flags = []
+        self.flagImages = []
         self.backgrounds = []
         self.width = constants.DEFAULT_WIDTH
         self.height = constants.DEFAULT_HEIGHT
@@ -36,10 +38,17 @@ class CardsSettings:
         self.font = constants.DEFAULT_FONT
         self.textX = 0
         self.textY = 0
+        self.flagX = constants.DEFAULT_FLAG_X
+        self.flagY = constants.DEFAULT_FLAG_Y
+        self.flagWidth = constants.DEFAULT_FLAG_WIDTH
+        self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
+        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         for i in range(0, camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.font, text=f'Camera {i+1} text', anchor='nw'))
+            self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
+            self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
 
     def botCallback(self, message):
         fullMessage = message.text.removeprefix('/cardData ')
@@ -57,6 +66,10 @@ class CardsSettings:
             'font': self.font,
             'textX': self.textX,
             'textY': self.textY,
+            'flagX': self.flagX,
+            'flagY': self.flagY,
+            'flagWidth': self.flagWidth,
+            'flagHeight': self.flagHeight,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -79,6 +92,10 @@ class CardsSettings:
             self.font = loadSettingsJson['font']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
+            self.flagX = loadSettingsJson['flagX']
+            self.flagY = loadSettingsJson['flagY']
+            self.flagWidth = loadSettingsJson['flagWidth']
+            self.flagHeight = loadSettingsJson['flagHeight']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -107,22 +124,32 @@ class CardsSettings:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
 
-    def updateLayoutCloseButton(self, window, width, height, textX, textY):
+    def updateLayoutCloseButton(self, window, width, height, textX, textY, flagWidth, flagHeight, flagX, flagY):
         self.width = width
         self.height = height
         self.textX = textX
         self.textY = textY
+        self.flagWidth = flagWidth
+        self.flagHeight = flagHeight
+        self.flagX = flagX
+        self.flagY = flagY
         for i in range(0, self.camerasCount):
             self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
             self.canvases[i].coords(self.texts[i], self.textX, self.textY)
+            self.flags[i] = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+            self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
+            self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
             if not self.canvases[i].winfo_ismapped():
                 self.canvases[i].pack(side=tk.LEFT, padx=10)
 
         window.destroy()
 
-    def updateExampleCanvas(self, canvas, width, height, backgroundColor, text, textX, textY):
+    def updateExampleCanvas(self, canvas, width, height, backgroundColor, text, textX, textY, flag, flagWidth, flagHeight, flagX, flagY):
         canvas.configure(width=width, height=height, background=backgroundColor)
         canvas.coords(text, textX, textY)
+        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+        canvas.itemconfig(flag, image=self.exampleFlag)
+        canvas.coords(flag, flagX, flagY)
 
     def updateLayout(self):
         layoutWindow = tk.Toplevel(self.root)
@@ -163,25 +190,63 @@ class CardsSettings:
         textYSpinbox.grid(column=3, row=2, sticky='w')
         textYVariable.set(f'{self.textY}')
 
+        flagWidthLabel = tk.Label(layoutWindow, text='Flag width')
+        flagWidthLabel.grid(column=0, row=3, sticky='e')
+        flagWidthVariable = tk.StringVar()
+        flagWidthSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=flagWidthVariable)
+        flagWidthSpinbox.grid(column=1, row=3, sticky='w')
+        flagWidthVariable.set(f'{self.flagWidth}')
+
+        flagHeightLabel = tk.Label(layoutWindow, text='Flag height')
+        flagHeightLabel.grid(column=2, row=3, sticky='e')
+        flagHeightVariable = tk.StringVar()
+        flagHeightSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=flagHeightVariable)
+        flagHeightSpinbox.grid(column=3, row=3, sticky='w')
+        flagHeightVariable.set(f'{self.flagHeight}')
+
+        flagXLabel = tk.Label(layoutWindow, text='Flag position X')
+        flagXLabel.grid(column=0, row=4, sticky='e')
+        flagXVariable = tk.StringVar()
+        flagXSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.width, textvariable=flagXVariable)
+        flagXSpinbox.grid(column=1, row=4, sticky='w')
+        flagXVariable.set(f'{self.flagX}')
+
+        flagYLabel = tk.Label(layoutWindow, text='Flag position Y')
+        flagYLabel.grid(column=2, row=4, sticky='e')
+        flagYVariable = tk.StringVar()
+        flagYSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.height, textvariable=flagYVariable)
+        flagYSpinbox.grid(column=3, row=4, sticky='w')
+        flagYVariable.set(f'{self.flagY}')
+
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(textXVariable.get()), int(textYVariable.get())))
-        OKButton.grid(column=0, row=3, columnspan=4)
+            layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        OKButton.grid(column=0, row=5, columnspan=4)
 
         # TODO Background color
         # TODO Font ?
 
         exampleCanvas = tk.Canvas(layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
-        exampleCanvas.grid(column=0, row=4, columnspan=4)
+        exampleCanvas.grid(column=0, row=6, columnspan=4)
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font, text=f'Lorem ipsum', anchor='nw')
+        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+        exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
 
         widthVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        flagWidthVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        flagXVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        flagYVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
+            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

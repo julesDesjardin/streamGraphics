@@ -122,8 +122,8 @@ class CardsSettings:
                 self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                 self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-            if not self.canvases[i].winfo_ismapped():
-                self.canvases[i].pack(side=tk.LEFT, padx=10)
+                if not self.canvases[i].winfo_ismapped():
+                    self.canvases[i].pack(side=tk.LEFT, padx=10)
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')

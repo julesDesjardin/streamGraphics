@@ -7,6 +7,7 @@ import queue
 import threading
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
+import cv2
 
 import constants
 import sys
@@ -32,6 +33,8 @@ class CardsSettings:
         self.flags = []
         self.flagImages = []
         self.backgrounds = []
+        self.loopFile = ''
+        self.loopImages = []
         self.width = constants.DEFAULT_WIDTH
         self.height = constants.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
@@ -46,6 +49,7 @@ class CardsSettings:
         for i in range(0, camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
+            self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.font, text=f'Camera {i+1} text', anchor='nw'))
             self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
@@ -63,6 +67,7 @@ class CardsSettings:
             'width': self.width,
             'height': self.height,
             'backgroundColor': self.backgroundColor,
+            'loopFile': self.loopFile,
             'font': self.font,
             'textX': self.textX,
             'textY': self.textY,
@@ -89,6 +94,7 @@ class CardsSettings:
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']
+            self.loopFile = loadSettingsJson['loopFile']
             self.font = loadSettingsJson['font']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
@@ -112,6 +118,19 @@ class CardsSettings:
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
+
+        if self.loopFile != '':
+            self.loopImages.clear()
+            vidcap = cv2.VideoCapture(self.loopFile)
+            success, image = vidcap.read()
+            while success:
+                pngImage = cv2.imencode('.png', image)[1]
+                imageFull = tk.PhotoImage(data=pngImage.tobytes())
+                self.loopImages.append(imageFull)
+                success, image = vidcap.read()
+            for i in range(0, self.camerasCount):
+                self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+
         try:
             self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId)
             self.bot.sendMessage('Bot Cards ready')
@@ -124,6 +143,46 @@ class CardsSettings:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
 
+    def browse(self, entry):
+        fileName = tkinter.filedialog.askopenfilename(initialdir='./')
+        entry.delete(0, tk.END)
+        entry.insert(0, fileName)
+
+    def updateBackgroundCloseButton(self, window, loopFile, canvas, background, width, height):
+        self.loopFile = loopFile
+        if self.loopFile != '':
+            self.loopImages.clear()
+            vidcap = cv2.VideoCapture(loopFile)
+            success, image = vidcap.read()
+            (heightVideo, widthVideo, _) = image.shape
+            width.set(widthVideo)
+            height.set(heightVideo)
+            canvas.configure(width=widthVideo, height=heightVideo)
+            while success:
+                pngImage = cv2.imencode('.png', image)[1]
+                imageFull = tk.PhotoImage(data=pngImage.tobytes())
+                self.loopImages.append(imageFull)
+                success, image = vidcap.read()
+        canvas.itemconfig(background, image=self.loopImages[0])
+        window.destroy()
+
+    def updateBackground(self, window, canvas, background, width, height):
+        backgroundWindow = tk.Toplevel(window)
+        backgroundWindow.grab_set()
+
+        loopLabel = tk.Label(backgroundWindow, text='Background video/image')
+        loopLabel.grid(row=0, column=0)
+        loopEntry = tk.Entry(backgroundWindow)
+        loopEntry.delete(0, tkinter.END)
+        loopEntry.insert(0, self.loopFile)
+        loopEntry.grid(row=0, column=1)
+        loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: self.browse(loopEntry))
+        loopBrowse.grid(row=0, column=2)
+
+        OKButton = tk.Button(backgroundWindow, text='OK', command=lambda: self.updateBackgroundCloseButton(
+            backgroundWindow, loopEntry.get(), canvas, background, width, height))
+        OKButton.grid(row=1, column=0, columnspan=3)
+
     def updateLayoutCloseButton(self, window, width, height, textX, textY, flagWidth, flagHeight, flagX, flagY):
         self.width = width
         self.height = height
@@ -135,6 +194,7 @@ class CardsSettings:
         self.flagY = flagY
         for i in range(0, self.camerasCount):
             self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
+            self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
             self.canvases[i].coords(self.texts[i], self.textX, self.textY)
             self.flags[i] = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
             self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
@@ -215,15 +275,20 @@ class CardsSettings:
         flagYSpinbox.grid(column=3, row=4, sticky='w')
         flagYVariable.set(f'{self.flagY}')
 
+        backgroundButton = tk.Button(layoutWindow, text='Update background image/video',
+                                     command=lambda: self.updateBackground(layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable))
+        backgroundButton.grid(column=0, row=5, columnspan=4)
+
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
             layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        OKButton.grid(column=0, row=5, columnspan=4)
+        OKButton.grid(column=0, row=6, columnspan=4)
 
         # TODO Background color
         # TODO Font ?
 
         exampleCanvas = tk.Canvas(layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
-        exampleCanvas.grid(column=0, row=6, columnspan=4)
+        exampleCanvas.grid(column=0, row=7, columnspan=4)
+        exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font, text=f'Lorem ipsum', anchor='nw')
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)

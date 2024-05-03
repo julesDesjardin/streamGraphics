@@ -6,8 +6,8 @@ import WCIFParse
 import InterfaceSettings
 import constants
 
-BUTTONS_ROWS = 10
-BUTTONS_COLS = 5
+BUTTONS_ROWS = 4
+BUTTONS_COLS = 7
 BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
 CAMERAS_ROWS = 2
 CAMERAS_COLS = 2
@@ -141,7 +141,12 @@ localSettings.showFrame()
 ##############################################################################
 
 main = tk.Frame(root)
-main.pack(side=tk.TOP, padx=50, pady=50)
+main.pack(side=tk.TOP, padx=10)
+
+main.grid_columnconfigure(0, minsize=800)
+main.grid_columnconfigure(1, minsize=800)
+main.grid_rowconfigure(0, minsize=270)
+main.grid_rowconfigure(1, minsize=270)
 
 framesButtons = []
 labelsButtons = []
@@ -158,11 +163,11 @@ for camera in range(0, CAMERAS_COUNT):
     timeTowerVariables.append(tk.IntVar())
     timeTowerButtons.append(tk.Checkbutton(framesButtons[camera], text='Expand TimeTower line', variable=timeTowerVariables[camera],
                             command=lambda localCamera=camera: timeTowerCommand(localSettings.bot, localCamera)))
-    timeTowerButtons[camera].grid(column=0, row=1, columnspan=2)
+    timeTowerButtons[camera].grid(column=0, row=1, columnspan=3, sticky='e')
     cleanButtons.append(tk.Button(framesButtons[camera]))
     # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
     cleanButtons[camera].configure(text=f'Clean', command=lambda localCamera=camera: buttonCommand(localCamera, -1, localSettings.bot, '', -1))
-    cleanButtons[camera].grid(column=2, row=1)
+    cleanButtons[camera].grid(column=3, row=1)
     buttons.append([])
     for button in range(0, BUTTONS_COLS + 2):
         framesButtons[camera].columnconfigure(button, pad=5)
@@ -170,11 +175,11 @@ for camera in range(0, CAMERAS_COUNT):
         framesButtons[camera].rowconfigure(button, pad=5)
 
     for button in range(0, BUTTONS_COUNT):
-        buttons[camera].append(tk.Button(framesButtons[camera], height=3, width=15, anchor=tk.W, justify=tk.LEFT))
+        buttons[camera].append(tk.Button(framesButtons[camera], height=2, width=15, anchor=tk.W, justify=tk.LEFT))
 
 for cameraRow in range(0, CAMERAS_ROWS):
     for cameraCol in range(0, CAMERAS_COLS):
-        framesButtons[cameraRow * CAMERAS_COLS + cameraCol].grid(column=cameraCol, row=cameraRow)
+        framesButtons[cameraRow * CAMERAS_COLS + cameraCol].grid(column=cameraCol, row=cameraRow, sticky='nsew')
 
 ttk.Style().configure("TButton", padding=6, relief="flat", background="#ccc")
 

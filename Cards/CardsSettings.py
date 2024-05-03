@@ -110,11 +110,15 @@ class CardsSettings:
             return
 
         try:
+            self.flags.clear()
             for i in range(0, self.camerasCount):
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                if not self.canvases[i].winfo_ismapped():
-                    self.canvases[i].pack(side=tk.LEFT, padx=10)
+                self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
+                self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
+                self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+            if not self.canvases[i].winfo_ismapped():
+                self.canvases[i].pack(side=tk.LEFT, padx=10)
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')

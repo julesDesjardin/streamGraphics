@@ -89,16 +89,28 @@ def updateCubers(settings, buttons):
                 newCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
                 newCompetitors.sort(key=lambda x: x[2])
                 for competitor in newCompetitors:
-                    fullCompetitors.append(competitor)
-                    bg.append(stage.backgroundColor)
-                    fg.append(stage.textColor)
-                    events.append(event)
-                    rounds.append(round)
+                    if competitor[1] <= settings.maxSeed:
+                        fullCompetitors.append(competitor)
+                        bg.append(stage.backgroundColor)
+                        fg.append(stage.textColor)
+                        events.append(event)
+                        rounds.append(round)
+
+    print(fullCompetitors)
+    # If too many competitors : keep top X only
+    sortedCompetitors = sorted(fullCompetitors, key=lambda x: x[1])
+    if len(sortedCompetitors) > BUTTONS_COUNT:
+        for competitor in sortedCompetitors[BUTTONS_COUNT:]:
+            indexCompetitor = fullCompetitors.index(competitor)
+            del fullCompetitors[indexCompetitor]
+            del bg[indexCompetitor]
+            del fg[indexCompetitor]
+            del events[indexCompetitor]
+            del rounds[indexCompetitor]
+    print(fullCompetitors)
     for i in range(0, BUTTONS_ROWS):
         for j in range(0, BUTTONS_COLS):
             buttonIndex = i * BUTTONS_COLS + j
-            while index < len(fullCompetitors) and fullCompetitors[index][1] > settings.maxSeed:  # Search next competitor within max seed
-                index = index + 1
             if index < len(fullCompetitors):
                 for camera in range(0, CAMERAS_COUNT):
                     configureButton(camera, buttonIndex, events[index], rounds[index], fullCompetitors[index], True,

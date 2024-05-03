@@ -60,8 +60,9 @@ class CardsSettings:
     def botCallback(self, message):
         fullMessage = message.text.removeprefix('/cardData ')
         camera = int(fullMessage[0])
-        data = fullMessage[2:]
-        self.queues[camera].put(data)
+        country = fullMessage[2:4]
+        data = fullMessage[5:]
+        self.queues[camera].put((country, data))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),

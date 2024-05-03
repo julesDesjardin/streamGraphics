@@ -10,6 +10,7 @@ from gql.transport.aiohttp import AIOHTTPTransport
 import cv2
 
 import constants
+import utils
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
@@ -35,6 +36,8 @@ class CardsSettings:
         self.backgrounds = []
         self.loopFile = ''
         self.loopImages = []
+        self.introFile = ''
+        self.introImages = []
         self.width = constants.DEFAULT_WIDTH
         self.height = constants.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
@@ -67,6 +70,7 @@ class CardsSettings:
             'width': self.width,
             'height': self.height,
             'backgroundColor': self.backgroundColor,
+            'introFile': self.introFile,
             'loopFile': self.loopFile,
             'font': self.font,
             'textX': self.textX,
@@ -94,6 +98,7 @@ class CardsSettings:
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']
+            self.introFile = loadSettingsJson['introFile']
             self.loopFile = loadSettingsJson['loopFile']
             self.font = loadSettingsJson['font']
             self.textX = loadSettingsJson['textX']
@@ -124,16 +129,12 @@ class CardsSettings:
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
 
         if self.loopFile != '':
-            self.loopImages.clear()
-            vidcap = cv2.VideoCapture(self.loopFile)
-            success, image = vidcap.read()
-            while success:
-                pngImage = cv2.imencode('.png', image)[1]
-                imageFull = tk.PhotoImage(data=pngImage.tobytes())
-                self.loopImages.append(imageFull)
-                success, image = vidcap.read()
+            utils.loadVideo(self.loopFile, self.loopImages)
             for i in range(0, self.camerasCount):
                 self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+
+        if self.introFile != '':
+            utils.loadVideo(self.introFile, self.introImages)
 
         try:
             self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId)
@@ -147,45 +148,43 @@ class CardsSettings:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
 
-    def browse(self, entry):
-        fileName = tkinter.filedialog.askopenfilename(initialdir='./')
-        entry.delete(0, tk.END)
-        entry.insert(0, fileName)
-
-    def updateBackgroundCloseButton(self, window, loopFile, canvas, background, width, height):
+    def updateBackgroundCloseButton(self, window, introFile, loopFile, canvas, background, width, height):
+        self.introFile = introFile
+        if self.introFile != '':
+            utils.loadVideo(self.introFile, self.introImages)
         self.loopFile = loopFile
         if self.loopFile != '':
-            self.loopImages.clear()
-            vidcap = cv2.VideoCapture(loopFile)
-            success, image = vidcap.read()
-            (heightVideo, widthVideo, _) = image.shape
+            (widthVideo, heightVideo) = utils.loadVideo(self.loopFile, self.loopImages)
+            canvas.configure(width=widthVideo, height=heightVideo)
             width.set(widthVideo)
             height.set(heightVideo)
-            canvas.configure(width=widthVideo, height=heightVideo)
-            while success:
-                pngImage = cv2.imencode('.png', image)[1]
-                imageFull = tk.PhotoImage(data=pngImage.tobytes())
-                self.loopImages.append(imageFull)
-                success, image = vidcap.read()
-        canvas.itemconfig(background, image=self.loopImages[0])
+            canvas.itemconfig(background, image=self.loopImages[0])
         window.destroy()
 
     def updateBackground(self, window, canvas, background, width, height):
         backgroundWindow = tk.Toplevel(window)
         backgroundWindow.grab_set()
 
+        introLabel = tk.Label(backgroundWindow, text='Intro video/image')
+        introLabel.grid(row=0, column=0)
+        introEntry = tk.Entry(backgroundWindow)
+        introEntry.delete(0, tkinter.END)
+        introEntry.insert(0, self.loopFile)
+        introEntry.grid(row=0, column=1)
+        introBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(introEntry))
+        introBrowse.grid(row=0, column=2)
         loopLabel = tk.Label(backgroundWindow, text='Background video/image')
-        loopLabel.grid(row=0, column=0)
+        loopLabel.grid(row=1, column=0)
         loopEntry = tk.Entry(backgroundWindow)
         loopEntry.delete(0, tkinter.END)
         loopEntry.insert(0, self.loopFile)
-        loopEntry.grid(row=0, column=1)
-        loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: self.browse(loopEntry))
-        loopBrowse.grid(row=0, column=2)
+        loopEntry.grid(row=1, column=1)
+        loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(loopEntry))
+        loopBrowse.grid(row=1, column=2)
 
         OKButton = tk.Button(backgroundWindow, text='OK', command=lambda: self.updateBackgroundCloseButton(
-            backgroundWindow, loopEntry.get(), canvas, background, width, height))
-        OKButton.grid(row=1, column=0, columnspan=3)
+            backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
+        OKButton.grid(row=2, column=0, columnspan=3)
 
     def updateLayoutCloseButton(self, window, width, height, textX, textY, flagWidth, flagHeight, flagX, flagY):
         self.width = width

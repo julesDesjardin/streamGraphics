@@ -96,7 +96,6 @@ def updateCubers(settings, buttons):
                         events.append(event)
                         rounds.append(round)
 
-    print(fullCompetitors)
     # If too many competitors : keep top X only
     sortedCompetitors = sorted(fullCompetitors, key=lambda x: x[1])
     if len(sortedCompetitors) > BUTTONS_COUNT:
@@ -107,7 +106,7 @@ def updateCubers(settings, buttons):
             del fg[indexCompetitor]
             del events[indexCompetitor]
             del rounds[indexCompetitor]
-    print(fullCompetitors)
+
     for i in range(0, BUTTONS_ROWS):
         for j in range(0, BUTTONS_COLS):
             buttonIndex = i * BUTTONS_COLS + j

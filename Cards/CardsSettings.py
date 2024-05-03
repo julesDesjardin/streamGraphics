@@ -144,12 +144,9 @@ class CardsSettings:
 
         window.destroy()
 
-    def updateExampleCanvas(self, canvas, width, height, backgroundColor, text, textX, textY, flag, flagWidth, flagHeight, flagX, flagY):
-        canvas.configure(width=width, height=height, background=backgroundColor)
-        canvas.coords(text, textX, textY)
-        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+    def updateFlag(self, canvas, flag, flagWidth, flagHeight):
+        self.exampleFlag = Flag.getFlag(flagWidth, flagHeight, 'local')
         canvas.itemconfig(flag, image=self.exampleFlag)
-        canvas.coords(flag, flagX, flagY)
 
     def updateLayout(self):
         layoutWindow = tk.Toplevel(self.root)
@@ -231,22 +228,20 @@ class CardsSettings:
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
 
-        widthVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        textXVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        textYVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        flagWidthVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        flagXVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        flagYVariable.trace_add('write', lambda var, index, mode: self.updateExampleCanvas(
-            exampleCanvas, int(widthVariable.get()), int(heightVariable.get()), self.backgroundColor, exampleText, int(textXVariable.get()), int(textYVariable.get()), exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=int(widthVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=int(heightVariable.get())))
+        textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleText, int(textXVariable.get()), int(textYVariable.get())))
+        textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleText, int(textXVariable.get()), int(textYVariable.get())))
+        flagWidthVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
+            exampleCanvas, exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get())))
+        flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
+            exampleCanvas, exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get())))
+        flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleFlagImage, int(flagXVariable.get()), int(flagYVariable.get())))
+        flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleFlagImage, int(flagXVariable.get()), int(flagYVariable.get())))
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

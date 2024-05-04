@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import time
+import queue
 import CardsSettings
 import sys
 import os
@@ -13,21 +15,40 @@ CAMERAS_COUNT = 4
 ##############################################################################
 
 
-def checkQueue(root, queue, canvas, text, flag, flagImage):
-    while True:
-        try:
-            (country, data) = queue.get(timeout=0.1)
-        except:
-            break
-        flag = Flag.getFlag(localSettings.flagWidth, localSettings.flagHeight, country)
-        canvas.itemconfig(flagImage, image=flag)
-        canvas.itemconfig(text, text=data)
-    root.after(1000, lambda: checkQueue(root, queue, canvas, text, flag, flagImage))
+def checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backgroundLoopIndex):
+    try:
+        (country, data) = dataQueue.get(block=False)
+        if data == '':
+            canvas.itemconfig(background, state='hidden')
+            canvas.itemconfig(flagImage, state='hidden')
+            canvas.itemconfig(text, state='hidden')
+            backgroundLoopIndex = -1
+        else:
+            if backgroundLoopIndex == -1:
+                if localSettings.introFile != '':
+                    for image in localSettings.introImages:
+                        canvas.itemconfig(background, image=image, state='normal')
+                        canvas.update()
+                        time.sleep(1 / 25)
+                backgroundLoopIndex = 0
+            flag = Flag.getFlag(localSettings.flagWidth, localSettings.flagHeight, country)
+            canvas.itemconfig(flagImage, image=flag, state='normal')
+            canvas.itemconfig(text, text=data, state='normal')
+    except queue.Empty:
+        pass
+    if backgroundLoopIndex != -1:
+        canvas.itemconfig(background, image=localSettings.loopImages[backgroundLoopIndex])
+        canvas.update()
+        if backgroundLoopIndex == len(localSettings.loopImages) - 1:
+            backgroundLoopIndex = 0
+        else:
+            backgroundLoopIndex = backgroundLoopIndex + 1
+    root.after(int(1000 / 25), lambda: checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backgroundLoopIndex))
 
 
-def checkAllQueues(root, queues, canvases, texts, flags, flagImages):
+def checkAllQueues(root, queues, canvases, texts, flags, flagImages, backgrounds):
     for i in range(0, CAMERAS_COUNT):
-        checkQueue(root, queues[i], canvases[i], texts[i], flags[i], flagImages[i])
+        checkQueue(root, queues[i], canvases[i], texts[i], flags[i], flagImages[i], backgrounds[i], -1)
 
 
 ##############################################################################
@@ -47,6 +68,7 @@ localSettings.mainFrame.pack()
 
 ##############################################################################
 
-checkAllQueues(root, localSettings.queues, localSettings.canvases, localSettings.texts, localSettings.flags, localSettings.flagImages)
+checkAllQueues(root, localSettings.queues, localSettings.canvases, localSettings.texts,
+               localSettings.flags, localSettings.flagImages, localSettings.backgrounds)
 
 root.mainloop()

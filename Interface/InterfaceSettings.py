@@ -155,6 +155,10 @@ class InterfaceSettings:
         window.wait_window(stageWindow)
         self.reloadStages(window, frame)
 
+    def deleteStage(self, window, frame, stage):
+        self.exampleStages.remove(stage)
+        self.reloadStages(window, frame)
+
     def reloadStages(self, window, frame):
         frame.grid_forget()
         frame.columnconfigure(0, pad=10)
@@ -184,7 +188,7 @@ class InterfaceSettings:
                 stageDownButtons[-1]['state'] = 'disabled'
             stageEditButtons.append(tk.Button(frame, text='Edit', command=lambda localStage=stage: self.editStage(window, frame, localStage)))
             stageEditButtons[-1].grid(row=row, column=3)
-            stageDeleteButtons.append(tk.Button(frame, text='Delete'))
+            stageDeleteButtons.append(tk.Button(frame, text='Delete', command=lambda localStage=stage: self.deleteStage(window, frame, localStage)))
             stageDeleteButtons[-1].grid(row=row, column=4)
             row = row + 1
         frame.grid(row=1, column=0)

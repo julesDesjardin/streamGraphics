@@ -126,6 +126,8 @@ def OKButtonCommand(updateTimeTower, settings, buttons):
         round = settings.stages[0].roundVar.get()
         dataWrite.sendTimeTowerEvent(settings.bot, constants.EVENTS[event], round)
     updateCubers(settings, buttons)
+    for camera in range(0, CAMERAS_COUNT):
+        buttonCommand(camera, -1, localSettings.bot, '', -1)
 
 
 def timeTowerCommand(bot, camera):

@@ -340,7 +340,7 @@ class CardsSettings:
         telegramWindow.grab_set()
         telegramLabel = tk.Label(telegramWindow, text='Please enter Telegram settings')
         telegramLabel.pack(pady=20)
-        tokenLabel = tk.Label(telegramWindow, text='TimeTower bot token')
+        tokenLabel = tk.Label(telegramWindow, text='Cards bot token')
         tokenLabel.pack(pady=5)
         tokenEntry = tk.Entry(telegramWindow, width=50)
         tokenEntry.insert(0, self.botToken)

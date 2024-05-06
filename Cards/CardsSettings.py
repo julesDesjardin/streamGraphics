@@ -21,10 +21,12 @@ class CardsSettings:
 
     BG_COLOR = '#F4ECE1'
 
-    def __init__(self, root, camerasCount):
+    def __init__(self, root, camerasX, camerasY):
         self.root = root
         self.mainFrame = tk.Frame(self.root)
-        self.camerasCount = camerasCount
+        self.camerasX = camerasX
+        self.camerasY = camerasY
+        self.camerasCount = self.camerasX * self.camerasY
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -49,13 +51,17 @@ class CardsSettings:
         self.flagWidth = constants.DEFAULT_FLAG_WIDTH
         self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
-        for i in range(0, camerasCount):
+        for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.font, text=f'Camera {i+1} text', anchor='nw'))
             self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
+        for cameraX in range(0, camerasX):
+            self.mainFrame.columnconfigure(cameraX, pad=20)
+        for cameraY in range(0, camerasY):
+            self.mainFrame.rowconfigure(cameraY, pad=20)
 
     def botCallback(self, message):
         fullMessage = message.text.removeprefix('/cardData ')
@@ -120,14 +126,16 @@ class CardsSettings:
 
         try:
             self.flags.clear()
-            for i in range(0, self.camerasCount):
-                self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-                self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
-                self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
-                self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-                if not self.canvases[i].winfo_ismapped():
-                    self.canvases[i].pack(side=tk.LEFT, padx=10)
+            for cameraY in range(0, self.camerasY):
+                for cameraX in range(0, self.camerasX):
+                    i = self.camerasX * cameraY + cameraX
+                    self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
+                    self.canvases[i].coords(self.texts[i], self.textX, self.textY)
+                    self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
+                    self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
+                    self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                    if not self.canvases[i].winfo_ismapped():
+                        self.canvases[i].grid(row=cameraY, column=cameraX)
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
@@ -199,15 +207,17 @@ class CardsSettings:
         self.flagHeight = flagHeight
         self.flagX = flagX
         self.flagY = flagY
-        for i in range(0, self.camerasCount):
-            self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-            self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
-            self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-            self.flags[i] = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
-            self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
-            self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-            if not self.canvases[i].winfo_ismapped():
-                self.canvases[i].pack(side=tk.LEFT, padx=10)
+        for cameraY in range(0, self.camerasY):
+            for cameraX in range(0, self.camerasX):
+                i = self.camerasX * cameraY + cameraX
+                self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
+                self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+                self.canvases[i].coords(self.texts[i], self.textX, self.textY)
+                self.flags[i] = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+                self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
+                self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                if not self.canvases[i].winfo_ismapped():
+                    self.canvases[i].grid(row=cameraY, column=cameraX)
 
         window.destroy()
 

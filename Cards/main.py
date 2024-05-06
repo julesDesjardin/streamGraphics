@@ -8,7 +8,9 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import Flag
 
-CAMERAS_COUNT = 4
+CAMERAS_X = 2
+CAMERAS_Y = 2
+CAMERAS_COUNT = CAMERAS_X * CAMERAS_Y
 
 ##############################################################################
 # FUNCTIONS
@@ -62,7 +64,7 @@ root.title('Stream Cards')
 # SETTINGS
 ##############################################################################
 
-localSettings = CardsSettings.CardsSettings(root, CAMERAS_COUNT)
+localSettings = CardsSettings.CardsSettings(root, CAMERAS_X, CAMERAS_Y)
 localSettings.showFrame()
 localSettings.mainFrame.pack()
 

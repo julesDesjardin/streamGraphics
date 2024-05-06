@@ -122,12 +122,11 @@ class TimeTowerContent:
     def mainLoop(self):
 
         # Update round
-        while True:
-            try:
-                (roundId, criteria) = self.queueRound.get(timeout=0.1)
-            except:
-                break
+        try:
+            (roundId, criteria) = self.queueRound.get(block=False)
             self.updateRound(roundId, criteria)
+        except:
+            pass
 
         # Update lines
 
@@ -153,11 +152,8 @@ class TimeTowerContent:
 
         # Update results
 
-        while True:
-            try:
-                queryResult = self.queueRanking.get(timeout=0.1)
-            except:
-                break
+        try:
+            queryResult = self.queueRanking.get(block=False)
 
             if int(queryResult['round']['id']) == self.roundId:
                 unorderedResults = []
@@ -180,6 +176,8 @@ class TimeTowerContent:
                     time.sleep(self.durationY / self.stepYmax)
                 for line in self.lines:
                     line.ranking = line.nextRanking
+        except:
+            pass
 
         # End of loop, loop again after 1 second
         self.root.after(1000, lambda: self.mainLoop())

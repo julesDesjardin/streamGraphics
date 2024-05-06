@@ -36,10 +36,9 @@ class TimeTowerSettings:
 
     def timeTowerEventCallback(self, message):
 
-        fullMessage = message.text.removeprefix('/timeTowerEvent ')
-        fullMessageSplit = fullMessage.split()
-        event = fullMessageSplit[0]
-        number = int(fullMessageSplit[1])
+        messageSplit = message.split()
+        event = messageSplit[0]
+        number = int(messageSplit[1])
 
         query = f'''
         query MyQuery {{
@@ -66,10 +65,9 @@ class TimeTowerSettings:
                         return
 
     def timeTowerExpandCallback(self, message):
-        fullMessage = message.text.removeprefix('/timeTowerExpand ')
-        fullMessageSplit = fullMessage.split()
-        competitor = int(fullMessageSplit[0])
-        enable = fullMessageSplit[1]
+        messageSplit = message.split()
+        competitor = int(messageSplit[0])
+        enable = messageSplit[1]
         for line in self.content.lines:
             if competitor == line.competitorRegistrantId:
                 if enable == '1':
@@ -110,8 +108,8 @@ class TimeTowerSettings:
                                          message='Error in the Settings file, please make sure you selected the correct file and try to load again')
             return
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId)
-            self.bot.sendMessage('Bot TimeTower ready')
+            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+            self.bot.sendSimpleMessage('Bot TimeTower ready')
             self.bot.setMessageHandler(['timeTowerEvent'], lambda message: self.timeTowerEventCallback(message))
             self.bot.setMessageHandler(['timeTowerExpand'], lambda message: self.timeTowerExpandCallback(message))
             self.threadBot = threading.Thread(target=self.bot.startPolling)
@@ -212,7 +210,8 @@ class TimeTowerSettings:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id)
+        self.bot = TelegramBot.TelegramBot(token, id, False, True)
+        self.bot.sendSimpleMessage('Bot TimeTower ready')
         self.bot.setMessageHandler(['timeTowerEvent'], lambda message: self.timeTowerEventCallback(message))
         self.bot.setMessageHandler(['timeTowerExpand'], lambda message: self.timeTowerExpandCallback(message))
         self.threadBot = threading.Thread(target=self.bot.startPolling)

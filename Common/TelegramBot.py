@@ -1,17 +1,56 @@
 import telebot
+import queue
+import time
+import threading
+
+SPLIT_SYMBOL = '\n£££'
+COMMAND_SYMBOL = '$$$'
+SENDING_MESSAGES_DELAY = 3
 
 
 class TelegramBot:
 
-    def __init__(self, token, id):
+    def __init__(self, token, id, sender, receiver):
         self.bot = telebot.TeleBot(token)
         self.id = id
+        if sender:
+            self.sendQueue = queue.Queue()
+            self.sendThread = threading.Thread(target=self.loopSendMessage)
+            self.sendThread.daemon = True
+            self.sendThread.start()
+        if receiver:
+            self.callbacks = dict([])
+            self.bot.register_channel_post_handler(self.messageHandler, commands=['streamCommand'])
+
+    def messageHandler(self, message):
+        fullMessage = message.text.removeprefix('/streamCommand \n')
+        for subCommand in fullMessage.split(SPLIT_SYMBOL):
+            command, data = subCommand.split(COMMAND_SYMBOL)
+            if command in self.callbacks:
+                self.callbacks[command](data)
 
     def setMessageHandler(self, commands, function):
-        self.bot.register_channel_post_handler(function, commands=commands)
+        for command in commands:
+            self.callbacks[command] = function
 
     def startPolling(self):
         self.bot.polling()
 
-    def sendMessage(self, message):
+    def sendMessage(self, command, data):
+        self.sendQueue.put([command, data])
+
+    def loopSendMessage(self):
+        while True:
+            messages = []
+            while True:
+                try:
+                    messages.append(self.sendQueue.get(block=False))
+                except:
+                    break
+            if len(messages) != 0:
+                fullMessage = '/streamCommand \n' + SPLIT_SYMBOL.join([COMMAND_SYMBOL.join(message) for message in messages])
+                self.bot.send_message(self.id, fullMessage)
+            time.sleep(SENDING_MESSAGES_DELAY)
+
+    def sendSimpleMessage(self, message):
         self.bot.send_message(self.id, message)

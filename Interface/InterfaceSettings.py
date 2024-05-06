@@ -81,8 +81,8 @@ class InterfaceSettings:
             stage.showStage()
 
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId)
-            self.bot.sendMessage('Bot interface ready')
+            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, False)
+            self.bot.sendSimpleMessage('Bot interface ready')
         except:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
@@ -250,7 +250,8 @@ This supports the following characters to be replaced by the appropriate value:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id)
+        self.bot = TelegramBot.TelegramBot(token, id, True, False)
+        self.bot.sendSimpleMessage('Bot Interface ready')
         window.destroy()
 
     def updateTelegramSettings(self):

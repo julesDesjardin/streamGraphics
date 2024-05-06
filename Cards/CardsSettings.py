@@ -64,11 +64,10 @@ class CardsSettings:
             self.mainFrame.rowconfigure(cameraY, pad=20)
 
     def botCallback(self, message):
-        fullMessage = message.text.removeprefix('/cardData ')
-        camera = int(fullMessage[0])
-        if len(fullMessage) > 4:
-            country = fullMessage[2:4]
-            data = fullMessage[5:]
+        camera = int(message[0])
+        if len(message) > 4:
+            country = message[2:4]
+            data = message[5:]
             self.queues[camera].put((country, data))
         else:
             self.queues[camera].put(('', ''))
@@ -149,8 +148,8 @@ class CardsSettings:
             utils.loadVideo(self.introFile, self.introImages)
 
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId)
-            self.bot.sendMessage('Bot Cards ready')
+            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+            self.bot.sendSimpleMessage('Bot Cards ready')
             self.bot.setMessageHandler(['cardData'], lambda message: self.botCallback(message))
             self.threadBot = threading.Thread(target=self.bot.startPolling)
             self.threadBot.daemon = True
@@ -328,7 +327,8 @@ class CardsSettings:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id)
+        self.bot = TelegramBot.TelegramBot(token, id, False, True)
+        self.bot.sendSimpleMessage('Bot Cards ready')
         self.bot.setMessageHandler(['cardData'], self.botCallback)
         self.threadBot = threading.Thread(target=self.bot.startPolling)
         self.threadBot.daemon = True

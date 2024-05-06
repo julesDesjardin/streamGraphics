@@ -126,8 +126,10 @@ class Stage:
         sampleUnclickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
         sampleClickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
 
-    def getColorSchedule(self, sampleUnclickedButton, sampleClickedButton):
-        color = WCIFParse.getRoomColor(self.wcif, self.venue, self.room)
+    def getColorSchedule(self, venue, room, sampleUnclickedButton, sampleClickedButton):
+        venueId = WCIFParse.getVenueId(self.wcif, venue)
+        roomId = WCIFParse.getRoomId(self.wcif, venueId, room)
+        color = WCIFParse.getRoomColor(self.wcif, venueId, roomId)
         self.backgroundColor = color
         self.updateTextColorFromBackground()
         self.updateButtonsAndFrame(sampleUnclickedButton, sampleClickedButton)
@@ -180,7 +182,7 @@ class Stage:
         sampleClickedButton.configure(relief=tk.SUNKEN)
         sampleClickedButton.grid(sticky='W', row=5, column=1)
         getColorScheduleButton = tk.Button(window, text='Get color from schedule',
-                                           command=lambda: self.getColorSchedule(sampleUnclickedButton, sampleClickedButton))
+                                           command=lambda: self.getColorSchedule(venueVar.get(), roomVar.get(), sampleUnclickedButton, sampleClickedButton))
         getColorScheduleButton.grid(row=3, column=0, columnspan=2)
         bgColorButton = tk.Button(window, text='Choose color', command=lambda: self.updateColor(sampleUnclickedButton, sampleClickedButton))
         bgColorButton.grid(row=4, column=0, columnspan=2)

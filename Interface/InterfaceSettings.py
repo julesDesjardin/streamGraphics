@@ -26,6 +26,7 @@ class InterfaceSettings:
         self.groups = {}
         self.maxSeed = constants.MAX_SEED
         self.stages = []
+        self.exampleStages = []
         self.cardText = ''
         self.botToken = ''
         self.botChannelId = ''
@@ -134,17 +135,17 @@ class InterfaceSettings:
                                        command=lambda: self.updateMaxSeedCloseButton(maxSeedEntry.get(), maxSeedWindow))
         maxSeedCloseButton.pack(padx=20, pady=5)
 
-    def stageSwitch(self, a, b, frame):
-        oldStage = self.stages[a]
-        self.stages[a] = self.stages[b]
-        self.stages[b] = oldStage
-        self.reloadStages(frame)
+    def stageSwitch(self, a, b, window, frame):
+        oldStage = self.exampleStages[a]
+        self.exampleStages[a] = self.exampleStages[b]
+        self.exampleStages[b] = oldStage
+        self.reloadStages(window, frame)
 
     def addStage(self, window, frame):
         venue = WCIFParse.getVenueId(self.wcif, WCIFParse.getVenues(self.wcif)[0])
         room = WCIFParse.getRoomId(self.wcif, venue, WCIFParse.getRooms(self.wcif, venue)[0])
         stage = Stage.Stage(self.root, self.wcif, '#FFFFFF', '#000000', venue, room)
-        self.stages.append(stage)
+        self.exampleStages.append(stage)
         stageWindow = stage.updateWindow(window, True)
         window.wait_window(stageWindow)
         self.reloadStages(window, frame)
@@ -169,17 +170,17 @@ class InterfaceSettings:
         stageDownButtons = []
         stageEditButtons = []
         stageDeleteButtons = []
-        for stage in self.stages:
+        for stage in self.exampleStages:
             stageLabels.append(tk.Label(
                 frame, text=f'{WCIFParse.getVenueName(self.wcif, stage.venue)}, {WCIFParse.getRoomName(self.wcif, stage.venue, stage.room)}', fg=stage.textColor, bg=stage.backgroundColor))
             stageLabels[-1].grid(row=row, column=0)
-            stageUpButtons.append(tk.Button(frame, text='↑', command=lambda a=row - 1, b=row: self.stageSwitch(a, b, frame)))
+            stageUpButtons.append(tk.Button(frame, text='↑', command=lambda a=row - 1, b=row: self.stageSwitch(a, b, window, frame)))
             stageUpButtons[-1].grid(row=row, column=1)
             if row == 0:
                 stageUpButtons[-1]['state'] = 'disabled'
-            stageDownButtons.append(tk.Button(frame, text='↓', command=lambda a=row, b=row + 1: self.stageSwitch(a, b, frame)))
+            stageDownButtons.append(tk.Button(frame, text='↓', command=lambda a=row, b=row + 1: self.stageSwitch(a, b, window, frame)))
             stageDownButtons[-1].grid(row=row, column=2)
-            if row == len(self.stages) - 1:
+            if row == len(self.exampleStages) - 1:
                 stageDownButtons[-1]['state'] = 'disabled'
             stageEditButtons.append(tk.Button(frame, text='Edit', command=lambda localStage=stage: self.editStage(window, frame, localStage)))
             stageEditButtons[-1].grid(row=row, column=3)
@@ -190,13 +191,18 @@ class InterfaceSettings:
 
     def updateStagesCloseWindow(self, window):
         window.destroy()
+        for stage in self.stages:
+            stage.hideStage()
+        self.stages = []
+        for stage in self.exampleStages:
+            self.stages.append(stage.copy())
         for stage in reversed(self.stages):
             stage.showStage()
 
     def updateStages(self):
-        # Hide all stages to prepare for update
+        self.exampleStages = []
         for stage in self.stages:
-            stage.hideStage()
+            self.exampleStages.append(stage.copy())
 
         stagesWindow = tk.Toplevel(self.root)
         stagesWindow.grab_set()

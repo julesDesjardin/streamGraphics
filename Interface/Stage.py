@@ -197,3 +197,6 @@ class Stage:
         window.columnconfigure(0, pad=50)
         window.columnconfigure(1, pad=50)
         return window
+
+    def copy(self):
+        return Stage(self.root, self.wcif, self.backgroundColor, self.textColor, self.venue, self.room)

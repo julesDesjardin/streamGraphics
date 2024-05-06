@@ -169,21 +169,17 @@ class TimeTowerContent:
                     unorderedResults.append((line.competitorId, line.currentResult, bestResult))
 
                 orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
-                updateResults = False
                 for line in self.lines:
                     line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1  # +1 because first index is 0
-                    if line.nextRanking != line.ranking:
-                        updateResults = True
 
-                if updateResults:
-                    for stepY in range(0, self.stepYmax + 1):
-                        self.canvas.delete('all')
-                        for line in self.lines:
-                            line.showLine(0, stepY)
-                        self.canvas.update()
-                        time.sleep(self.durationY / self.stepYmax)
+                for stepY in range(0, self.stepYmax + 1):
+                    self.canvas.delete('all')
                     for line in self.lines:
-                        line.ranking = line.nextRanking
+                        line.showLine(0, stepY)
+                    self.canvas.update()
+                    time.sleep(self.durationY / self.stepYmax)
+                for line in self.lines:
+                    line.ranking = line.nextRanking
 
         # End of loop, loop again after 1 second
         self.root.after(1000, lambda: self.mainLoop())

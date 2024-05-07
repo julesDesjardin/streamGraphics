@@ -21,3 +21,10 @@ def loadVideo(videoFile, imageList):
         success, image = vidcap.read()
 
     return (width, height)
+
+
+def cleverInt(string):
+    if string == '' or int(string) == 0:
+        return 1
+    else:
+        return int(string)

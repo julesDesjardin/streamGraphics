@@ -315,24 +315,24 @@ class CardsSettings:
 
         managerFlag = DragManager.DragManager(exampleCanvas, exampleFlagImage, flagXVariable, flagYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
-        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=int(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=int(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=int(widthVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=int(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=int(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=int(heightVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=utils.cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=utils.cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=utils.cleverInt(widthVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=utils.cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, int(textXVariable.get()), int(textYVariable.get())))
+            exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
         flagWidthVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get())))
+            exampleCanvas, exampleFlagImage, utils.cleverInt(flagWidthVariable.get()), utils.cleverInt(flagHeightVariable.get())))
         flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, int(flagWidthVariable.get()), int(flagHeightVariable.get())))
+            exampleCanvas, exampleFlagImage, utils.cleverInt(flagWidthVariable.get()), utils.cleverInt(flagHeightVariable.get())))
         flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, int(flagXVariable.get()), int(flagYVariable.get())))
+            exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
         flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, int(flagXVariable.get()), int(flagYVariable.get())))
+            exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

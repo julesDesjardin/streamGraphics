@@ -316,7 +316,11 @@ class CardsSettings:
         managerFlag = DragManager.DragManager(exampleCanvas, exampleFlagImage, flagXVariable, flagYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
         widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=int(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=int(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=int(widthVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=int(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=int(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=int(heightVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, int(textXVariable.get()), int(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

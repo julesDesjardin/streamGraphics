@@ -306,6 +306,8 @@ class CardsSettings:
         exampleCanvas = tk.Canvas(layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
         exampleCanvas.grid(column=0, row=7, columnspan=4)
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
+        if self.loopFile != '':
+            exampleCanvas.itemconfig(exampleBackground, image=self.loopImages[0])
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font,

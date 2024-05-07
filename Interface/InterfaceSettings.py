@@ -82,11 +82,12 @@ class InterfaceSettings:
             stage.showStage()
 
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, False)
-            self.bot.sendSimpleMessage('Bot interface ready')
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, False)
+                self.bot.sendSimpleMessage('Bot interface ready')
         except:
             tkinter.messagebox.showerror(
-                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
+                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
             return
 
     def updateCompIdCloseButton(self, compId, window):
@@ -260,9 +261,15 @@ This supports the following characters to be replaced by the appropriate value:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id, True, False)
-        self.bot.sendSimpleMessage('Bot Interface ready')
-        window.destroy()
+        try:
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(token, id, True, False)
+                self.bot.sendSimpleMessage('Bot Interface ready')
+        except:
+            tkinter.messagebox.showerror(
+                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
+        else:
+            window.destroy()
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

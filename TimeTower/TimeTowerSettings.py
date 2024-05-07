@@ -130,16 +130,17 @@ class TimeTowerSettings:
                                          message='Error in the Settings file, please make sure you selected the correct file and try to load again')
             return
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
-            self.bot.sendSimpleMessage('Bot TimeTower ready')
-            self.bot.setMessageHandler(['timeTowerEvent'], lambda message: self.timeTowerEventCallback(message))
-            self.bot.setMessageHandler(['timeTowerExpand'], lambda message: self.timeTowerExpandCallback(message))
-            self.threadBot = threading.Thread(target=self.bot.startPolling)
-            self.threadBot.daemon = True
-            self.threadBot.start()
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+                self.bot.sendSimpleMessage('Bot TimeTower ready')
+                self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
+                self.bot.setMessageHandler(['timeTowerExpand'], self.timeTowerExpandCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
         except:
             tkinter.messagebox.showerror(
-                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
+                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
             return
 
         roundId = 0
@@ -270,15 +271,20 @@ class TimeTowerSettings:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id, False, True)
-        self.bot.sendSimpleMessage('Bot TimeTower ready')
-        self.bot.setMessageHandler(['timeTowerEvent'], lambda message: self.timeTowerEventCallback(message))
-        self.bot.setMessageHandler(['timeTowerExpand'], lambda message: self.timeTowerExpandCallback(message))
-        self.threadBot = threading.Thread(target=self.bot.startPolling)
-        self.threadBot.daemon = True
-        self.threadBot.start()
-
-        window.destroy()
+        try:
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+                self.bot.sendSimpleMessage('Bot TimeTower ready')
+                self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
+                self.bot.setMessageHandler(['timeTowerExpand'], self.timeTowerExpandCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
+        except:
+            tkinter.messagebox.showerror(
+                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
+        else:
+            window.destroy()
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

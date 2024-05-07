@@ -149,12 +149,13 @@ class CardsSettings:
             utils.loadVideo(self.introFile, self.introImages)
 
         try:
-            self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
-            self.bot.sendSimpleMessage('Bot Cards ready')
-            self.bot.setMessageHandler(['cardData'], lambda message: self.botCallback(message))
-            self.threadBot = threading.Thread(target=self.bot.startPolling)
-            self.threadBot.daemon = True
-            self.threadBot.start()
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+                self.bot.sendSimpleMessage('Bot Cards ready')
+                self.bot.setMessageHandler(['cardData'], self.botCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
         except:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
@@ -337,13 +338,19 @@ class CardsSettings:
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
-        self.bot = TelegramBot.TelegramBot(token, id, False, True)
-        self.bot.sendSimpleMessage('Bot Cards ready')
-        self.bot.setMessageHandler(['cardData'], self.botCallback)
-        self.threadBot = threading.Thread(target=self.bot.startPolling)
-        self.threadBot.daemon = True
-        self.threadBot.start()
-        window.destroy()
+        try:
+            if self.bot is None:
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+                self.bot.sendSimpleMessage('Bot Cards ready')
+                self.bot.setMessageHandler(['cardData'], self.botCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
+        except:
+            tkinter.messagebox.showerror(
+                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
+        else:
+            window.destroy()
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

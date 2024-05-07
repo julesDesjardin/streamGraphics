@@ -29,8 +29,8 @@ class TimeTowerSettings:
         self.bot = None
         self.queue = queue.Queue()
         self.content = None
-        self.stepXmax = constants.DEFAULT_STEPS_X
-        self.stepYmax = constants.DEFAULT_STEPS_Y
+        self.FPSX = constants.DEFAULT_FPS_X
+        self.FPSY = constants.DEFAULT_FPS_Y
         self.durationX = constants.DEFAULT_DURATION_X
         self.durationY = constants.DEFAULT_DURATION_Y
 
@@ -82,6 +82,10 @@ class TimeTowerSettings:
             'compId': self.compId,
             'delay': self.delay,
             'region': self.region,
+            'durationX': self.durationX,
+            'FPSX': self.FPSX,
+            'durationY': self.durationY,
+            'FPSY': self.FPSY,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -101,6 +105,10 @@ class TimeTowerSettings:
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
+            self.durationX = loadSettingsJson['durationX']
+            self.FPSX = loadSettingsJson['FPSX']
+            self.durationY = loadSettingsJson['durationY']
+            self.FPSY = loadSettingsJson['FPSY']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -127,7 +135,7 @@ class TimeTowerSettings:
             roundId = self.content.roundId
             criteria = self.content.criteria
         self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
-                                                         self.delay, roundId, criteria, self.stepXmax, self.stepYmax, self.durationX, self.durationY)
+                                                         self.delay, roundId, criteria, self.FPSX, self.FPSY, self.durationX, self.durationY)
         self.content.showFrame()
         self.content.mainLoop()
 
@@ -166,7 +174,7 @@ class TimeTowerSettings:
                 roundId = self.content.roundId
                 criteria = self.content.criteria
             self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
-                                                             self.delay, roundId, criteria, self.stepXmax, self.stepYmax, self.durationX, self.durationY)
+                                                             self.delay, roundId, criteria, self.FPSX, self.FPSY, self.durationX, self.durationY)
             self.content.showFrame()
             self.content.mainLoop()
             window.destroy()
@@ -206,6 +214,59 @@ class TimeTowerSettings:
         regionCloseButton = tk.Button(regionWindow, text='Update region',
                                       command=lambda: self.updateRegionCloseButton(regionBox.get(), regionWindow))
         regionCloseButton.pack(padx=20, pady=5)
+
+    def updateAnimationSettingsCloseButton(self, durationX, FPSX, durationY, FPSY, window):
+        try:
+            self.durationX = int(durationX)
+            self.FPSX = int(FPSX)
+            self.durationY = int(durationY)
+            self.FPSY = int(FPSY)
+        except:
+            tkinter.messagebox.showerror(title='Animation Settings Error !', message='All numbers must be integer!')
+        else:
+            window.destroy()
+
+    def updateAnimationSettings(self):
+        animationWindow = tk.Toplevel(self.root)
+        animationWindow.grab_set()
+        animationWindow.columnconfigure(0, pad=10)
+        animationWindow.columnconfigure(1, pad=10)
+        animationWindow.rowconfigure(0, pad=10)
+        animationWindow.rowconfigure(1, pad=10)
+        animationWindow.rowconfigure(2, pad=10)
+        animationWindow.rowconfigure(3, pad=10)
+        animationWindow.rowconfigure(4, pad=10)
+        animationWindow.rowconfigure(5, pad=50)
+        animationLabel = tk.Label(animationWindow, text='Update animation settings for expanding lines and updating results')
+        animationLabel.grid(row=0, column=0, columnspan=2)
+        durationXLabel = tk.Label(animationWindow, text='Duration of expansion/reduction of a focused line (in milliseconds)')
+        durationXLabel.grid(row=1, column=0, sticky='e')
+        durationXVariable = tk.StringVar()
+        durationXSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=10000, textvariable=durationXVariable)
+        durationXSpinbox.grid(row=1, column=1, sticky='w')
+        durationXVariable.set(f'{self.durationX}')
+        FPSXLabel = tk.Label(animationWindow, text='FPS for expansion/reduction of a focused line')
+        FPSXLabel.grid(row=2, column=0, sticky='e')
+        FPSXVariable = tk.StringVar()
+        FPSXSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=100, textvariable=FPSXVariable)
+        FPSXSpinbox.grid(row=2, column=1, sticky='w')
+        FPSXVariable.set(f'{self.FPSX}')
+        durationYLabel = tk.Label(animationWindow, text='Duration of ranking update')
+        durationYLabel.grid(row=3, column=0, sticky='e')
+        durationYVariable = tk.StringVar()
+        durationYSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=10000, textvariable=durationYVariable)
+        durationYSpinbox.grid(row=3, column=1, sticky='w')
+        durationYVariable.set(f'{self.durationY}')
+        FPSYLabel = tk.Label(animationWindow, text='FPS for ranking update')
+        FPSYLabel.grid(row=4, column=0, sticky='e')
+        FPSYVariable = tk.StringVar()
+        FPSYSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=100, textvariable=FPSYVariable)
+        FPSYSpinbox.grid(row=4, column=1, sticky='w')
+        FPSYVariable.set(f'{self.FPSY}')
+
+        OKButton = tk.Button(animationWindow, text='OK', command=lambda: self.updateAnimationSettingsCloseButton(
+            durationXVariable.get(), FPSXVariable.get(), durationYVariable.get(), FPSYVariable.get(), animationWindow))
+        OKButton.grid(row=5, column=0, columnspan=2)
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
@@ -249,12 +310,14 @@ class TimeTowerSettings:
         delayButton.grid(column=0, row=2)
         regionButton = tk.Button(frame, text='Update championship region', command=self.updateRegion)
         regionButton.grid(column=0, row=3)
+        animationButton = tk.Button(frame, text='Update animation Settings', command=self.updateAnimationSettings)
+        animationButton.grid(column=0, row=4)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=4)
+        telegramButton.grid(column=0, row=5)
         saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=5)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=6)
+        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=7)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -264,3 +327,4 @@ class TimeTowerSettings:
         frame.rowconfigure(4, pad=20)
         frame.rowconfigure(5, pad=20)
         frame.rowconfigure(6, pad=20)
+        frame.rowconfigure(7, pad=20)

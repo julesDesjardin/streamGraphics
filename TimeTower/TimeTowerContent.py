@@ -11,7 +11,7 @@ import time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria, stepXmax, stepYmax, durationX, durationY):
+    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria, FPSX, FPSY, durationX, durationY):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -52,10 +52,10 @@ class TimeTowerContent:
         self.threadResults = threading.Thread(target=self.resultsLoop)
         self.threadResults.daemon = True
         self.threadResults.start()
-        self.stepXmax = stepXmax
-        self.stepYmax = stepYmax
-        self.durationX = durationX
-        self.durationY = durationY
+        self.stepXmax = int(FPSX * durationX / 1000)
+        self.stepYmax = int(FPSY * durationY / 1000)
+        self.durationX = durationX / 1000
+        self.durationY = durationY / 1000
 
     def updateRound(self, roundId, criteria):
         self.roundId = roundId

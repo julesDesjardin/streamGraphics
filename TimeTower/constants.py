@@ -208,7 +208,7 @@ REGION_OPTIONS = ['World'] + [SEPARATOR] + CONTINENTS + [SEPARATOR] + [country[0
 DEFAULT_TIMETOWER_PARAMETERS = ['#000', '#555', '#444', '#999', 50, 60, 45, 30, 100, 300, 50, 100, 300, 'Helvetica 15 bold',
                                 'Helvetica 15 bold', 'Helvetica 15', 'Helvetica 12 italic', 'Helvetica 15 bold', 'Helvetica 12', '#FFF', '#FFF', '#FFF', '#FFF', 50, 10, 16]
 
-DEFAULT_DURATION_X = 1
-DEFAULT_DURATION_Y = 1
-DEFAULT_STEPS_X = 50
-DEFAULT_STEPS_Y = 50
+DEFAULT_DURATION_X = 1000
+DEFAULT_DURATION_Y = 1000
+DEFAULT_FPS_X = 50
+DEFAULT_FPS_Y = 50

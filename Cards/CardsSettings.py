@@ -308,7 +308,8 @@ class CardsSettings:
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
-        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font, text=f'Lorem ipsum', anchor='nw')
+        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font,
+                                                text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor='nw')
 
         managerFlag = DragManager.DragManager(exampleCanvas, exampleFlagImage, flagXVariable, flagYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)

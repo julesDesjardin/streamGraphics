@@ -11,7 +11,7 @@ import time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, roundId, criteria, FPSX, FPSY, durationX, durationY):
+    def __init__(self, root, queueRound, queueUpdate, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, durationX, durationY):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -43,19 +43,20 @@ class TimeTowerContent:
         self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthFullName + widthCount +
                                 widthResult + widthFullResult, height=maxNumber * (height + heightSeparator), bg='#FFF')
         self.queueRound = queueRound
+        self.queueUpdate = queueUpdate
         self.queueRanking = queue.Queue()
-        self.roundId = roundId
-        self.criteria = criteria
+        self.roundId = 0
+        self.criteria = ''
         self.lines = []
         self.reloadDelay = reloadDelay
         self.stop = 0
         self.threadResults = threading.Thread(target=self.resultsLoop)
         self.threadResults.daemon = True
         self.threadResults.start()
-        self.stepXmax = int(FPSX * durationX / 1000)
-        self.stepYmax = int(FPSY * durationY / 1000)
-        self.durationX = durationX / 1000
-        self.durationY = durationY / 1000
+        self.stepXmax = stepXmax
+        self.stepYmax = stepYmax
+        self.durationX = durationX
+        self.durationY = durationY
 
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
@@ -116,10 +117,18 @@ class TimeTowerContent:
                 queryResult = utils.getQueryResult(query)
                 self.queueRanking.put(queryResult)
             time.sleep(self.reloadDelay / 1000)
-            if self.stop == 1:
-                break
 
     def mainLoop(self):
+
+        # Update layout
+
+        try:
+            (self.region, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY) = self.queueUpdate.get(block=False)
+            for line in self.lines:
+                line.stepXmax = self.stepXmax
+                line.stepYmax = self.stepYmax
+        except:
+            pass
 
         # Update round
         try:

@@ -27,7 +27,8 @@ class TimeTowerSettings:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
-        self.queue = queue.Queue()
+        self.queueRound = queue.Queue()
+        self.queueUpdate = queue.Queue()
         self.content = None
         self.FPSX = constants.DEFAULT_FPS_X
         self.FPSY = constants.DEFAULT_FPS_Y
@@ -61,7 +62,7 @@ class TimeTowerSettings:
             if (competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:
                     if (round['number'] == number):
-                        self.queue.put((int(round['id']), utils.CRITERIA[event]))
+                        self.queueRound.put((int(round['id']), utils.CRITERIA[event]))
                         return
 
     def timeTowerExpandCallback(self, message):
@@ -74,6 +75,19 @@ class TimeTowerSettings:
                     line.expandRequest = True
                 else:
                     line.reduceRequest = True
+
+    def loadContent(self):
+        durationX = self.durationX / 1000
+        durationY = self.durationY / 1000
+        stepXmax = int(self.FPSX * self.durationX / 1000)
+        stepYmax = int(self.FPSY * self.durationY / 1000)
+        if self.content is None:
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
+                                                             self.delay, stepXmax, stepYmax, durationX, durationY)
+            self.content.showFrame()
+            self.content.mainLoop()
+        else:
+            self.queueUpdate.put((self.region, self.delay, stepXmax, stepYmax, durationX, durationY))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -130,14 +144,7 @@ class TimeTowerSettings:
 
         roundId = 0
         criteria = ''
-        if self.content is not None:
-            self.content.stop = 1
-            roundId = self.content.roundId
-            criteria = self.content.criteria
-        self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
-                                                         self.delay, roundId, criteria, self.FPSX, self.FPSY, self.durationX, self.durationY)
-        self.content.showFrame()
-        self.content.mainLoop()
+        self.loadContent()
 
     def updateCompIdCloseButton(self, compId, window):
         try:
@@ -166,17 +173,7 @@ class TimeTowerSettings:
         except:
             tkinter.messagebox.showerror(title='Delay Error !', message='The delay must be a whole number ! (No units needed)')
         else:
-            roundId = 0
-            criteria = ''
-            if self.content is not None:
-                self.content.stop = 1
-                self.content.threadResults.join()
-                roundId = self.content.roundId
-                criteria = self.content.criteria
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queue, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
-                                                             self.delay, roundId, criteria, self.FPSX, self.FPSY, self.durationX, self.durationY)
-            self.content.showFrame()
-            self.content.mainLoop()
+            self.loadContent()
             window.destroy()
 
     def updateDelay(self):
@@ -197,6 +194,7 @@ class TimeTowerSettings:
 
     def updateRegionCloseButton(self, region, window):
         self.region = region
+        self.loadContent()
         window.destroy()
 
     def updateRegion(self):
@@ -224,6 +222,7 @@ class TimeTowerSettings:
         except:
             tkinter.messagebox.showerror(title='Animation Settings Error !', message='All numbers must be integer!')
         else:
+            self.loadContent()
             window.destroy()
 
     def updateAnimationSettings(self):

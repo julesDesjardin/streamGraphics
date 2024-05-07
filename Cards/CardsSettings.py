@@ -11,6 +11,7 @@ import cv2
 
 import constants
 import utils
+import DragManager
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
@@ -305,10 +306,12 @@ class CardsSettings:
         exampleCanvas = tk.Canvas(layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
         exampleCanvas.grid(column=0, row=7, columnspan=4)
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
-        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font, text=f'Lorem ipsum', anchor='nw')
         self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
+        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font, text=f'Lorem ipsum', anchor='nw')
 
+        managerFlag = DragManager.DragManager(exampleCanvas, exampleFlagImage, flagXVariable, flagYVariable)
+        managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
         widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=int(widthVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=int(heightVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

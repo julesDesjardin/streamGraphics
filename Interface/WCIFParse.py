@@ -70,6 +70,13 @@ def getActivities(wcif, venueId, roomId):
     return activities
 
 
+def getActivityId(wcif, venueId, roomId, event, round, group):
+    activities = getActivities(wcif, venueId, roomId)
+    for activity in activities:
+        if activities[activity] == f'{constants.EVENTS[event]}-r{round}-g{group}':
+            return activity
+
+
 def getPb(wcif, competitor, event, singleOrAverage):
     for pb in wcif['persons'][competitor]['personalBests']:
         if pb['eventId'] == constants.EVENTS[event] and pb['type'] == singleOrAverage:
@@ -147,3 +154,11 @@ def getRegistrantId(wcif, competitor):
 
 def getCountry(wcif, competitor):
     return wcif['persons'][competitor]['countryIso2']
+
+
+def getWCAID(wcif, competitor):
+    return wcif['persons'][competitor]['wcaId']
+
+
+def getCompetitorName(wcif, competitor):
+    return wcif['persons'][competitor]['name']

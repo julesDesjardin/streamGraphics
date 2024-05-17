@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox
 import json
 import dataWrite
 import WCIFParse
 import InterfaceSettings
 import constants
+import PresentationInterface
 
 BUTTONS_ROWS = 4
 BUTTONS_COLS = 7
@@ -83,10 +85,9 @@ def updateCubers(settings, buttons):
             round = stage.roundVar.get()
             group = stage.groupVar.get()
             if group != '0':
-                activityId = list(activities.keys())[list(activities.values()).index(
-                    (f'{constants.EVENTS[event]}-r{round}-g{group}'))]  # Get key from value in the dictionary
+                activityId = WCIFParse.getActivityId(settings.wcif, stage.venue, stage.room, event, round, group)
                 competitors = WCIFParse.getCompetitors(settings.wcif, activityId, event)
-                newCompetitors = [(id, seed, settings.wcif['persons'][id]['name']) for (id, seed) in competitors]
+                newCompetitors = [(id, seed, WCIFParse.getCompetitorName(settings.wcif, id)) for (id, seed) in competitors]
                 newCompetitors.sort(key=lambda x: x[2])
                 for competitor in newCompetitors:
                     if competitor[1] <= settings.maxSeed:
@@ -120,11 +121,20 @@ def updateCubers(settings, buttons):
                     configureButton(camera, buttonIndex, '', '', (0, 0, ''), False, i + 2, j, '#000000', '#000000')
 
 
+def getStageInfo(settings):
+    for stage in settings.stages:
+        if stage.stageEnabled:
+            return (stage.venue, stage.room, stage.eventVar.get(), stage.roundVar.get(), stage.groupVar.get())
+    tkinter.messagebox.showerror(
+        title='Stages error !', message='All stages are disabled (or no stages exist), please enable a stage')
+    return (None, None, None, None, None)
+
+
 def OKButtonCommand(updateTimeTower, settings, buttons):
     if updateTimeTower:
-        event = settings.stages[0].eventVar.get()
-        round = settings.stages[0].roundVar.get()
-        dataWrite.sendTimeTowerEvent(settings.bot, constants.EVENTS[event], round)
+        (_, _, event, round, _) = getStageInfo(settings)
+        if event is not None:
+            dataWrite.sendTimeTowerEvent(settings.bot, constants.EVENTS[event], round)
     updateCubers(settings, buttons)
     for camera in range(0, CAMERAS_COUNT):
         buttonCommand(camera, -1, localSettings.bot, '', -1)
@@ -132,6 +142,12 @@ def OKButtonCommand(updateTimeTower, settings, buttons):
 
 def timeTowerCommand(bot, camera):
     dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), timeTowerVariables[camera].get())
+
+
+def presentationButtonCommand(settings):
+    (venue, room, event, round, group) = getStageInfo(settings)
+    if event is not None:
+        presentation = PresentationInterface.PresentationInterface(settings.root, settings.wcif, venue, room, event, int(round), group, settings.bot)
 
 
 ##############################################################################
@@ -207,6 +223,8 @@ TimeTowerCheckbox = tk.Checkbutton(OKFrame, text="Update TimeTower", variable=Ti
 TimeTowerCheckbox.pack()
 OKButton = tk.Button(OKFrame, text="OK", command=lambda: OKButtonCommand(TimeTowerVariable.get(), localSettings, buttons))
 OKButton.pack()
+presentationButton = tk.Button(OKFrame, text='Start presentation', command=lambda: presentationButtonCommand(localSettings))
+presentationButton.pack(pady=30)
 
 ##############################################################################
 

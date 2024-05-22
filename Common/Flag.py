@@ -11,4 +11,5 @@ def getFlag(width, height, country):
     else:
         image_url = f'https://flagcdn.com/w320/{country.lower()}.png'
         flagImageFull = Image.open(urlopen(image_url))
-    return ImageTk.PhotoImage(flagImageFull.resize((width, height)))
+        flagImageFull.thumbnail((1000, height))
+    return ImageTk.PhotoImage(flagImageFull)

@@ -20,13 +20,13 @@ CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
 ##############################################################################
 
 
-def buttonCommand(camera, buttonIndex, bot, cardData, competitorId):
+def buttonCommand(camera, buttonIndex, bot, country, cardText, competitorId):
     for index in range(len(buttons[camera])):
         if index == buttonIndex:
             buttons[camera][index].configure(relief=tk.SUNKEN)
         else:
             buttons[camera][index].configure(relief=tk.RAISED)
-    dataWrite.sendCardData(bot, camera, cardData)
+    dataWrite.sendCardData(bot, camera, country, cardText)
     if timeTowerVariables[camera].get() == 1:
         dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), 0)
         dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, competitorId), 1)
@@ -48,26 +48,26 @@ def configureButton(camera, buttonIndex, event, round, competitor, visible, row,
         extraButtonText = f'Seed {seed}'
         if previousRank is not None:
             extraButtonText = extraButtonText + f', Placed {previousRank}'
-        cardData = WCIFParse.getCountry(localSettings.wcif, id) + ' ' + localSettings.cardText
-        cardData = cardData.replace('%name', f"{name}")
+        cardText = localSettings.cardText
+        cardText = cardText.replace('%name', f"{name}")
         prSingleInt = WCIFParse.getPb(localSettings.wcif, id, event, 'single')
         prAverageInt = WCIFParse.getPb(localSettings.wcif, id, event, 'average')
-        cardData = cardData.replace('%prSingle', dataWrite.resultToString(prSingleInt))
-        cardData = cardData.replace('%prAverage', dataWrite.resultToString(prAverageInt))
-        cardData = cardData.replace('%nrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
-        cardData = cardData.replace('%nrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
-        cardData = cardData.replace('%crSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
-        cardData = cardData.replace('%crAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
-        cardData = cardData.replace('%wrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
-        cardData = cardData.replace('%wrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
-        cardData = cardData.replace('%seed', f"{seed}")
-        cardData = cardData.replace('%previousRank', f"{previousRank}")
-        cardData = cardData.replace('%previousSingle', dataWrite.resultToString(
+        cardText = cardText.replace('%prSingle', dataWrite.resultToString(prSingleInt))
+        cardText = cardText.replace('%prAverage', dataWrite.resultToString(prAverageInt))
+        cardText = cardText.replace('%nrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
+        cardText = cardText.replace('%nrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
+        cardText = cardText.replace('%crSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
+        cardText = cardText.replace('%crAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
+        cardText = cardText.replace('%wrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
+        cardText = cardText.replace('%wrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
+        cardText = cardText.replace('%seed', f"{seed}")
+        cardText = cardText.replace('%previousRank', f"{previousRank}")
+        cardText = cardText.replace('%previousSingle', dataWrite.resultToString(
             WCIFParse.getRoundResult(localSettings.wcif, id, event, round, 'single')))
-        cardData = cardData.replace('%previousAverage', dataWrite.resultToString(
+        cardText = cardText.replace('%previousAverage', dataWrite.resultToString(
             WCIFParse.getRoundResult(localSettings.wcif, id, event, round, 'average')))
         buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}', command=lambda: buttonCommand(
-            camera, buttonIndex, localSettings.bot, cardData, id), bg=bg, fg=fg)
+            camera, buttonIndex, localSettings.bot, WCIFParse.getCountry(localSettings.wcif, id), cardText, id), bg=bg, fg=fg)
         buttons[camera][buttonIndex].grid(row=row, column=column)
 
 
@@ -137,7 +137,7 @@ def OKButtonCommand(updateTimeTower, settings, buttons):
             dataWrite.sendTimeTowerEvent(settings.bot, constants.EVENTS[event], round)
     updateCubers(settings, buttons)
     for camera in range(0, CAMERAS_COUNT):
-        buttonCommand(camera, -1, localSettings.bot, '', -1)
+        buttonCommand(camera, -1, localSettings.bot, '', '', -1)
 
 
 def timeTowerCommand(bot, camera):
@@ -195,7 +195,7 @@ for camera in range(0, CAMERAS_COUNT):
     timeTowerButtons[camera].grid(column=0, row=1, columnspan=3, sticky='e')
     cleanButtons.append(tk.Button(framesButtons[camera]))
     # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
-    cleanButtons[camera].configure(text=f'Clean', command=lambda localCamera=camera: buttonCommand(localCamera, -1, localSettings.bot, '', -1))
+    cleanButtons[camera].configure(text=f'Clean', command=lambda localCamera=camera: buttonCommand(localCamera, -1, localSettings.bot, '', '', -1))
     cleanButtons[camera].grid(column=3, row=1)
     buttons.append([])
     for button in range(0, BUTTONS_COLS + 2):

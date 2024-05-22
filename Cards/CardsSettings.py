@@ -65,10 +65,11 @@ class CardsSettings:
             self.mainFrame.rowconfigure(cameraY, pad=20)
 
     def botCallback(self, message):
-        camera = int(message[0])
-        if len(message) > 4:
-            country = message[2:4]
-            data = message[5:]
+        messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
+        camera = int(messageArray[0])
+        if len(messageArray) > 1:
+            country = messageArray[1]
+            data = messageArray[2]
             self.queues[camera].put((country, data))
         else:
             self.queues[camera].put(('', ''))

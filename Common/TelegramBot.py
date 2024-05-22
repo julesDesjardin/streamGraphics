@@ -5,6 +5,7 @@ import threading
 
 SPLIT_SYMBOL = '\n£££'
 COMMAND_SYMBOL = '$$$'
+DATA_SPLIT_SYMBOL = '§§§'
 SENDING_MESSAGES_DELAY = 3
 
 

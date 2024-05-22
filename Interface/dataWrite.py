@@ -1,3 +1,9 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+from Common import TelegramBot
+
+
 def resultToString(result):
     if result == 'DNF':
         return 'DNF'
@@ -6,8 +12,9 @@ def resultToString(result):
     return f"{((result % 6000) / 100):.2f}"
 
 
-def sendCardData(bot, camera, data):
-    bot.sendMessage('cardData', f'{camera} {data}')
+def sendCardData(bot, camera, country, text):
+    fullData = [f'{camera}', country, text]
+    bot.sendMessage('cardData', TelegramBot.DATA_SPLIT_SYMBOL.join(fullData))
 
 
 def sendTimeTowerEvent(bot, event, round):

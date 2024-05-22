@@ -4,7 +4,7 @@ import os
 from PIL import Image, ImageTk
 
 
-def getFlag(width, height, country):
+def getFlag(height, country):
     if country == 'local':
         # For debug/example purpose : use a local US flag to avoid losing time getting an actual flag from the internet
         flagImageFull = Image.open(f'{os.path.dirname(__file__)}/us.png')

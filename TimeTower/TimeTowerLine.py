@@ -12,14 +12,13 @@ from Common import Flag
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, widthFlag, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax, stepYmax):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax, stepYmax):
         self.canvas = canvas
         self.bgName = bgName
         self.bgResult = bgResult
         self.flagImage = None
         self.widthRanking = widthRanking
         self.widthFlagRectangle = widthFlagRectangle
-        self.widthFlag = widthFlag
         self.heightFlag = heightFlag
         self.widthName = widthName
         self.widthFullName = widthFullName
@@ -62,7 +61,7 @@ class TimeTowerLine:
             country = 'local'
         else:
             country = self.country
-        self.flagImage = Flag.getFlag(self.widthFlag, self.heightFlag, country)
+        self.flagImage = Flag.getFlag(self.heightFlag, country)
 
     def updateResults(self, queryResult):
         for result in queryResult['round']['results']:

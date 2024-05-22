@@ -49,15 +49,14 @@ class CardsSettings:
         self.textY = 0
         self.flagX = constants.DEFAULT_FLAG_X
         self.flagY = constants.DEFAULT_FLAG_Y
-        self.flagWidth = constants.DEFAULT_FLAG_WIDTH
         self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
-        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+        self.exampleFlag = Flag.getFlag(self.flagHeight, 'local')
         for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.font, text=f'Camera {i+1} text', anchor='nw'))
-            self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
+            self.flags.append(Flag.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
         for cameraX in range(0, camerasX):
             self.mainFrame.columnconfigure(cameraX, pad=20)
@@ -88,7 +87,6 @@ class CardsSettings:
             'textY': self.textY,
             'flagX': self.flagX,
             'flagY': self.flagY,
-            'flagWidth': self.flagWidth,
             'flagHeight': self.flagHeight,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
@@ -116,7 +114,6 @@ class CardsSettings:
             self.textY = loadSettingsJson['textY']
             self.flagX = loadSettingsJson['flagX']
             self.flagY = loadSettingsJson['flagY']
-            self.flagWidth = loadSettingsJson['flagWidth']
             self.flagHeight = loadSettingsJson['flagHeight']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
@@ -132,7 +129,7 @@ class CardsSettings:
                     i = self.camerasX * cameraY + cameraX
                     self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                     self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                    self.flags.append(Flag.getFlag(self.flagWidth, self.flagHeight, 'local'))
+                    self.flags.append(Flag.getFlag(self.flagHeight, 'local'))
                     self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                     self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
                     if not self.canvases[i].winfo_ismapped():
@@ -200,12 +197,11 @@ class CardsSettings:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, width, height, textX, textY, flagWidth, flagHeight, flagX, flagY):
+    def updateLayoutCloseButton(self, window, width, height, textX, textY, flagHeight, flagX, flagY):
         self.width = width
         self.height = height
         self.textX = textX
         self.textY = textY
-        self.flagWidth = flagWidth
         self.flagHeight = flagHeight
         self.flagX = flagX
         self.flagY = flagY
@@ -215,7 +211,7 @@ class CardsSettings:
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                 self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                self.flags[i] = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+                self.flags[i] = Flag.getFlag(self.flagHeight, 'local')
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                 self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
                 if not self.canvases[i].winfo_ismapped():
@@ -223,94 +219,109 @@ class CardsSettings:
 
         window.destroy()
 
-    def updateFlag(self, canvas, flag, flagWidth, flagHeight):
-        self.exampleFlag = Flag.getFlag(flagWidth, flagHeight, 'local')
+    def updateFlag(self, canvas, flag, flagHeight):
+        self.exampleFlag = Flag.getFlag(flagHeight, 'local')
         canvas.itemconfig(flag, image=self.exampleFlag)
 
     def updateLayout(self):
         layoutWindow = tk.Toplevel(self.root)
         layoutWindow.grab_set()
         layoutWindow.rowconfigure(0, pad=10)
-        layoutWindow.rowconfigure(1, pad=10)
+        layoutWindow.rowconfigure(1, pad=30)
         layoutWindow.rowconfigure(2, pad=10)
-        layoutWindow.rowconfigure(3, pad=10)
+        layoutWindow.rowconfigure(3, pad=30)
         layoutWindow.rowconfigure(4, pad=10)
+        layoutWindow.rowconfigure(5, pad=30)
+        layoutWindow.rowconfigure(6, pad=10)
+        layoutWindow.rowconfigure(7, pad=10)
+        layoutWindow.rowconfigure(8, pad=30)
+        layoutWindow.rowconfigure(9, pad=10)
+        layoutWindow.rowconfigure(10, pad=10)
+        layoutWindow.rowconfigure(11, pad=10)
+
+        emptyFrames = []
+
         layoutLabel = tk.Label(layoutWindow, text='Customize the cards layout')
         layoutLabel.grid(column=0, row=0, columnspan=4)
 
+        emptyFrames.append(tk.Frame(layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=1)
+
         widthLabel = tk.Label(layoutWindow, text='Card width')
-        widthLabel.grid(column=0, row=1, sticky='e')
+        widthLabel.grid(column=0, row=2, sticky='e')
         widthVariable = tk.StringVar()
         widthSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=widthVariable)
-        widthSpinbox.grid(column=1, row=1, sticky='w')
+        widthSpinbox.grid(column=1, row=2, sticky='w')
         widthVariable.set(f'{self.width}')
 
         heightLabel = tk.Label(layoutWindow, text='Card height')
-        heightLabel.grid(column=2, row=1, sticky='e')
+        heightLabel.grid(column=2, row=2, sticky='e')
         heightVariable = tk.StringVar()
         heightSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=heightVariable)
-        heightSpinbox.grid(column=3, row=1, sticky='w')
+        heightSpinbox.grid(column=3, row=2, sticky='w')
         heightVariable.set(f'{self.height}')
 
+        emptyFrames.append(tk.Frame(layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=3)
+
         textXLabel = tk.Label(layoutWindow, text='Text position X')
-        textXLabel.grid(column=0, row=2, sticky='e')
+        textXLabel.grid(column=0, row=4, sticky='e')
         textXVariable = tk.StringVar()
         textXSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.width, textvariable=textXVariable)
-        textXSpinbox.grid(column=1, row=2, sticky='w')
+        textXSpinbox.grid(column=1, row=4, sticky='w')
         textXVariable.set(f'{self.textX}')
 
         textYLabel = tk.Label(layoutWindow, text='Text position Y')
-        textYLabel.grid(column=2, row=2, sticky='e')
+        textYLabel.grid(column=2, row=4, sticky='e')
         textYVariable = tk.StringVar()
         textYSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.height, textvariable=textYVariable)
-        textYSpinbox.grid(column=3, row=2, sticky='w')
+        textYSpinbox.grid(column=3, row=4, sticky='w')
         textYVariable.set(f'{self.textY}')
 
-        flagWidthLabel = tk.Label(layoutWindow, text='Flag width')
-        flagWidthLabel.grid(column=0, row=3, sticky='e')
-        flagWidthVariable = tk.StringVar()
-        flagWidthSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=flagWidthVariable)
-        flagWidthSpinbox.grid(column=1, row=3, sticky='w')
-        flagWidthVariable.set(f'{self.flagWidth}')
+        emptyFrames.append(tk.Frame(layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=5)
 
         flagHeightLabel = tk.Label(layoutWindow, text='Flag height')
-        flagHeightLabel.grid(column=2, row=3, sticky='e')
+        flagHeightLabel.grid(column=0, columnspan=2, row=6, sticky='e')
         flagHeightVariable = tk.StringVar()
         flagHeightSpinbox = tk.Spinbox(layoutWindow, width=20, from_=0, to=2000, textvariable=flagHeightVariable)
-        flagHeightSpinbox.grid(column=3, row=3, sticky='w')
+        flagHeightSpinbox.grid(column=2, columnspan=2, row=6, sticky='w')
         flagHeightVariable.set(f'{self.flagHeight}')
 
         flagXLabel = tk.Label(layoutWindow, text='Flag position X')
-        flagXLabel.grid(column=0, row=4, sticky='e')
+        flagXLabel.grid(column=0, row=7, sticky='e')
         flagXVariable = tk.StringVar()
         flagXSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.width, textvariable=flagXVariable)
-        flagXSpinbox.grid(column=1, row=4, sticky='w')
+        flagXSpinbox.grid(column=1, row=7, sticky='w')
         flagXVariable.set(f'{self.flagX}')
 
         flagYLabel = tk.Label(layoutWindow, text='Flag position Y')
-        flagYLabel.grid(column=2, row=4, sticky='e')
+        flagYLabel.grid(column=2, row=7, sticky='e')
         flagYVariable = tk.StringVar()
         flagYSpinbox = tk.Spinbox(layoutWindow, from_=0, to=self.height, textvariable=flagYVariable)
-        flagYSpinbox.grid(column=3, row=4, sticky='w')
+        flagYSpinbox.grid(column=3, row=7, sticky='w')
         flagYVariable.set(f'{self.flagY}')
+
+        emptyFrames.append(tk.Frame(layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=8)
 
         backgroundButton = tk.Button(layoutWindow, text='Update background image/video',
                                      command=lambda: self.updateBackground(layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable))
-        backgroundButton.grid(column=0, row=5, columnspan=4)
+        backgroundButton.grid(column=0, row=9, columnspan=4)
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagWidthVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
-        OKButton.grid(column=0, row=6, columnspan=4)
+            layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+        OKButton.grid(column=0, row=10, columnspan=4)
 
         # TODO Background color
         # TODO Font ?
 
         exampleCanvas = tk.Canvas(layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
-        exampleCanvas.grid(column=0, row=7, columnspan=4)
+        exampleCanvas.grid(column=0, row=11, columnspan=4)
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
         if self.loopFile != '':
             exampleCanvas.itemconfig(exampleBackground, image=self.loopImages[0])
-        self.exampleFlag = Flag.getFlag(self.flagWidth, self.flagHeight, 'local')
+        self.exampleFlag = Flag.getFlag(self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.font,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor='nw')
@@ -327,10 +338,8 @@ class CardsSettings:
             exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
-        flagWidthVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, utils.cleverInt(flagWidthVariable.get()), utils.cleverInt(flagHeightVariable.get())))
         flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, utils.cleverInt(flagWidthVariable.get()), utils.cleverInt(flagHeightVariable.get())))
+            exampleCanvas, exampleFlagImage, utils.cleverInt(flagHeightVariable.get())))
         flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
         flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

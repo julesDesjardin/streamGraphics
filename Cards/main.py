@@ -33,7 +33,7 @@ def checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backg
                         canvas.update()
                         time.sleep(1 / 25)
                 backgroundLoopIndex = 0
-            flag = Flag.getFlag(localSettings.flagWidth, localSettings.flagHeight, country)
+            flag = Flag.getFlag(localSettings.flagHeight, country)
             canvas.itemconfig(flagImage, image=flag, state='normal')
             canvas.itemconfig(text, text=data, state='normal')
     except queue.Empty:

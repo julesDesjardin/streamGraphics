@@ -12,8 +12,8 @@ def resultToString(result):
     return f"{((result % 6000) / 100):.2f}"
 
 
-def sendCardData(bot, camera, country, text):
-    fullData = [f'{camera}', country, text]
+def sendCardData(bot, camera, country, name, text):
+    fullData = [f'{camera}', country, name, text]
     bot.sendMessage('cardData', TelegramBot.DATA_SPLIT_SYMBOL.join(fullData))
 
 

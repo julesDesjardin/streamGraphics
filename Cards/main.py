@@ -17,12 +17,13 @@ CAMERAS_COUNT = CAMERAS_X * CAMERAS_Y
 ##############################################################################
 
 
-def checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backgroundLoopIndex):
+def checkQueue(root, dataQueue, canvas, name, text, flag, flagImage, background, backgroundLoopIndex):
     try:
-        (country, data) = dataQueue.get(block=False)
-        if data == '':
+        (country, nameRead, textRead) = dataQueue.get(block=False)
+        if nameRead == '':
             canvas.itemconfig(background, state='hidden')
             canvas.itemconfig(flagImage, state='hidden')
+            canvas.itemconfig(name, state='hidden')
             canvas.itemconfig(text, state='hidden')
             backgroundLoopIndex = -1
         else:
@@ -35,7 +36,8 @@ def checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backg
                 backgroundLoopIndex = 0
             flag = Flag.getFlag(localSettings.flagHeight, country)
             canvas.itemconfig(flagImage, image=flag, state='normal')
-            canvas.itemconfig(text, text=data, state='normal')
+            canvas.itemconfig(name, text=nameRead, state='normal')
+            canvas.itemconfig(text, text=textRead, state='normal')
     except queue.Empty:
         pass
     if backgroundLoopIndex != -1:
@@ -45,12 +47,12 @@ def checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backg
             backgroundLoopIndex = 0
         else:
             backgroundLoopIndex = backgroundLoopIndex + 1
-    root.after(int(1000 / 25), lambda: checkQueue(root, dataQueue, canvas, text, flag, flagImage, background, backgroundLoopIndex))
+    root.after(int(1000 / 25), lambda: checkQueue(root, dataQueue, canvas, name, text, flag, flagImage, background, backgroundLoopIndex))
 
 
-def checkAllQueues(root, queues, canvases, texts, flags, flagImages, backgrounds):
+def checkAllQueues(root, queues, canvases, names, texts, flags, flagImages, backgrounds):
     for i in range(0, CAMERAS_COUNT):
-        checkQueue(root, queues[i], canvases[i], texts[i], flags[i], flagImages[i], backgrounds[i], -1)
+        checkQueue(root, queues[i], canvases[i], names[i], texts[i], flags[i], flagImages[i], backgrounds[i], -1)
 
 
 ##############################################################################
@@ -70,7 +72,7 @@ localSettings.mainFrame.pack()
 
 ##############################################################################
 
-checkAllQueues(root, localSettings.queues, localSettings.canvases, localSettings.texts,
+checkAllQueues(root, localSettings.queues, localSettings.canvases, localSettings.names, localSettings.texts,
                localSettings.flags, localSettings.flagImages, localSettings.backgrounds)
 
 root.mainloop()

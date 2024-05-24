@@ -7,7 +7,7 @@ from urllib.request import urlopen
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import Flag
+from Common import Image
 
 
 class TimeTowerLine:
@@ -61,7 +61,7 @@ class TimeTowerLine:
             country = 'local'
         else:
             country = self.country
-        self.flagImage = Flag.getFlag(self.heightFlag, country)
+        self.flagImage = Image.getFlag(self.heightFlag, country)
 
     def updateResults(self, queryResult):
         for result in queryResult['round']['results']:

@@ -15,7 +15,7 @@ import DragManager
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot, Flag
+from Common import TelegramBot, Image
 
 
 class CardsSettings:
@@ -37,6 +37,8 @@ class CardsSettings:
         self.texts = []
         self.flags = []
         self.flagImages = []
+        self.avatars = []
+        self.avatarImages = []
         self.backgrounds = []
         self.loopFile = ''
         self.loopImages = []
@@ -54,15 +56,23 @@ class CardsSettings:
         self.flagX = constants.DEFAULT_FLAG_X
         self.flagY = constants.DEFAULT_FLAG_Y
         self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
-        self.exampleFlag = Flag.getFlag(self.flagHeight, 'local')
+        self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
+        self.avatarX = constants.DEFAULT_AVATAR_X
+        self.avatarY = constants.DEFAULT_AVATAR_Y
+        self.avatarWidth = constants.DEFAULT_AVATAR_WIDTH
+        self.avatarHeight = constants.DEFAULT_AVATAR_HEIGHT
+        self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
+        self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.names.append(self.canvases[i].create_text(self.textX, self.textY, font=self.fontName, text=f'Camera {i+1} competitor', anchor='nw'))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.fontText, text=f'Camera {i+1} text', anchor='nw'))
-            self.flags.append(Flag.getFlag(self.flagHeight, 'local'))
+            self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
+            self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
+            self.avatarImages.append(self.canvases[i].create_image(self.avatarX, self.avatarY, image=self.avatars[i]))
         for cameraX in range(0, camerasX):
             self.mainFrame.columnconfigure(cameraX, pad=20)
         for cameraY in range(0, camerasY):
@@ -71,13 +81,14 @@ class CardsSettings:
     def botCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
         camera = int(messageArray[0])
-        if len(messageArray) > 3:
-            country = messageArray[1]
-            name = messageArray[2]
-            data = messageArray[3]
-            self.queues[camera].put((country, name, data))
+        country = messageArray[1]
+        name = messageArray[2]
+        avatar = messageArray[3]
+        if len(messageArray) > 4:
+            data = messageArray[4]
         else:
-            self.queues[camera].put(('', '', ''))
+            data = ''
+        self.queues[camera].put((country, name, avatar, data))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -97,6 +108,10 @@ class CardsSettings:
             'flagX': self.flagX,
             'flagY': self.flagY,
             'flagHeight': self.flagHeight,
+            'avatarX': self.avatarX,
+            'avatarY': self.avatarY,
+            'avatarWidth': self.avatarWidth,
+            'avatarHeight': self.avatarHeight,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -127,6 +142,10 @@ class CardsSettings:
             self.flagX = loadSettingsJson['flagX']
             self.flagY = loadSettingsJson['flagY']
             self.flagHeight = loadSettingsJson['flagHeight']
+            self.avatarX = loadSettingsJson['avatarX']
+            self.avatarY = loadSettingsJson['avatarY']
+            self.avatarWidth = loadSettingsJson['avatarWidth']
+            self.avatarHeight = loadSettingsJson['avatarHeight']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -142,9 +161,12 @@ class CardsSettings:
                     self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                     self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
                     self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                    self.flags.append(Flag.getFlag(self.flagHeight, 'local'))
+                    self.flags.append(Image.getFlag(self.flagHeight, 'local'))
                     self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                     self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                    self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
+                    self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
+                    self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
                     if not self.canvases[i].winfo_ismapped():
                         self.canvases[i].grid(row=cameraY, column=cameraX)
         except:
@@ -210,7 +232,7 @@ class CardsSettings:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, width, height, nameX, nameY, textX, textY, flagHeight, flagX, flagY):
+    def updateLayoutCloseButton(self, window, width, height, nameX, nameY, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
         self.width = width
         self.height = height
         self.nameX = nameX
@@ -220,6 +242,10 @@ class CardsSettings:
         self.flagHeight = flagHeight
         self.flagX = flagX
         self.flagY = flagY
+        self.avatarWidth = avatarWidth
+        self.avatarHeight = avatarHeight
+        self.avatarX = avatarX
+        self.avatarY = avatarY
         for cameraY in range(0, self.camerasY):
             for cameraX in range(0, self.camerasX):
                 i = self.camerasX * cameraY + cameraX
@@ -227,17 +253,27 @@ class CardsSettings:
                 self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
                 self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                self.flags[i] = Flag.getFlag(self.flagHeight, 'local')
+                self.flags[i] = Image.getFlag(self.flagHeight, 'local')
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                 self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
+                self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
+                self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
                 if not self.canvases[i].winfo_ismapped():
                     self.canvases[i].grid(row=cameraY, column=cameraX)
 
         window.destroy()
 
     def updateFlag(self, canvas, flag, flagHeight):
-        self.exampleFlag = Flag.getFlag(flagHeight, 'local')
+        self.exampleFlag = Image.getFlag(flagHeight, 'local')
         canvas.itemconfig(flag, image=self.exampleFlag)
+
+    def updateAvatar(self, canvas, avatar, avatarX, avatarY, avatarWidth, avatarHeight, rectangle):
+        self.exampleAvatar = Image.getAvatar(avatarWidth, avatarHeight, 'local')
+        canvas.itemconfig(avatar, image=self.exampleAvatar)
+        canvas.coords(rectangle,
+                      avatarX - int(avatarWidth / 2), avatarY - int(avatarHeight / 2), avatarX + int(avatarWidth / 2), avatarY + int(avatarHeight / 2))
+        canvas.coords(avatar, avatarX, avatarY)
 
     def layoutEndRow(self, pad):
         self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
@@ -344,6 +380,41 @@ class CardsSettings:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        avatarWidthLabel = tk.Label(self.layoutWindow, text='Avatar Width')
+        avatarWidthLabel.grid(column=0, row=self.currentRow, sticky='e')
+        avatarWidthVariable = tk.StringVar()
+        avatarWidthSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=avatarWidthVariable)
+        avatarWidthSpinbox.grid(column=1, columnspan=2, row=self.currentRow, sticky='w')
+        avatarWidthVariable.set(f'{self.avatarWidth}')
+
+        avatarHeightLabel = tk.Label(self.layoutWindow, text='Avatar height')
+        avatarHeightLabel.grid(column=2, row=self.currentRow, sticky='e')
+        avatarHeightVariable = tk.StringVar()
+        avatarHeightSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=avatarHeightVariable)
+        avatarHeightSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        avatarHeightVariable.set(f'{self.avatarHeight}')
+
+        self.layoutEndRow(10)
+
+        avatarXLabel = tk.Label(self.layoutWindow, text='Avatar position X')
+        avatarXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        avatarXVariable = tk.StringVar()
+        avatarXSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.width, textvariable=avatarXVariable)
+        avatarXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        avatarXVariable.set(f'{self.avatarX}')
+
+        avatarYLabel = tk.Label(self.layoutWindow, text='Avatar position Y')
+        avatarYLabel.grid(column=2, row=self.currentRow, sticky='e')
+        avatarYVariable = tk.StringVar()
+        avatarYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=avatarYVariable)
+        avatarYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        avatarYVariable.set(f'{self.avatarY}')
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
         backgroundButton = tk.Button(self.layoutWindow, text='Update background image/video',
                                      command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable))
         backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
@@ -351,7 +422,7 @@ class CardsSettings:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get())))
+            self.layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
         OKButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
@@ -364,13 +435,18 @@ class CardsSettings:
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
         if self.loopFile != '':
             exampleCanvas.itemconfig(exampleBackground, image=self.loopImages[0])
-        self.exampleFlag = Flag.getFlag(self.flagHeight, 'local')
+        self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
+        self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
+        exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
         exampleName = exampleCanvas.create_text(self.nameX, self.nameY, font=self.fontName, text=f'Competitor name', anchor='nw')
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.fontText,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor='nw')
+        exampleAvatarRectangle = exampleCanvas.create_rectangle(
+            self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))
 
         managerFlag = DragManager.DragManager(exampleCanvas, exampleFlagImage, flagXVariable, flagYVariable)
+        managerAvatar = DragManager.DragManager(exampleCanvas, exampleAvatarImage, avatarXVariable, avatarYVariable)
         managerName = DragManager.DragManager(exampleCanvas, exampleName, nameXVariable, nameYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
         widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=utils.cleverInt(widthVariable.get())))
@@ -393,6 +469,14 @@ class CardsSettings:
             exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
         flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
+        avatarWidthVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
+            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+        avatarHeightVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
+            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+        avatarXVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
+            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+        avatarYVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
+            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

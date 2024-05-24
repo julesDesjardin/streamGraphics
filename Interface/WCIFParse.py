@@ -162,3 +162,7 @@ def getWCAID(wcif, competitor):
 
 def getCompetitorName(wcif, competitor):
     return wcif['persons'][competitor]['name']
+
+
+def getAvatar(wcif, competitor):
+    return wcif['persons'][competitor]['avatar']['url']

@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
-from tkinter import ttk
+from tkinter import ttk, font
 import json
 import queue
 import threading
@@ -47,10 +47,12 @@ class CardsSettings:
         self.width = constants.DEFAULT_WIDTH
         self.height = constants.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
-        self.fontName = constants.DEFAULT_FONT
+        self.nameFont = constants.DEFAULT_FONT_FAMILY
+        self.nameSize = constants.DEFAULT_FONT_SIZE
         self.nameX = 0
         self.nameY = 0
-        self.fontText = constants.DEFAULT_FONT
+        self.textFont = constants.DEFAULT_FONT_FAMILY
+        self.textSize = constants.DEFAULT_FONT_SIZE
         self.textX = 0
         self.textY = 0
         self.flagX = constants.DEFAULT_FLAG_X
@@ -67,8 +69,10 @@ class CardsSettings:
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
-            self.names.append(self.canvases[i].create_text(self.textX, self.textY, font=self.fontName, text=f'Camera {i+1} competitor', anchor='nw'))
-            self.texts.append(self.canvases[i].create_text(self.textX, self.textY, font=self.fontText, text=f'Camera {i+1} text', anchor='nw'))
+            self.names.append(self.canvases[i].create_text(self.textX, self.textY,
+                              font=(self.nameFont, self.nameSize), text=f'Camera {i+1} competitor', anchor='nw'))
+            self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
+                              font=(self.textFont, self.textSize), text=f'Camera {i+1} text', anchor='nw'))
             self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
@@ -99,10 +103,12 @@ class CardsSettings:
             'backgroundColor': self.backgroundColor,
             'introFile': self.introFile,
             'loopFile': self.loopFile,
-            'fontName': self.fontName,
+            'nameFont': self.nameFont,
+            'nameSize': self.nameSize,
             'nameX': self.nameX,
             'nameY': self.nameY,
-            'fontText': self.fontText,
+            'textFont': self.textFont,
+            'textSize': self.textSize,
             'textX': self.textX,
             'textY': self.textY,
             'flagX': self.flagX,
@@ -133,10 +139,12 @@ class CardsSettings:
             self.backgroundColor = loadSettingsJson['backgroundColor']
             self.introFile = loadSettingsJson['introFile']
             self.loopFile = loadSettingsJson['loopFile']
-            self.fontName = loadSettingsJson['fontName']
+            self.nameFont = loadSettingsJson['nameFont']
+            self.nameSize = loadSettingsJson['nameSize']
             self.nameX = loadSettingsJson['nameX']
             self.nameY = loadSettingsJson['nameY']
-            self.fontText = loadSettingsJson['fontText']
+            self.textFont = loadSettingsJson['textFont']
+            self.textSize = loadSettingsJson['textSize']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
             self.flagX = loadSettingsJson['flagX']
@@ -232,11 +240,15 @@ class CardsSettings:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, width, height, nameX, nameY, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
         self.width = width
         self.height = height
+        self.nameFont = nameFont
+        self.nameSize = nameSize
         self.nameX = nameX
         self.nameY = nameY
+        self.textFont = textFont
+        self.textSize = textSize
         self.textX = textX
         self.textY = textY
         self.flagHeight = flagHeight
@@ -252,7 +264,9 @@ class CardsSettings:
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                 if self.loopFile != '':
                     self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize))
                 self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
+                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize))
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                 self.flags[i] = Image.getFlag(self.flagHeight, 'local')
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
@@ -288,6 +302,9 @@ class CardsSettings:
 
         emptyFrames = []
 
+        fonts = list(font.families())
+        fonts.sort()
+
         layoutLabel = tk.Label(self.layoutWindow, text='Customize the cards layout')
         layoutLabel.grid(column=0, columnspan=4, row=self.currentRow)
 
@@ -315,6 +332,25 @@ class CardsSettings:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        nameFontLabel = tk.Label(self.layoutWindow, text='Name Font')
+        nameFontLabel.grid(column=0, row=self.currentRow, sticky='e')
+        nameFontVariable = tk.StringVar()
+        nameFontMenu = ttk.Combobox(self.layoutWindow, textvariable=nameFontVariable)
+        nameFontMenu['values'] = fonts
+        nameFontVariable.set(self.nameFont)
+        nameFontMenu.set(self.nameFont)
+        nameFontMenu['state'] = 'readonly'
+        nameFontMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        nameSizeLabel = tk.Label(self.layoutWindow, text='Name font size')
+        nameSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
+        nameSizeVariable = tk.StringVar()
+        nameSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=nameSizeVariable)
+        nameSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        nameSizeVariable.set(f'{self.nameSize}')
+
+        self.layoutEndRow(10)
+
         nameXLabel = tk.Label(self.layoutWindow, text='Name position X')
         nameXLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameXVariable = tk.StringVar()
@@ -333,6 +369,25 @@ class CardsSettings:
         emptyFrames.append(tk.Frame(self.layoutWindow))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
+
+        textFontLabel = tk.Label(self.layoutWindow, text='Text Font')
+        textFontLabel.grid(column=0, row=self.currentRow, sticky='e')
+        textFontVariable = tk.StringVar()
+        textFontMenu = ttk.Combobox(self.layoutWindow, textvariable=textFontVariable)
+        textFontMenu['values'] = fonts
+        textFontVariable.set(self.textFont)
+        textFontMenu.set(self.textFont)
+        textFontMenu['state'] = 'readonly'
+        textFontMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        textSizeLabel = tk.Label(self.layoutWindow, text='Text font size')
+        textSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
+        textSizeVariable = tk.StringVar()
+        textSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=textSizeVariable)
+        textSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        textSizeVariable.set(f'{self.textSize}')
+
+        self.layoutEndRow(10)
 
         textXLabel = tk.Label(self.layoutWindow, text='Text position X')
         textXLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -423,13 +478,12 @@ class CardsSettings:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, int(widthVariable.get()), int(heightVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
+            self.layoutWindow, int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
         OKButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
 
         # TODO Background color
-        # TODO Font ?
 
         exampleWindow = tk.Toplevel(self.layoutWindow)
         exampleLabel = tk.Label(
@@ -444,8 +498,9 @@ class CardsSettings:
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
-        exampleName = exampleCanvas.create_text(self.nameX, self.nameY, font=self.fontName, text=f'Competitor name', anchor='nw')
-        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=self.fontText,
+        exampleName = exampleCanvas.create_text(
+            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), text=f'Competitor name', anchor='nw')
+        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize),
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor='nw')
         exampleAvatarRectangle = exampleCanvas.create_rectangle(
             self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))
@@ -460,10 +515,18 @@ class CardsSettings:
         heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=utils.cleverInt(heightVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
+        nameFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
+        nameSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
         nameXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, utils.cleverInt(nameXVariable.get()), utils.cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, utils.cleverInt(nameXVariable.get()), utils.cleverInt(nameYVariable.get())))
+        textFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
+        textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

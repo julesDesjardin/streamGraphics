@@ -250,7 +250,8 @@ class CardsSettings:
             for cameraX in range(0, self.camerasX):
                 i = self.camerasX * cameraY + cameraX
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-                self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+                if self.loopFile != '':
+                    self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
                 self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                 self.flags[i] = Image.getFlag(self.flagHeight, 'local')

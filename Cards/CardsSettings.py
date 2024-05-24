@@ -431,8 +431,12 @@ class CardsSettings:
         # TODO Background color
         # TODO Font ?
 
-        exampleCanvas = tk.Canvas(self.layoutWindow, width=self.width, height=self.height, background=self.backgroundColor)
-        exampleCanvas.grid(column=0, row=self.currentRow, columnspan=4)
+        exampleWindow = tk.Toplevel(self.layoutWindow)
+        exampleLabel = tk.Label(
+            exampleWindow, text='Example Card. See main window to change sizes, fonts, backgrounds, etc, and confirm changes.\nYou can drag and drop elements (Flag, Avatar, name, extra text) in this window.')
+        exampleLabel.pack(pady=20)
+        exampleCanvas = tk.Canvas(exampleWindow, width=self.width, height=self.height, background=self.backgroundColor)
+        exampleCanvas.pack()
         exampleBackground = exampleCanvas.create_image(0, 0, anchor='nw')
         if self.loopFile != '':
             exampleCanvas.itemconfig(exampleBackground, image=self.loopImages[0])

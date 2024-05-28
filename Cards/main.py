@@ -44,9 +44,11 @@ def checkQueue(root, dataQueue, canvas, name, text, flag, flagImage, avatar, ava
     except queue.Empty:
         pass
     if backgroundLoopIndex != -1:
-        canvas.itemconfig(background, image=localSettings.loopImages[backgroundLoopIndex], state='normal')
+        if localSettings.loopFile != '':
+            canvas.itemconfig(background, image=localSettings.loopImages[backgroundLoopIndex])
+        canvas.itemconfig(background, state='normal')
         canvas.update()
-        if backgroundLoopIndex == len(localSettings.loopImages) - 1:
+        if backgroundLoopIndex >= len(localSettings.loopImages) - 1:
             backgroundLoopIndex = 0
         else:
             backgroundLoopIndex = backgroundLoopIndex + 1

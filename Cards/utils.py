@@ -10,6 +10,16 @@ def browse(entry):
 
 
 def loadVideo(videoFile, imageList):
+    return loadVideoOrFirstFrame(videoFile, imageList, True)
+
+
+def loadFirstFrame(videoFile):
+    imageList = []
+    (width, height) = loadVideoOrFirstFrame(videoFile, imageList, True)
+    return (imageList[0], width, height)
+
+
+def loadVideoOrFirstFrame(videoFile, imageList, firstFrameOnly):
     imageList.clear()
     vidcap = cv2.VideoCapture(videoFile)
     success, image = vidcap.read()
@@ -19,6 +29,8 @@ def loadVideo(videoFile, imageList):
         imageFull = tk.PhotoImage(data=pngImage.tobytes())
         imageList.append(imageFull)
         success, image = vidcap.read()
+        if firstFrameOnly:
+            success = False
 
     return (width, height)
 

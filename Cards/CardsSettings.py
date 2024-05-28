@@ -48,6 +48,7 @@ class CardsSettings:
         self.width = constants.DEFAULT_WIDTH
         self.height = constants.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
+        self.exampleBackgroundImage = None
         self.nameFont = constants.DEFAULT_FONT_FAMILY
         self.nameSize = constants.DEFAULT_FONT_SIZE
         self.nameX = 0
@@ -203,20 +204,18 @@ class CardsSettings:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
 
-    def updateBackgroundCloseButton(self, window, introFile, loopFile, canvas, background, width, height):
-        self.introFile = introFile
-        if self.introFile != '':
-            utils.loadVideo(self.introFile, self.introImages)
-        self.loopFile = loopFile
-        if self.loopFile != '':
-            (widthVideo, heightVideo) = utils.loadVideo(self.loopFile, self.loopImages)
+    def updateBackgroundCloseButton(self, window, introFile, loopFile, canvas, background, width, height, intro, loop):
+        intro.set(introFile)
+        loop.set(loopFile)
+        if loopFile != '':
+            (self.exampleBackgroundImage, widthVideo, heightVideo) = utils.loadFirstFrame(loopFile)
             canvas.configure(width=widthVideo, height=heightVideo)
             width.set(widthVideo)
             height.set(heightVideo)
-            canvas.itemconfig(background, image=self.loopImages[0])
+            canvas.itemconfig(background, image=self.exampleBackgroundImage)
         window.destroy()
 
-    def updateBackground(self, window, canvas, background, width, height):
+    def updateBackground(self, window, canvas, background, width, height, intro, loop):
         backgroundWindow = tk.Toplevel(window)
         backgroundWindow.grab_set()
 
@@ -224,7 +223,7 @@ class CardsSettings:
         introLabel.grid(row=0, column=0)
         introEntry = tk.Entry(backgroundWindow)
         introEntry.delete(0, tkinter.END)
-        introEntry.insert(0, self.loopFile)
+        introEntry.insert(0, intro.get())
         introEntry.grid(row=0, column=1)
         introBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(introEntry))
         introBrowse.grid(row=0, column=2)
@@ -232,17 +231,23 @@ class CardsSettings:
         loopLabel.grid(row=1, column=0)
         loopEntry = tk.Entry(backgroundWindow)
         loopEntry.delete(0, tkinter.END)
-        loopEntry.insert(0, self.loopFile)
+        loopEntry.insert(0, loop.get())
         loopEntry.grid(row=1, column=1)
         loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(loopEntry))
         loopBrowse.grid(row=1, column=2)
 
         OKButton = tk.Button(backgroundWindow, text='OK', command=lambda: self.updateBackgroundCloseButton(
-            backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
+            backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height, intro, loop))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
+        self.introFile = introFile
+        self.loopFile = loopFile
+        if self.introFile != '':
+            utils.loadVideo(self.introFile, self.introImages)
+        if self.loopFile != '':
+            utils.loadVideo(self.loopFile, self.loopImages)
         self.width = width
         self.height = height
         self.nameFont = nameFont
@@ -479,8 +484,12 @@ class CardsSettings:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        introFileVariable = tk.StringVar()
+        loopFileVariable = tk.StringVar()
+        introFileVariable.set(self.introFile)
+        loopFileVariable.set(self.loopFile)
         backgroundButton = tk.Button(self.layoutWindow, text='Update background image/video',
-                                     command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable))
+                                     command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable))
         backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
@@ -498,7 +507,7 @@ class CardsSettings:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, backgroundColorVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
+            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
         OKButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)

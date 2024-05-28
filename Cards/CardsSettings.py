@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk, font
+from tkinter.colorchooser import askcolor
 import json
 import queue
 import threading
@@ -240,7 +241,8 @@ class CardsSettings:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
+        self.backgroundColor = backgroundColor
         self.width = width
         self.height = height
         self.nameFont = nameFont
@@ -289,6 +291,12 @@ class CardsSettings:
         canvas.coords(rectangle,
                       avatarX - int(avatarWidth / 2), avatarY - int(avatarHeight / 2), avatarX + int(avatarWidth / 2), avatarY + int(avatarHeight / 2))
         canvas.coords(avatar, avatarX, avatarY)
+
+    def updateBackgroundColor(self, canvas, button, var):
+        colors = askcolor(var.get(), title='Background color')
+        button.configure(background=colors[1])
+        canvas.configure(background=colors[1])
+        var.set(colors[1])
 
     def layoutEndRow(self, pad):
         self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
@@ -477,13 +485,23 @@ class CardsSettings:
 
         self.layoutEndRow(10)
 
-        OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
-        OKButton.grid(column=0, row=self.currentRow, columnspan=4)
+        backgroundColorLabel = tk.Label(self.layoutWindow, text='Background color:')
+        backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        backgroundColorVariable = tk.StringVar()
+        backgroundColorVariable.set(self.backgroundColor)
+        backgroundColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        backgroundColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        backgroundColorButton = tk.Button(backgroundColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
+        backgroundColorButton.configure(command=lambda: self.updateBackgroundColor(exampleCanvas, backgroundColorButton, backgroundColorVariable))
+        backgroundColorButton.pack()
 
         self.layoutEndRow(10)
 
-        # TODO Background color
+        OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
+            self.layoutWindow, backgroundColorVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
+        OKButton.grid(column=0, row=self.currentRow, columnspan=4)
+
+        self.layoutEndRow(10)
 
         exampleWindow = tk.Toplevel(self.layoutWindow)
         exampleLabel = tk.Label(

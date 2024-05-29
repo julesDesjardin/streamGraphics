@@ -35,10 +35,12 @@ def checkQueue(root, dataQueue, canvas, name, text, flag, flagImage, avatar, ava
                         canvas.update()
                         time.sleep(1 / 25)
                 backgroundLoopIndex = 0
-            flag = Image.getFlag(localSettings.flagHeight, country)
-            canvas.itemconfig(flagImage, image=flag, state='normal')
-            avatar = Image.getAvatar(localSettings.avatarWidth, localSettings.avatarHeight, avatarRead)
-            canvas.itemconfig(avatarImage, image=avatar, state='normal')
+            if localSettings.flagEnable:
+                flag = Image.getFlag(localSettings.flagHeight, country)
+                canvas.itemconfig(flagImage, image=flag, state='normal')
+            if localSettings.avatarEnable:
+                avatar = Image.getAvatar(localSettings.avatarWidth, localSettings.avatarHeight, avatarRead)
+                canvas.itemconfig(avatarImage, image=avatar, state='normal')
             canvas.itemconfig(name, text=nameRead, state='normal')
             canvas.itemconfig(text, text=textRead, state='normal')
     except queue.Empty:

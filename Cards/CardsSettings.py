@@ -57,10 +57,12 @@ class CardsSettings:
         self.textSize = constants.DEFAULT_FONT_SIZE
         self.textX = 0
         self.textY = 0
+        self.flagEnable = True
         self.flagX = constants.DEFAULT_FLAG_X
         self.flagY = constants.DEFAULT_FLAG_Y
         self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
+        self.avatarEnable = True
         self.avatarX = constants.DEFAULT_AVATAR_X
         self.avatarY = constants.DEFAULT_AVATAR_Y
         self.avatarWidth = constants.DEFAULT_AVATAR_WIDTH
@@ -113,9 +115,11 @@ class CardsSettings:
             'textSize': self.textSize,
             'textX': self.textX,
             'textY': self.textY,
+            'flagEnable': self.flagEnable,
             'flagX': self.flagX,
             'flagY': self.flagY,
             'flagHeight': self.flagHeight,
+            'avatarEnable': self.avatarEnable,
             'avatarX': self.avatarX,
             'avatarY': self.avatarY,
             'avatarWidth': self.avatarWidth,
@@ -149,9 +153,11 @@ class CardsSettings:
             self.textSize = loadSettingsJson['textSize']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
+            self.flagEnable = loadSettingsJson['flagEnable']
             self.flagX = loadSettingsJson['flagX']
             self.flagY = loadSettingsJson['flagY']
             self.flagHeight = loadSettingsJson['flagHeight']
+            self.avatarEnable = loadSettingsJson['avatarEnable']
             self.avatarX = loadSettingsJson['avatarX']
             self.avatarY = loadSettingsJson['avatarY']
             self.avatarWidth = loadSettingsJson['avatarWidth']
@@ -174,9 +180,17 @@ class CardsSettings:
                     self.flags.append(Image.getFlag(self.flagHeight, 'local'))
                     self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                     self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                    if self.flagEnable:
+                        self.canvases[i].itemconfig(self.flagImages[i], state='normal')
+                    else:
+                        self.canvases[i].itemconfig(self.flagImages[i], state='hidden')
                     self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
                     self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
                     self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
+                    if self.avatarEnable:
+                        self.canvases[i].itemconfig(self.avatarImages[i], state='normal')
+                    else:
+                        self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
                     if not self.canvases[i].winfo_ismapped():
                         self.canvases[i].grid(row=cameraY, column=cameraX)
         except:
@@ -240,7 +254,7 @@ class CardsSettings:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height, intro, loop))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagHeight, flagX, flagY, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
@@ -258,9 +272,11 @@ class CardsSettings:
         self.textSize = textSize
         self.textX = textX
         self.textY = textY
+        self.flagEnable = flagEnable
         self.flagHeight = flagHeight
         self.flagX = flagX
         self.flagY = flagY
+        self.avatarEnable = avatarEnable
         self.avatarWidth = avatarWidth
         self.avatarHeight = avatarHeight
         self.avatarX = avatarX
@@ -278,13 +294,33 @@ class CardsSettings:
                 self.flags[i] = Image.getFlag(self.flagHeight, 'local')
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                 self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                if self.flagEnable:
+                    self.canvases[i].itemconfig(self.flagImages[i], state='normal')
+                else:
+                    self.canvases[i].itemconfig(self.flagImages[i], state='hidden')
                 self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
                 self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
                 self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
+                if self.avatarEnable:
+                    self.canvases[i].itemconfig(self.avatarImages[i], state='normal')
+                else:
+                    self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
                 if not self.canvases[i].winfo_ismapped():
                     self.canvases[i].grid(row=cameraY, column=cameraX)
 
         window.destroy()
+
+    def enableButtonCallback(self, enable, spinboxes, canvas, images):
+        if enable:
+            for spinbox in spinboxes:
+                spinbox.configure(state='normal')
+            for image in images:
+                canvas.itemconfig(image, state='normal')
+        else:
+            for spinbox in spinboxes:
+                spinbox.configure(state='disabled')
+            for image in images:
+                canvas.itemconfig(image, state='hidden')
 
     def updateFlag(self, canvas, flag, flagHeight):
         self.exampleFlag = Image.getFlag(flagHeight, 'local')
@@ -421,6 +457,13 @@ class CardsSettings:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        flagEnableVariable = tk.BooleanVar()
+        flagEnableVariable.set(self.flagEnable)
+        flagEnableButton = tk.Checkbutton(self.layoutWindow, text='Show flag', variable=flagEnableVariable,
+                                          command=lambda: self.enableButtonCallback(flagEnableVariable.get(), [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage]))
+        flagEnableButton.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        self.layoutEndRow(10)
+
         flagHeightLabel = tk.Label(self.layoutWindow, text='Flag height')
         flagHeightLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         flagHeightVariable = tk.StringVar()
@@ -448,6 +491,13 @@ class CardsSettings:
         emptyFrames.append(tk.Frame(self.layoutWindow))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
+
+        avatarEnableVariable = tk.BooleanVar()
+        avatarEnableVariable.set(self.avatarEnable)
+        avatarEnableButton = tk.Checkbutton(self.layoutWindow, text='Show avatar', variable=avatarEnableVariable,
+                                            command=lambda: self.enableButtonCallback(avatarEnableVariable.get(), [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle]))
+        avatarEnableButton.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        self.layoutEndRow(10)
 
         avatarWidthLabel = tk.Label(self.layoutWindow, text='Avatar Width')
         avatarWidthLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -507,7 +557,7 @@ class CardsSettings:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
+            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), flagEnableVariable.get(), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), avatarEnableVariable.get(), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
         OKButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
@@ -572,6 +622,10 @@ class CardsSettings:
             exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarYVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
             exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+
+        self.enableButtonCallback(self.flagEnable, [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage])
+        self.enableButtonCallback(self.avatarEnable,
+                                  [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle])
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

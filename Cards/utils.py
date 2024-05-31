@@ -10,7 +10,7 @@ def browse(entry):
 
 
 def loadVideo(videoFile, imageList):
-    return loadVideoOrFirstFrame(videoFile, imageList, True)
+    return loadVideoOrFirstFrame(videoFile, imageList, False)
 
 
 def loadFirstFrame(videoFile):

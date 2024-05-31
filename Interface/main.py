@@ -23,8 +23,10 @@ CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
 def buttonCommand(camera, buttonIndex, bot, country, name, avatar, cardText, competitorId):
     for index in range(len(buttons[camera])):
         if index == buttonIndex:
+            buttonSurroundingFrames[camera][index].configure(highlightbackground='black')
             buttons[camera][index].configure(relief=tk.SUNKEN)
         else:
+            buttonSurroundingFrames[camera][index].configure(highlightbackground='white')
             buttons[camera][index].configure(relief=tk.RAISED)
     dataWrite.sendCardData(bot, camera, country, name, avatar, cardText, False)
     if timeTowerVariables[camera].get() == 1:
@@ -35,7 +37,7 @@ def buttonCommand(camera, buttonIndex, bot, country, name, avatar, cardText, com
 
 def configureButton(camera, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
     if not visible:
-        buttons[camera][buttonIndex].grid_forget()
+        buttonSurroundingFrames[camera][buttonIndex].grid_forget()
     else:
         if int(round) > 1:
             previousRound = int(round) - 1
@@ -51,7 +53,7 @@ def configureButton(camera, buttonIndex, event, round, competitor, visible, row,
         cardText = utils.replaceText(localSettings.cardText, localSettings.wcif, id, seed, event, round)
         buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}', command=lambda: buttonCommand(
             camera, buttonIndex, localSettings.bot, WCIFParse.getCountry(localSettings.wcif, id), name, WCIFParse.getAvatar(localSettings.wcif, id), cardText, id), bg=bg, fg=fg)
-        buttons[camera][buttonIndex].grid(row=row, column=column)
+        buttonSurroundingFrames[camera][buttonIndex].grid(row=row, column=column)
 
 
 def updateCubers(settings, buttons):
@@ -163,6 +165,7 @@ main.grid_rowconfigure(1, minsize=270)
 
 framesButtons = []
 labelsButtons = []
+buttonSurroundingFrames = []
 buttons = []
 activeCubers = []
 timeTowerVariables = []
@@ -182,6 +185,7 @@ for camera in range(0, CAMERAS_COUNT):
     cleanButtons[camera].configure(text=f'Clean', command=lambda localCamera=camera:
                                    buttonCommand(localCamera, -1, localSettings.bot, '', '', '', '', -1))
     cleanButtons[camera].grid(column=3, row=1)
+    buttonSurroundingFrames.append([])
     buttons.append([])
     for button in range(0, BUTTONS_COLS + 2):
         framesButtons[camera].columnconfigure(button, pad=5)
@@ -189,7 +193,9 @@ for camera in range(0, CAMERAS_COUNT):
         framesButtons[camera].rowconfigure(button, pad=5)
 
     for button in range(0, BUTTONS_COUNT):
-        buttons[camera].append(tk.Button(framesButtons[camera], height=2, width=15, anchor=tk.W, justify=tk.LEFT))
+        buttonSurroundingFrames[camera].append(tk.Frame(framesButtons[camera], highlightthickness=2))
+        buttons[camera].append(tk.Button(buttonSurroundingFrames[camera][-1], height=2, width=15, anchor=tk.W, justify=tk.LEFT))
+        buttons[camera][-1].pack()
 
 for cameraRow in range(0, CAMERAS_ROWS):
     for cameraCol in range(0, CAMERAS_COLS):

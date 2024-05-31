@@ -4,13 +4,15 @@ import json
 import dataWrite
 import WCIFParse
 import InterfaceSettings
-import constants
+import utils
 
 
 class PresentationInterface:
-    def __init__(self, root, wcif, venue, room, event, round, group, bot):
+    def __init__(self, root, wcif, text, venue, room, event, round, group, bot):
 
         self.root = root
+        self.wcif = wcif
+        self.text = text
         self.event = event
         self.round = round
         self.bot = bot
@@ -23,15 +25,15 @@ class PresentationInterface:
         self.competitorsId = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)]
         if round == 1:
             self.competitorsId.sort(key=lambda x: WCIFParse.getRanking(
-                wcif, x, event, constants.SEED_TYPE[constants.EVENTS[event]], 'world'), reverse=True)
+                wcif, x, event, utils.SEED_TYPE[utils.EVENTS[event]], 'world'), reverse=True)
         else:
             self.competitorsId.sort(key=lambda x: WCIFParse.getRoundResult(
-                wcif, x, event, round - 1, constants.SEED_TYPE[constants.EVENTS[event]]), reverse=True)
+                wcif, x, event, round - 1, utils.SEED_TYPE[utils.EVENTS[event]]), reverse=True)
 
-        self.competitorsWCAID = []
+        self.avatars = []
         self.competitorsName = []
         for competitor in self.competitorsId:
-            self.competitorsWCAID.append(WCIFParse.getWCAID(wcif, competitor))
+            self.avatars.append(WCIFParse.getAvatar(wcif, competitor))
             self.competitorsName.append(WCIFParse.getCompetitorName(wcif, competitor))
 
         self.previousButton = tk.Button(self.window, command=self.previousButtonCommand)
@@ -67,9 +69,10 @@ class PresentationInterface:
             self.nextButton.configure(text=f'Next: {self.competitorsName[self.id + 1]}')
 
         if self.id == -1:
-            self.bot.sendSimpleMessage('/presentation ')
+            dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
         else:
-            self.bot.sendSimpleMessage(f'/presentation {self.event} {self.round} {self.id} {self.competitorsWCAID[self.id]}')
+            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitorsId[self.id]), self.competitorsName[self.id], self.avatars[self.id], utils.replaceText(
+                self.text, self.wcif, self.competitorsId[self.id], len(self.competitorsId) - self.id, self.event, self.round), True)
 
     def previousButtonCommand(self):
         self.id = self.id - 1
@@ -77,7 +80,7 @@ class PresentationInterface:
 
     def nextButtonCommand(self):
         if self.id == len(self.competitorsId) - 1:
-            self.bot.sendSimpleMessage('/presentation ')
+            dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
             self.window.destroy()
         else:
             self.id = self.id + 1

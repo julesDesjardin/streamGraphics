@@ -5,7 +5,7 @@ import json
 import dataWrite
 import WCIFParse
 import InterfaceSettings
-import constants
+import utils
 import PresentationInterface
 
 BUTTONS_ROWS = 4
@@ -26,7 +26,7 @@ def buttonCommand(camera, buttonIndex, bot, country, name, avatar, cardText, com
             buttons[camera][index].configure(relief=tk.SUNKEN)
         else:
             buttons[camera][index].configure(relief=tk.RAISED)
-    dataWrite.sendCardData(bot, camera, country, name, avatar, cardText)
+    dataWrite.sendCardData(bot, camera, country, name, avatar, cardText, False)
     if timeTowerVariables[camera].get() == 1:
         dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), 0)
         dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, competitorId), 1)
@@ -48,23 +48,7 @@ def configureButton(camera, buttonIndex, event, round, competitor, visible, row,
         extraButtonText = f'Seed {seed}'
         if previousRank is not None:
             extraButtonText = extraButtonText + f', Placed {previousRank}'
-        cardText = localSettings.cardText
-        prSingleInt = WCIFParse.getPb(localSettings.wcif, id, event, 'single')
-        prAverageInt = WCIFParse.getPb(localSettings.wcif, id, event, 'average')
-        cardText = cardText.replace('%prSingle', dataWrite.resultToString(prSingleInt))
-        cardText = cardText.replace('%prAverage', dataWrite.resultToString(prAverageInt))
-        cardText = cardText.replace('%nrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','national')}")
-        cardText = cardText.replace('%nrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','national')}")
-        cardText = cardText.replace('%crSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','continental')}")
-        cardText = cardText.replace('%crAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','continental')}")
-        cardText = cardText.replace('%wrSingle', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'single','world')}")
-        cardText = cardText.replace('%wrAverage', f"{WCIFParse.getRanking(localSettings.wcif,id,event,'average','world')}")
-        cardText = cardText.replace('%seed', f"{seed}")
-        cardText = cardText.replace('%previousRank', f"{previousRank}")
-        cardText = cardText.replace('%previousSingle', dataWrite.resultToString(
-            WCIFParse.getRoundResult(localSettings.wcif, id, event, round, 'single')))
-        cardText = cardText.replace('%previousAverage', dataWrite.resultToString(
-            WCIFParse.getRoundResult(localSettings.wcif, id, event, round, 'average')))
+        cardText = utils.replaceText(localSettings.cardText, localSettings.wcif, id, seed, event, round)
         buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}', command=lambda: buttonCommand(
             camera, buttonIndex, localSettings.bot, WCIFParse.getCountry(localSettings.wcif, id), name, WCIFParse.getAvatar(localSettings.wcif, id), cardText, id), bg=bg, fg=fg)
         buttons[camera][buttonIndex].grid(row=row, column=column)
@@ -133,7 +117,7 @@ def OKButtonCommand(updateTimeTower, settings, buttons):
     if updateTimeTower:
         (_, _, event, round, _) = getStageInfo(settings)
         if event is not None:
-            dataWrite.sendTimeTowerEvent(settings.bot, constants.EVENTS[event], round)
+            dataWrite.sendTimeTowerEvent(settings.bot, utils.EVENTS[event], round)
     updateCubers(settings, buttons)
     for camera in range(0, CAMERAS_COUNT):
         buttonCommand(camera, -1, localSettings.bot, '', '', '', '', -1)
@@ -146,7 +130,8 @@ def timeTowerCommand(bot, camera):
 def presentationButtonCommand(settings):
     (venue, room, event, round, group) = getStageInfo(settings)
     if event is not None:
-        presentation = PresentationInterface.PresentationInterface(settings.root, settings.wcif, venue, room, event, int(round), group, settings.bot)
+        presentation = PresentationInterface.PresentationInterface(
+            settings.root, settings.wcif, settings.presentationText, venue, room, event, int(round), group, settings.bot)
 
 
 ##############################################################################
@@ -155,7 +140,7 @@ def presentationButtonCommand(settings):
 
 root = tk.Tk()
 root.title('Stream Interface')
-root.state('zoomed')
+# root.state('zoomed')
 
 ##############################################################################
 # SETTINGS

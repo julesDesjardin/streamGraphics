@@ -6,7 +6,7 @@ import json
 import urllib.request
 import Stage
 import WCIFParse
-import constants
+import utils
 
 import sys
 import os
@@ -24,10 +24,11 @@ class InterfaceSettings:
         self.wcif = {}
         self.rounds = {}
         self.groups = {}
-        self.maxSeed = constants.MAX_SEED
+        self.maxSeed = utils.MAX_SEED
         self.stages = []
         self.exampleStages = []
         self.cardText = ''
+        self.presentationText = ''
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -40,6 +41,7 @@ class InterfaceSettings:
             'maxSeed': self.maxSeed,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
             'cardText': self.cardText,
+            'presentationText': self.presentationText,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -71,6 +73,7 @@ class InterfaceSettings:
             for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
                 self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
             self.cardText = loadSettingsJson['cardText']
+            self.presentationText = loadSettingsJson['presentationText']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -225,17 +228,20 @@ class InterfaceSettings:
         OKButton = tk.Button(stagesWindow, text='OK', command=lambda: self.updateStagesCloseWindow(stagesWindow))
         OKButton.grid(row=3, column=0)
 
-    def updateCardTextCloseButton(self, cardText, window):
-        self.cardText = cardText
+    def updateCardTextCloseButton(self, text, isCard, window):
+        if isCard:
+            self.cardText = text
+        else:
+            self.presentationText = text
         window.destroy()
 
-    def updateCardText(self):
+    def updateCardText(self, isCard):
         cardTextWindow = tk.Toplevel(self.root)
         cardTextWindow.grab_set()
-        cardTextDescription = '''
-Please enter the text to show on the card
+        cardOrPresentation = 'card' if isCard else 'presentation'
+        cardTextDescription = f'''
+Please enter the text to show on the {cardOrPresentation}
 This supports the following characters to be replaced by the appropriate value:
-%name: Name of the competitor
 %prSingle: PR single
 %prAverage: PR average/mean
 %nrSingle: National ranking single
@@ -252,10 +258,13 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextLabel = tk.Label(cardTextWindow, text=cardTextDescription, justify='left')
         cardTextLabel.pack(padx=20, pady=5)
         cardTextEntry = tk.Text(cardTextWindow)
-        cardTextEntry.insert('1.0', self.cardText)
+        if isCard:
+            cardTextEntry.insert('1.0', self.cardText)
+        else:
+            cardTextEntry.insert('1.0', self.presentationText)
         cardTextEntry.pack(padx=20, pady=5)
-        cardTextCloseButton = tk.Button(cardTextWindow, text='Save card text',
-                                        command=lambda: self.updateCardTextCloseButton(cardTextEntry.get('1.0', 'end-1c'), cardTextWindow))
+        cardTextCloseButton = tk.Button(cardTextWindow, text=f'Save {cardOrPresentation} text',
+                                        command=lambda: self.updateCardTextCloseButton(cardTextEntry.get('1.0', 'end-1c'), isCard, cardTextWindow))
         cardTextCloseButton.pack(padx=20, pady=5)
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
@@ -302,14 +311,16 @@ This supports the following characters to be replaced by the appropriate value:
         maxSeedButton.grid(column=0, row=3)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
         stagesButton.grid(column=0, row=4)
-        cardTextButton = tk.Button(frame, text='Change text on card', command=self.updateCardText)
+        cardTextButton = tk.Button(frame, text='Change text on card', command=lambda: self.updateCardText(True))
         cardTextButton.grid(column=0, row=5)
+        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
+        cardTextButton.grid(column=0, row=6)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=6)
+        telegramButton.grid(column=0, row=7)
         saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=7)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=8)
+        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=9)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -321,3 +332,4 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(6, pad=20)
         frame.rowconfigure(7, pad=20)
         frame.rowconfigure(8, pad=20)
+        frame.rowconfigure(9, pad=20)

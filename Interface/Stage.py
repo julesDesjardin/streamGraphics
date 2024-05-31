@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
-import constants
+import utils
 import WCIFParse
 
 
@@ -21,7 +21,7 @@ class Stage:
                                    activebackground=self.backgroundColor, activeforeground=self.textColor)
         self.eventLabel.grid(column=1, row=0, sticky=tk.E)
         self.eventVar = tk.StringVar()
-        self.eventMenu = ttk.OptionMenu(self.frame, self.eventVar, list(constants.EVENTS.keys())[0], *list(constants.EVENTS.keys()))
+        self.eventMenu = ttk.OptionMenu(self.frame, self.eventVar, list(utils.EVENTS.keys())[0], *list(utils.EVENTS.keys()))
         self.eventMenu.grid(column=2, row=0, sticky=tk.W)
         self.roundLabel = tk.Label(self.frame, text='Round:', bg=self.backgroundColor, fg=self.textColor,
                                    activebackground=self.backgroundColor, activeforeground=self.textColor)
@@ -66,7 +66,7 @@ class Stage:
         groups = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
-            if activitySplit[0] == constants.EVENTS[self.eventVar.get()] and activitySplit[1] == f'r{self.roundVar.get()}':
+            if activitySplit[0] == utils.EVENTS[self.eventVar.get()] and activitySplit[1] == f'r{self.roundVar.get()}':
                 groups.append(int(activitySplit[2][1:]))
         menu = self.groupMenu["menu"]
         menu.delete(0, "end")
@@ -83,7 +83,7 @@ class Stage:
         rounds = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
-            if activitySplit[0] == constants.EVENTS[self.eventVar.get()]:
+            if activitySplit[0] == utils.EVENTS[self.eventVar.get()]:
                 newRound = int(activitySplit[1][1:])
                 if newRound not in rounds:
                     rounds.append(newRound)

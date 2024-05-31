@@ -1,4 +1,4 @@
-import constants
+import utils
 
 
 def getVenueName(wcif, venueId):
@@ -73,22 +73,22 @@ def getActivities(wcif, venueId, roomId):
 def getActivityId(wcif, venueId, roomId, event, round, group):
     activities = getActivities(wcif, venueId, roomId)
     for activity in activities:
-        if activities[activity] == f'{constants.EVENTS[event]}-r{round}-g{group}':
+        if activities[activity] == f'{utils.EVENTS[event]}-r{round}-g{group}':
             return activity
 
 
 def getPb(wcif, competitor, event, singleOrAverage):
     for pb in wcif['persons'][competitor]['personalBests']:
-        if pb['eventId'] == constants.EVENTS[event] and pb['type'] == singleOrAverage:
+        if pb['eventId'] == utils.EVENTS[event] and pb['type'] == singleOrAverage:
             return pb['best']
     return 'DNF'
 
 
 def getRanking(wcif, competitor, event, singleOrAverage, scale):
     for pb in wcif['persons'][competitor]['personalBests']:
-        if pb['eventId'] == constants.EVENTS[event] and pb['type'] == singleOrAverage:
+        if pb['eventId'] == utils.EVENTS[event] and pb['type'] == singleOrAverage:
             return pb[f'{scale}Ranking']
-    return constants.MAX_RANKING
+    return utils.MAX_RANKING
 
 
 def getRoundResult(wcif, competitor, event, round, singleOrAverage):
@@ -96,9 +96,9 @@ def getRoundResult(wcif, competitor, event, round, singleOrAverage):
         return 'DNF'
     registrantId = wcif['persons'][competitor]['registrantId']
     for wcifEvent in wcif['events']:
-        if (wcifEvent['id'] == constants.EVENTS[event]):
+        if (wcifEvent['id'] == utils.EVENTS[event]):
             for wcifRound in wcifEvent['rounds']:
-                if (wcifRound['id'] == f'{constants.EVENTS[event]}-r{round}'):
+                if (wcifRound['id'] == f'{utils.EVENTS[event]}-r{round}'):
                     for result in wcifRound['results']:
                         if (result['personId'] == registrantId):
                             if (singleOrAverage == 'single'):
@@ -112,13 +112,13 @@ def getRoundRank(wcif, competitor, event, round):
         return None
     registrantId = wcif['persons'][competitor]['registrantId']
     for wcifEvent in wcif['events']:
-        if (wcifEvent['id'] == constants.EVENTS[event]):
+        if (wcifEvent['id'] == utils.EVENTS[event]):
             for wcifRound in wcifEvent['rounds']:
-                if (wcifRound['id'] == f'{constants.EVENTS[event]}-r{round}'):
+                if (wcifRound['id'] == f'{utils.EVENTS[event]}-r{round}'):
                     for result in wcifRound['results']:
                         if (result['personId'] == registrantId):
                             return result['ranking']
-    return constants.MAX_RANKING
+    return utils.MAX_RANKING
 
 
 def getAllCompetitorsRanked(wcif, event):
@@ -127,14 +127,14 @@ def getAllCompetitorsRanked(wcif, event):
     eventActivities = []
     for activity in activities:
         activitySplit = activities[activity].split('-')
-        if activitySplit[0] == constants.EVENTS[event] and activitySplit[1] == 'r1':  # Only count R1 for seeding
+        if activitySplit[0] == utils.EVENTS[event] and activitySplit[1] == 'r1':  # Only count R1 for seeding
             eventActivities.append(activity)
 
     for i in range(0, len(wcif['persons'])):
         for assignment in wcif['persons'][i]['assignments']:
             if assignment['assignmentCode'] == 'competitor' and assignment['activityId'] in eventActivities:
                 competitors.append(i)
-    competitors.sort(key=lambda x: getRanking(wcif, x, event, constants.SEED_TYPE[constants.EVENTS[event]], 'world'))
+    competitors.sort(key=lambda x: getRanking(wcif, x, event, utils.SEED_TYPE[utils.EVENTS[event]], 'world'))
     return competitors
 
 

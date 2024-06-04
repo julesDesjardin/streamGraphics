@@ -14,6 +14,13 @@ BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
 CAMERAS_ROWS = 2
 CAMERAS_COLS = 2
 CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
+FRAME_THICKNESS = 2
+BUTTON_THICKNESS = 2
+BUTTON_WIDTH = 100
+BUTTON_HEIGHT = 30
+BUTTON_PADX = 5
+BUTTON_PADY = 5
+LABEL_HEIGHT = 30
 
 ##############################################################################
 # FUNCTIONS
@@ -158,12 +165,10 @@ localSettings.showFrame()
 main = tk.Frame(root)
 main.pack(side=tk.TOP, padx=10)
 
-main.grid_columnconfigure(0, minsize=800)
-main.grid_columnconfigure(1, minsize=800)
-main.grid_rowconfigure(0, minsize=270)
-main.grid_rowconfigure(1, minsize=270)
+emptyPixel = tk.PhotoImage(width=1, height=1)
 
 framesButtons = []
+labelsFrames = []
 labelsButtons = []
 buttonSurroundingFrames = []
 buttons = []
@@ -173,7 +178,11 @@ timeTowerButtons = []
 cleanButtons = []
 for camera in range(0, CAMERAS_COUNT):
     activeCubers.append(-1)
-    framesButtons.append(tk.Frame(main, highlightbackground='black', highlightthickness=2))
+    framesButtons.append(tk.Frame(main, highlightbackground='black', highlightthickness=FRAME_THICKNESS,
+                                  width=2 * FRAME_THICKNESS + BUTTONS_COLS * (BUTTON_WIDTH + 2 * BUTTON_PADX + 2 * BUTTON_THICKNESS + 3),
+                                  height=2 * FRAME_THICKNESS + LABEL_HEIGHT + (BUTTONS_ROWS + 1) * (BUTTON_HEIGHT + 2 * BUTTON_PADY + 2 * BUTTON_THICKNESS + 3)))
+    framesButtons[camera].grid_propagate(0)
+    framesButtons[camera].grid_rowconfigure(0, minsize=LABEL_HEIGHT)  # Change label height
     labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
     labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
     timeTowerVariables.append(tk.IntVar())
@@ -182,19 +191,20 @@ for camera in range(0, CAMERAS_COUNT):
     timeTowerButtons[camera].grid(column=0, row=1, columnspan=3, sticky='e')
     cleanButtons.append(tk.Button(framesButtons[camera]))
     # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
-    cleanButtons[camera].configure(text=f'Clean', command=lambda localCamera=camera:
-                                   buttonCommand(localCamera, -1, localSettings.bot, '', '', '', '', -1))
+    cleanButtons[camera].configure(text=f'Clean', image=emptyPixel, compound='c', width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
+                                   command=lambda localCamera=camera: buttonCommand(localCamera, -1, localSettings.bot, '', '', '', '', -1))
     cleanButtons[camera].grid(column=3, row=1)
     buttonSurroundingFrames.append([])
     buttons.append([])
     for button in range(0, BUTTONS_COLS + 2):
-        framesButtons[camera].columnconfigure(button, pad=5)
+        framesButtons[camera].columnconfigure(button, pad=BUTTON_PADX)
     for button in range(0, BUTTONS_ROWS):
-        framesButtons[camera].rowconfigure(button, pad=5)
+        framesButtons[camera].rowconfigure(button, pad=BUTTON_PADY)
 
     for button in range(0, BUTTONS_COUNT):
-        buttonSurroundingFrames[camera].append(tk.Frame(framesButtons[camera], highlightthickness=2))
-        buttons[camera].append(tk.Button(buttonSurroundingFrames[camera][-1], height=2, width=15, anchor=tk.W, justify=tk.LEFT))
+        buttonSurroundingFrames[camera].append(tk.Frame(framesButtons[camera], highlightthickness=BUTTON_THICKNESS))
+        buttons[camera].append(tk.Button(buttonSurroundingFrames[camera][-1], image=emptyPixel,
+                               compound='c', width=BUTTON_WIDTH, height=BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
         buttons[camera][-1].pack()
 
 for cameraRow in range(0, CAMERAS_ROWS):

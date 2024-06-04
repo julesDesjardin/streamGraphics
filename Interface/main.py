@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 import tkinter.messagebox
 import json
 import dataWrite
@@ -210,8 +209,6 @@ for camera in range(0, CAMERAS_COUNT):
 for cameraRow in range(0, CAMERAS_ROWS):
     for cameraCol in range(0, CAMERAS_COLS):
         framesButtons[cameraRow * CAMERAS_COLS + cameraCol].grid(column=cameraCol, row=cameraRow, sticky='nsew')
-
-ttk.Style().configure("TButton", padding=6, relief="flat", background="#ccc")
 
 ##############################################################################
 # CHOOSE GROUP

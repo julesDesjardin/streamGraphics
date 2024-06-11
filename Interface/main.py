@@ -7,43 +7,14 @@ import InterfaceSettings
 import utils
 import PresentationInterface
 
-BUTTONS_ROWS = 4
-BUTTONS_COLS = 7
-BUTTONS_COUNT = BUTTONS_ROWS * BUTTONS_COLS
-CAMERAS_ROWS = 2
-CAMERAS_COLS = 2
-CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
-FRAME_THICKNESS = 2
-BUTTON_THICKNESS = 2
-BUTTON_WIDTH = 100
-BUTTON_HEIGHT = 30
-BUTTON_PADX = 5
-BUTTON_PADY = 5
-LABEL_HEIGHT = 30
 
 ##############################################################################
 # FUNCTIONS
 ##############################################################################
 
-
-def buttonCommand(camera, buttonIndex, bot, country, name, avatar, cardText, competitorId):
-    for index in range(len(buttons[camera])):
-        if index == buttonIndex:
-            buttonSurroundingFrames[camera][index].configure(highlightbackground='black')
-            buttons[camera][index].configure(relief=tk.SUNKEN)
-        else:
-            buttonSurroundingFrames[camera][index].configure(highlightbackground='white')
-            buttons[camera][index].configure(relief=tk.RAISED)
-    dataWrite.sendCardData(bot, camera, country, name, avatar, cardText, False)
-    if timeTowerVariables[camera].get() == 1:
-        dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), 0)
-        dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, competitorId), 1)
-    activeCubers[camera] = competitorId
-
-
-def configureButton(camera, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
+def configureButton(frame, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
     if not visible:
-        buttonSurroundingFrames[camera][buttonIndex].grid_forget()
+        frame.buttonFrames[buttonIndex].grid_forget()
     else:
         if int(round) > 1:
             previousRound = int(round) - 1
@@ -57,12 +28,12 @@ def configureButton(camera, buttonIndex, event, round, competitor, visible, row,
         if previousRank is not None:
             extraButtonText = extraButtonText + f', Placed {previousRank}'
         cardText = utils.replaceText(localSettings.cardText, localSettings.wcif, id, seed, event, round)
-        buttons[camera][buttonIndex].configure(text=f'{name}\n{extraButtonText}', command=lambda: buttonCommand(
-            camera, buttonIndex, localSettings.bot, WCIFParse.getCountry(localSettings.wcif, id), name, WCIFParse.getAvatar(localSettings.wcif, id), cardText, id), bg=bg, fg=fg)
-        buttonSurroundingFrames[camera][buttonIndex].grid(row=row, column=column)
+        frame.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: frame.buttonCommand(
+            buttonIndex, WCIFParse.getCountry(localSettings.wcif, id), name, WCIFParse.getAvatar(localSettings.wcif, id), cardText, id))
+        frame.buttonFrames[buttonIndex].grid(row=row, column=column)
 
 
-def updateCubers(settings, buttons):
+def updateCubers(settings):
     index = 0
     fullCompetitors = []
     bg = []
@@ -90,8 +61,8 @@ def updateCubers(settings, buttons):
 
     # If too many competitors : keep top X only
     sortedCompetitors = sorted(fullCompetitors, key=lambda x: x[1])
-    if len(sortedCompetitors) > BUTTONS_COUNT:
-        for competitor in sortedCompetitors[BUTTONS_COUNT:]:
+    if len(sortedCompetitors) > settings.buttonCount:
+        for competitor in sortedCompetitors[settings.buttonCount:]:
             indexCompetitor = fullCompetitors.index(competitor)
             del fullCompetitors[indexCompetitor]
             del bg[indexCompetitor]
@@ -99,17 +70,17 @@ def updateCubers(settings, buttons):
             del events[indexCompetitor]
             del rounds[indexCompetitor]
 
-    for i in range(0, BUTTONS_ROWS):
-        for j in range(0, BUTTONS_COLS):
-            buttonIndex = i * BUTTONS_COLS + j
+    for i in range(0, settings.buttonRows):
+        for j in range(0, settings.buttonCols):
+            buttonIndex = i * settings.buttonCols + j
             if index < len(fullCompetitors):
-                for camera in range(0, CAMERAS_COUNT):
-                    configureButton(camera, buttonIndex, events[index], rounds[index], fullCompetitors[index], True,
-                                    i + 2, j, bg[index], fg[index])  # + 2 because row 0 is for label and row 1 is for clean
+                for frame in settings.interfaceFrames:
+                    configureButton(frame, buttonIndex, events[index], rounds[index], fullCompetitors[index], True,
+                                    i + 3, j, bg[index], fg[index])
                 index = index + 1
             else:
-                for camera in range(0, CAMERAS_COUNT):
-                    configureButton(camera, buttonIndex, '', '', (0, 0, ''), False, i + 2, j, '#000000', '#000000')
+                for frame in settings.interfaceFrames:
+                    configureButton(frame, buttonIndex, '', '', (0, 0, ''), False, i + 3, j, '#000000', '#000000')
 
 
 def getStageInfo(settings):
@@ -121,18 +92,14 @@ def getStageInfo(settings):
     return (None, None, None, None, None)
 
 
-def OKButtonCommand(updateTimeTower, settings, buttons):
+def OKButtonCommand(updateTimeTower, settings):
     if updateTimeTower:
         (_, _, event, round, _) = getStageInfo(settings)
         if event is not None:
             dataWrite.sendTimeTowerEvent(settings.bot, utils.EVENTS[event], round)
-    updateCubers(settings, buttons)
-    for camera in range(0, CAMERAS_COUNT):
-        buttonCommand(camera, -1, localSettings.bot, '', '', '', '', -1)
-
-
-def timeTowerCommand(bot, camera):
-    dataWrite.sendTimeTowerExpand(bot, WCIFParse.getRegistrantId(localSettings.wcif, activeCubers[camera]), timeTowerVariables[camera].get())
+    updateCubers(settings)
+    for frame in settings.interfaceFrames:
+        frame.buttonCommand(-1, '', '', '', '', -1)
 
 
 def presentationButtonCommand(settings):
@@ -148,67 +115,19 @@ def presentationButtonCommand(settings):
 
 root = tk.Tk()
 root.title('Stream Interface')
-# root.state('zoomed')
-
-##############################################################################
-# SETTINGS
-##############################################################################
-
-localSettings = InterfaceSettings.InterfaceSettings(root)
-localSettings.showFrame()
 
 ##############################################################################
 # MAIN
 ##############################################################################
 
 main = tk.Frame(root)
-main.pack(side=tk.TOP, padx=10)
 
-emptyPixel = tk.PhotoImage(width=1, height=1)
+##############################################################################
+# SETTINGS
+##############################################################################
 
-framesButtons = []
-labelsFrames = []
-labelsButtons = []
-buttonSurroundingFrames = []
-buttons = []
-activeCubers = []
-timeTowerVariables = []
-timeTowerButtons = []
-cleanButtons = []
-for camera in range(0, CAMERAS_COUNT):
-    activeCubers.append(-1)
-    framesButtons.append(tk.Frame(main, highlightbackground='black', highlightthickness=FRAME_THICKNESS,
-                                  width=2 * FRAME_THICKNESS + BUTTONS_COLS * (BUTTON_WIDTH + 2 * BUTTON_PADX + 2 * BUTTON_THICKNESS + 3),
-                                  height=2 * FRAME_THICKNESS + LABEL_HEIGHT + (BUTTONS_ROWS + 1) * (BUTTON_HEIGHT + 2 * BUTTON_PADY + 2 * BUTTON_THICKNESS + 3)))
-    framesButtons[camera].grid_propagate(0)
-    framesButtons[camera].grid_rowconfigure(0, minsize=LABEL_HEIGHT)  # Change label height
-    labelsButtons.append(tk.Label(framesButtons[camera], text=f'Cuber on camera {camera+1}'))
-    labelsButtons[camera].grid(column=0, row=0, columnspan=BUTTONS_COLS)
-    timeTowerVariables.append(tk.IntVar())
-    timeTowerButtons.append(tk.Checkbutton(framesButtons[camera], text='Expand TimeTower line', variable=timeTowerVariables[camera],
-                            command=lambda localCamera=camera: timeTowerCommand(localSettings.bot, localCamera)))
-    timeTowerButtons[camera].grid(column=0, row=1, columnspan=3, sticky='e')
-    cleanButtons.append(tk.Button(framesButtons[camera]))
-    # localCamera is a trick for the lambda function, since "camera" is a global variable it wouldn't get the value from the loop
-    cleanButtons[camera].configure(text=f'Clean', image=emptyPixel, compound='c', width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
-                                   command=lambda localCamera=camera: buttonCommand(localCamera, -1, localSettings.bot, '', '', '', '', -1))
-    cleanButtons[camera].grid(column=3, row=1)
-    buttonSurroundingFrames.append([])
-    buttons.append([])
-    for button in range(0, BUTTONS_COLS + 2):
-        framesButtons[camera].columnconfigure(button, pad=BUTTON_PADX)
-    for button in range(0, BUTTONS_ROWS):
-        framesButtons[camera].rowconfigure(button, pad=BUTTON_PADY)
-
-    for button in range(0, BUTTONS_COUNT):
-        buttonSurroundingFrames[camera].append(tk.Frame(framesButtons[camera], highlightthickness=BUTTON_THICKNESS))
-        buttons[camera].append(tk.Button(buttonSurroundingFrames[camera][-1], image=emptyPixel,
-                               compound='c', width=BUTTON_WIDTH, height=BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
-        buttons[camera][-1].pack()
-
-for cameraRow in range(0, CAMERAS_ROWS):
-    for cameraCol in range(0, CAMERAS_COLS):
-        framesButtons[cameraRow * CAMERAS_COLS + cameraCol].grid(column=cameraCol, row=cameraRow, sticky='nsew')
+localSettings = InterfaceSettings.InterfaceSettings(root, main)
+localSettings.showFrame()
 
 ##############################################################################
 # CHOOSE GROUP
@@ -219,11 +138,12 @@ OKFrame.pack(side=tk.BOTTOM, pady=20)
 TimeTowerVariable = tk.IntVar()
 TimeTowerCheckbox = tk.Checkbutton(OKFrame, text="Update TimeTower", variable=TimeTowerVariable)
 TimeTowerCheckbox.pack()
-OKButton = tk.Button(OKFrame, text="OK", command=lambda: OKButtonCommand(TimeTowerVariable.get(), localSettings, buttons))
+OKButton = tk.Button(OKFrame, text="OK", command=lambda: OKButtonCommand(TimeTowerVariable.get(), localSettings))
 OKButton.pack()
 presentationButton = tk.Button(OKFrame, text='Start presentation', command=lambda: presentationButtonCommand(localSettings))
 presentationButton.pack(pady=30)
 
 ##############################################################################
 
+main.pack(side=tk.TOP, padx=10)
 root.mainloop()

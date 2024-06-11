@@ -7,6 +7,7 @@ import urllib.request
 import Stage
 import WCIFParse
 import utils
+import InterfaceFrame
 
 import sys
 import os
@@ -18,13 +19,18 @@ class InterfaceSettings:
 
     BG_COLOR = '#F4ECE1'
 
-    def __init__(self, root):
+    def __init__(self, root, mainFrame):
         self.root = root
+        self.mainFrame = mainFrame
         self.compId = ''
         self.wcif = {}
         self.rounds = {}
         self.groups = {}
         self.maxSeed = utils.MAX_SEED
+        self.buttonRows = utils.BUTTONS_ROWS
+        self.buttonCols = utils.BUTTONS_COLS
+        self.buttonCount = self.buttonRows * self.buttonCols
+        self.interfaceFrames = []
         self.stages = []
         self.exampleStages = []
         self.cardText = ''
@@ -39,6 +45,8 @@ class InterfaceSettings:
         saveSettingsJson = {
             'compId': self.compId,
             'maxSeed': self.maxSeed,
+            'buttonRows': self.buttonRows,
+            'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
             'cardText': self.cardText,
             'presentationText': self.presentationText,
@@ -66,6 +74,9 @@ class InterfaceSettings:
                     title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
                 return
             self.maxSeed = loadSettingsJson['maxSeed']
+            self.buttonRows = loadSettingsJson['buttonRows']
+            self.buttonCols = loadSettingsJson['buttonCols']
+            self.buttonCount = self.buttonRows * self.buttonCols
 
             for stage in self.stages:
                 stage.hideStage()
@@ -92,6 +103,8 @@ class InterfaceSettings:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
             return
+
+        self.reloadInterfaceFrames()
 
     def updateCompIdCloseButton(self, compId, window):
         self.compId = compId
@@ -138,6 +151,53 @@ class InterfaceSettings:
         maxSeedCloseButton = tk.Button(maxSeedWindow, text='Save max seed',
                                        command=lambda: self.updateMaxSeedCloseButton(maxSeedEntry.get(), maxSeedWindow))
         maxSeedCloseButton.pack(padx=20, pady=5)
+
+    def reloadInterfaceFrames(self):
+        for frame in self.interfaceFrames:
+            frame.hideFrame()
+        self.interfaceFrames = []
+        for cameraY in range(0, utils.CAMERAS_ROWS):
+            for cameraX in range(0, utils.CAMERAS_COLS):
+                self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
+                                            (self.mainFrame, self.wcif, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * utils.CAMERAS_COLS + cameraX))
+        for frame in self.interfaceFrames:
+            frame.showFrame()
+
+    def updateButtonsCloseButton(self, buttonRows, buttonCols, window):
+        try:
+            self.buttonRows = int(buttonRows)
+            self.buttonCols = int(buttonCols)
+            self.buttonCount = self.buttonRows * self.buttonCols
+            self.reloadInterfaceFrames()
+        except:
+            tkinter.messagebox.showerror(title='Buttons Error !', message='Error ! Please make sure both values are numbers')
+        else:
+            window.destroy()
+
+    def updateButtons(self):
+        buttonsWindow = tk.Toplevel(self.root)
+        buttonsWindow.grab_set()
+        buttonsWindow.rowconfigure(0, pad=20)
+        buttonsWindow.rowconfigure(1, pad=20)
+        buttonsWindow.rowconfigure(2, pad=20)
+        buttonsWindow.rowconfigure(3, pad=20)
+        buttonsLabel = tk.Label(buttonsWindow, text='Please change the number of rows and columns of buttons')
+        buttonsLabel.grid(column=0, row=0, columnspan=2)
+        buttonRowsLabel = tk.Label(buttonsWindow, text='Rows:')
+        buttonRowsLabel.grid(column=0, row=1, sticky='e')
+        buttonRowsVariable = tk.StringVar()
+        buttonRowsSpinbox = tk.Spinbox(buttonsWindow, from_=1, to=10, textvariable=buttonRowsVariable)
+        buttonRowsVariable.set(self.buttonRows)
+        buttonRowsSpinbox.grid(column=1, row=1, sticky='w')
+        buttonColsLabel = tk.Label(buttonsWindow, text='Columns:')
+        buttonColsLabel.grid(column=0, row=2, sticky='e')
+        buttonColsVariable = tk.StringVar()
+        buttonColsSpinbox = tk.Spinbox(buttonsWindow, from_=1, to=10, textvariable=buttonColsVariable)
+        buttonColsVariable.set(self.buttonCols)
+        buttonColsSpinbox.grid(column=1, row=2, sticky='w')
+        buttonsCloseButton = tk.Button(buttonsWindow, text='OK', command=lambda:
+                                       self.updateButtonsCloseButton(buttonRowsVariable.get(), buttonColsVariable.get(), buttonsWindow))
+        buttonsCloseButton.grid(column=0, row=3, columnspan=2)
 
     def stageSwitch(self, a, b, window, frame):
         oldStage = self.exampleStages[a]
@@ -278,6 +338,7 @@ This supports the following characters to be replaced by the appropriate value:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
         else:
+            self.reloadInterfaceFrames()
             window.destroy()
 
     def updateTelegramSettings(self):
@@ -309,18 +370,20 @@ This supports the following characters to be replaced by the appropriate value:
         reloadButton.grid(column=0, row=2)
         maxSeedButton = tk.Button(frame, text='Change Max Seed', command=self.updateMaxSeed)
         maxSeedButton.grid(column=0, row=3)
+        buttonsButton = tk.Button(frame, text='Change number of buttons', command=self.updateButtons)
+        buttonsButton.grid(column=0, row=4)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
-        stagesButton.grid(column=0, row=4)
+        stagesButton.grid(column=0, row=5)
         cardTextButton = tk.Button(frame, text='Change text on card', command=lambda: self.updateCardText(True))
-        cardTextButton.grid(column=0, row=5)
-        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
         cardTextButton.grid(column=0, row=6)
+        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
+        cardTextButton.grid(column=0, row=7)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=7)
+        telegramButton.grid(column=0, row=8)
         saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=8)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=9)
+        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=10)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -333,3 +396,4 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(7, pad=20)
         frame.rowconfigure(8, pad=20)
         frame.rowconfigure(9, pad=20)
+        frame.rowconfigure(10, pad=20)

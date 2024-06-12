@@ -55,7 +55,7 @@ class InterfaceFrame:
             self.buttons[-1].pack()
 
     def timeTowerCommand(self):
-        dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, activeCuber), timeTowerVariable.get())
+        dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, self.activeCuber), self.timeTowerVariable.get())
 
     def buttonCommand(self, buttonIndex, country, name, avatar, cardText, competitorId):
         for index in range(len(self.buttons)):

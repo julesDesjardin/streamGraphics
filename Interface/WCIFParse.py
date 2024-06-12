@@ -149,6 +149,8 @@ def getCompetitors(wcif, activityId, event):
 
 
 def getRegistrantId(wcif, competitor):
+    if competitor == -1:
+        return -1
     return wcif['persons'][competitor]['registrantId']
 
 

@@ -717,15 +717,15 @@ class Cards:
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
-        settingsLabel = tk.Label(frame, text='Settings', bg=self.BG_COLOR)
+        settingsLabel = tk.Label(frame, text='Cards Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)
         layoutButton = tk.Button(frame, text='Update layout', command=self.updateLayout)
         layoutButton.grid(column=0, row=1)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
         telegramButton.grid(column=0, row=2)
-        saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
+        saveButton = tk.Button(frame, text='Save Cards Settings...', command=self.saveSettings)
         saveButton.grid(column=0, row=3)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton = tk.Button(frame, text='Load Cards Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=4)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)

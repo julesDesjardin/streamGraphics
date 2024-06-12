@@ -362,7 +362,7 @@ This supports the following characters to be replaced by the appropriate value:
 
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
-        settingsLabel = tk.Label(frame, text='Settings', bg=self.BG_COLOR)
+        settingsLabel = tk.Label(frame, text='Interface Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)
         compIdButton = tk.Button(frame, text='Update competition ID', command=self.updateCompId)
         compIdButton.grid(column=0, row=1)
@@ -380,9 +380,9 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextButton.grid(column=0, row=7)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
         telegramButton.grid(column=0, row=8)
-        saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
+        saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
         saveButton.grid(column=0, row=9)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=10)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)

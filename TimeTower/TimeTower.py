@@ -308,7 +308,7 @@ class TimeTower:
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
-        settingsLabel = tk.Label(frame, text='Settings', bg=self.BG_COLOR)
+        settingsLabel = tk.Label(frame, text='TimeTower Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)
         compIdButton = tk.Button(frame, text='Update competition ID', command=self.updateCompId)
         compIdButton.grid(column=0, row=1)
@@ -320,9 +320,9 @@ class TimeTower:
         animationButton.grid(column=0, row=4)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
         telegramButton.grid(column=0, row=5)
-        saveButton = tk.Button(frame, text='Save Settings...', command=self.saveSettings)
+        saveButton = tk.Button(frame, text='Save TimeTower Settings...', command=self.saveSettings)
         saveButton.grid(column=0, row=6)
-        saveButton = tk.Button(frame, text='Load Settings...', command=self.loadSettings)
+        saveButton = tk.Button(frame, text='Load TimeTower Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=7)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)

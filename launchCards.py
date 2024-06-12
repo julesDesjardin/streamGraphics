@@ -7,6 +7,6 @@ import Cards
 root = tk.Tk()
 root.title('Stream Cards')
 
-Cards = Cards.Cards(root)
+cards = Cards.Cards(root)
 
 root.mainloop()

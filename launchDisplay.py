@@ -9,7 +9,7 @@ import TimeTower
 root = tk.Tk()
 root.title('Stream Display')
 
-Cards = Cards.Cards(root)
+cards = Cards.Cards(root)
 timeTower = TimeTower.TimeTower(root)
 
 root.mainloop()

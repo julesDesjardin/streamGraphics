@@ -41,6 +41,7 @@ class CardsSettings:
         self.avatars = []
         self.avatarImages = []
         self.backgrounds = []
+        self.backgroundLoopIndices = []
         self.loopFile = ''
         self.loopImages = []
         self.introFile = ''
@@ -73,6 +74,7 @@ class CardsSettings:
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
+            self.backgroundLoopIndices.append(-1)
             self.names.append(self.canvases[i].create_text(self.textX, self.textY,
                               font=(self.nameFont, self.nameSize), text=f'Camera {i+1} competitor', anchor='nw'))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
@@ -662,6 +664,53 @@ class CardsSettings:
         telegramCloseButton = tk.Button(telegramWindow, text='Save Telegram Settings',
                                         command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
         telegramCloseButton.pack(pady=20)
+
+    def checkAllQueues(self):
+        for i in range(0, self.camerasCount):
+            dataQueue = self.queues[i]
+            canvas = self.canvases[i]
+            name = self.names[i]
+            text = self.texts[i]
+            flagImage = self.flagImages[i]
+            avatarImage = self.avatarImages[i]
+            background = self.backgrounds[i]
+            try:
+                (country, nameRead, avatarRead, textRead) = dataQueue.get(block=False)
+                if nameRead == '':
+                    canvas.itemconfig(background, state='hidden')
+                    canvas.itemconfig(flagImage, state='hidden')
+                    canvas.itemconfig(avatarImage, state='hidden')
+                    canvas.itemconfig(name, state='hidden')
+                    canvas.itemconfig(text, state='hidden')
+                    self.backgroundLoopIndices[i] = -1
+                else:
+                    if self.backgroundLoopIndices[i] == -1:
+                        if self.introFile != '':
+                            for image in self.introImages:
+                                canvas.itemconfig(background, image=image, state='normal')
+                                canvas.update()
+                                time.sleep(1 / 25)
+                        self.backgroundLoopIndices[i] = 0
+                    if self.flagEnable:
+                        self.flags[i] = Image.getFlag(self.flagHeight, country)
+                        canvas.itemconfig(flagImage, image=self.flags[i], state='normal')
+                    if self.avatarEnable:
+                        self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, avatarRead)
+                        canvas.itemconfig(avatarImage, image=self.avatars[i], state='normal')
+                    canvas.itemconfig(name, text=nameRead, state='normal')
+                    canvas.itemconfig(text, text=textRead, state='normal')
+            except queue.Empty:
+                pass
+            if self.backgroundLoopIndices[i] != -1:
+                if self.loopFile != '':
+                    canvas.itemconfig(background, image=self.loopImages[self.backgroundLoopIndices[i]])
+                canvas.itemconfig(background, state='normal')
+                canvas.update()
+                if self.backgroundLoopIndices[i] >= len(self.loopImages) - 1:
+                    self.backgroundLoopIndices[i] = 0
+                else:
+                    self.backgroundLoopIndices[i] = self.backgroundLoopIndices[i] + 1
+        self.root.after(int(1000 / 25), self.checkAllQueues)
 
     def showFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)

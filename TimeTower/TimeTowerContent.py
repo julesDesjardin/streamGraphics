@@ -191,4 +191,4 @@ class TimeTowerContent:
 
     def showFrame(self):
         self.canvas.pack()
-        self.frame.pack(padx=20, pady=20)
+        self.frame.pack(padx=20, pady=20, side=tk.RIGHT)

@@ -88,7 +88,7 @@ class Cards:
             self.mainFrame.rowconfigure(cameraY, pad=20)
 
         self.showSettingsFrame()
-        self.mainFrame.pack()
+        self.mainFrame.pack(side=tk.RIGHT)
         self.checkAllQueues()
 
     def botCallback(self, message):

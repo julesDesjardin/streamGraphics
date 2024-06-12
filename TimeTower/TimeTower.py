@@ -5,7 +5,7 @@ from tkinter import ttk
 import json
 import queue
 import threading
-import utils
+import timeTowerUtils
 
 import sys
 import os
@@ -29,10 +29,10 @@ class TimeTower:
         self.queueRound = queue.Queue()
         self.queueUpdate = queue.Queue()
         self.content = None
-        self.FPSX = utils.DEFAULT_FPS_X
-        self.FPSY = utils.DEFAULT_FPS_Y
-        self.durationX = utils.DEFAULT_DURATION_X
-        self.durationY = utils.DEFAULT_DURATION_Y
+        self.FPSX = timeTowerUtils.DEFAULT_FPS_X
+        self.FPSY = timeTowerUtils.DEFAULT_FPS_Y
+        self.durationX = timeTowerUtils.DEFAULT_DURATION_X
+        self.durationY = timeTowerUtils.DEFAULT_DURATION_Y
 
         self.showSettingsFrame()
 
@@ -58,12 +58,12 @@ class TimeTower:
         }}
         '''
 
-        result = utils.getQueryResult(query)
+        result = timeTowerUtils.getQueryResult(query)
         for competitionEvent in result['competition']['competitionEvents']:
             if (competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:
                     if (round['number'] == number):
-                        self.queueRound.put((int(round['id']), utils.CRITERIA[event]))
+                        self.queueRound.put((int(round['id']), timeTowerUtils.CRITERIA[event]))
                         return
 
     def timeTowerExpandCallback(self, message):
@@ -83,7 +83,7 @@ class TimeTower:
         stepXmax = int(self.FPSX * self.durationX / 1000)
         stepYmax = int(self.FPSY * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *utils.DEFAULT_TIMETOWER_PARAMETERS,
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *timeTowerUtils.DEFAULT_TIMETOWER_PARAMETERS,
                                                              self.delay, stepXmax, stepYmax, durationX, durationY)
             self.content.showFrame()
             self.content.mainLoop()
@@ -191,7 +191,7 @@ class TimeTower:
         delayCloseButton.pack(padx=20, pady=5)
 
     def checkRegionSeparator(self, regionBox):
-        if regionBox.get() == utils.SEPARATOR:
+        if regionBox.get() == timeTowerUtils.SEPARATOR:
             regionBox.set('World')
 
     def updateRegionCloseButton(self, region, window):
@@ -206,7 +206,7 @@ class TimeTower:
             regionWindow, text='Please choose a region (country or continent) if you want local competitors to be highlighted, so you can see the local results more easily.\nThe "World" option highlights everyone the same.')
         regionLabel.pack(padx=20, pady=5)
         regionBox = ttk.Combobox(regionWindow)
-        regionBox['values'] = utils.REGION_OPTIONS
+        regionBox['values'] = timeTowerUtils.REGION_OPTIONS
         regionBox.set(self.region)
         regionBox['state'] = 'readonly'
         regionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(regionBox))

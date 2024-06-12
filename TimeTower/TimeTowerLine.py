@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import utils
+import timeTowerUtils
 from urllib.request import urlopen
 
 
@@ -57,7 +57,7 @@ class TimeTowerLine:
         self.reduceRequest = False
         self.stepXmax = stepXmax
         self.stepYmax = stepYmax
-        if utils.DEBUG_MODE_LOCAL_FLAG:
+        if timeTowerUtils.DEBUG_MODE_LOCAL_FLAG:
             country = 'local'
         else:
             country = self.country
@@ -69,14 +69,14 @@ class TimeTowerLine:
                 self.results = []
                 for attempt in result['attempts']:
                     if attempt['result'] < 0:
-                        nonDNFResult = utils.DNF_ATTEMPT
+                        nonDNFResult = timeTowerUtils.DNF_ATTEMPT
                     else:
                         nonDNFResult = attempt['result']
                     self.results.append(nonDNFResult)
 
         # Update currentResult
         if len(self.results) == 0:
-            self.currentResult = utils.DNF_ATTEMPT
+            self.currentResult = timeTowerUtils.DNF_ATTEMPT
         else:
             match self.criteria:
                 case 'average':
@@ -143,7 +143,7 @@ class TimeTowerLine:
             fontResult = self.fontIncompleteResult
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthResult, currentY + self.height, fill=self.bgResult, outline='')
         self.canvas.create_text(currentX + self.widthResult / 2, currentY + self.height / 2,
-                                text=utils.getReadableResult(self.currentResult), fill=self.colorResult, font=(fontResult))
+                                text=timeTowerUtils.getReadableResult(self.currentResult), fill=self.colorResult, font=(fontResult))
         currentX = currentX + self.widthResult
 
         # Full result
@@ -151,7 +151,7 @@ class TimeTowerLine:
             currentWidthFullResult = int(self.widthFullResult * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult,
                                          currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results,
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getAllResults(self.results,
                                     self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
             currentX = currentX + currentWidthFullResult
         elif self.reduceRequest:
@@ -161,6 +161,6 @@ class TimeTowerLine:
             currentX = currentX + currentWidthFullResult
         elif self.expanded:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullResult, currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=utils.getAllResults(self.results,
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getAllResults(self.results,
                                     self.criteria), fill=self.colorResult, font=(self.fontFullResult), anchor='w')
             currentX = currentX + self.widthFullResult

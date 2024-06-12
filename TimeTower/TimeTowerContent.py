@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-import utils
+import timeTowerUtils
 import TimeTowerLine
 import threading
 import queue
@@ -77,9 +77,9 @@ class TimeTowerContent:
         }}
         '''
 
-        queryResult = utils.getQueryResult(query)
+        queryResult = timeTowerUtils.getQueryResult(query)
         for person in queryResult['round']['results']:
-            if self.region == 'World' or self.region in utils.COUNTRIES[person['person']['country']['iso2']]:
+            if self.region == 'World' or self.region in timeTowerUtils.COUNTRIES[person['person']['country']['iso2']]:
                 bgName = self.bgLocalName
                 bgResult = self.bgLocalResult
                 colorName = self.colorLocalName
@@ -112,7 +112,7 @@ class TimeTowerContent:
                 }}
                 '''
 
-                queryResult = utils.getQueryResult(query)
+                queryResult = timeTowerUtils.getQueryResult(query)
                 self.queueRanking.put(queryResult)
             time.sleep(self.reloadDelay / 1000)
 
@@ -166,7 +166,7 @@ class TimeTowerContent:
                 unorderedResults = []
                 for line in self.lines:
                     line.updateResults(queryResult)
-                    bestResult = utils.DNF_ATTEMPT
+                    bestResult = timeTowerUtils.DNF_ATTEMPT
                     if len(line.results) > 0:
                         bestResult = min(line.results)
                     unorderedResults.append((line.competitorId, line.currentResult, bestResult))

@@ -10,7 +10,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import cv2
 
-import utils
+import cardsUtils
 import DragManager
 import sys
 import os
@@ -25,8 +25,8 @@ class Cards:
     def __init__(self, root):
         self.root = root
         self.mainFrame = tk.Frame(self.root)
-        self.camerasX = utils.CAMERAS_COLS
-        self.camerasY = utils.CAMERAS_ROWS
+        self.camerasX = cardsUtils.CAMERAS_COLS
+        self.camerasY = cardsUtils.CAMERAS_ROWS
         self.camerasCount = self.camerasX * self.camerasY
         self.botToken = ''
         self.botChannelId = ''
@@ -45,28 +45,28 @@ class Cards:
         self.loopImages = []
         self.introFile = ''
         self.introImages = []
-        self.width = utils.DEFAULT_WIDTH
-        self.height = utils.DEFAULT_HEIGHT
+        self.width = cardsUtils.DEFAULT_WIDTH
+        self.height = cardsUtils.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
         self.exampleBackgroundImage = None
-        self.nameFont = utils.DEFAULT_FONT_FAMILY
-        self.nameSize = utils.DEFAULT_FONT_SIZE
+        self.nameFont = cardsUtils.DEFAULT_FONT_FAMILY
+        self.nameSize = cardsUtils.DEFAULT_FONT_SIZE
         self.nameX = 0
         self.nameY = 0
-        self.textFont = utils.DEFAULT_FONT_FAMILY
-        self.textSize = utils.DEFAULT_FONT_SIZE
+        self.textFont = cardsUtils.DEFAULT_FONT_FAMILY
+        self.textSize = cardsUtils.DEFAULT_FONT_SIZE
         self.textX = 0
         self.textY = 0
         self.flagEnable = True
-        self.flagX = utils.DEFAULT_FLAG_X
-        self.flagY = utils.DEFAULT_FLAG_Y
-        self.flagHeight = utils.DEFAULT_FLAG_HEIGHT
+        self.flagX = cardsUtils.DEFAULT_FLAG_X
+        self.flagY = cardsUtils.DEFAULT_FLAG_Y
+        self.flagHeight = cardsUtils.DEFAULT_FLAG_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         self.avatarEnable = True
-        self.avatarX = utils.DEFAULT_AVATAR_X
-        self.avatarY = utils.DEFAULT_AVATAR_Y
-        self.avatarWidth = utils.DEFAULT_AVATAR_WIDTH
-        self.avatarHeight = utils.DEFAULT_AVATAR_HEIGHT
+        self.avatarX = cardsUtils.DEFAULT_AVATAR_X
+        self.avatarY = cardsUtils.DEFAULT_AVATAR_Y
+        self.avatarWidth = cardsUtils.DEFAULT_AVATAR_WIDTH
+        self.avatarHeight = cardsUtils.DEFAULT_AVATAR_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         for i in range(0, self.camerasCount):
@@ -203,12 +203,12 @@ class Cards:
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
 
         if self.loopFile != '':
-            utils.loadVideo(self.loopFile, self.loopImages)
+            cardsUtils.loadVideo(self.loopFile, self.loopImages)
             for i in range(0, self.camerasCount):
                 self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
 
         if self.introFile != '':
-            utils.loadVideo(self.introFile, self.introImages)
+            cardsUtils.loadVideo(self.introFile, self.introImages)
 
         try:
             if self.bot is None:
@@ -227,7 +227,7 @@ class Cards:
         intro.set(introFile)
         loop.set(loopFile)
         if loopFile != '':
-            (self.exampleBackgroundImage, widthVideo, heightVideo) = utils.loadFirstFrame(loopFile)
+            (self.exampleBackgroundImage, widthVideo, heightVideo) = cardsUtils.loadFirstFrame(loopFile)
             canvas.configure(width=widthVideo, height=heightVideo)
             width.set(widthVideo)
             height.set(heightVideo)
@@ -244,7 +244,7 @@ class Cards:
         introEntry.delete(0, tkinter.END)
         introEntry.insert(0, intro.get())
         introEntry.grid(row=0, column=1)
-        introBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(introEntry))
+        introBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: cardsUtils.browse(introEntry))
         introBrowse.grid(row=0, column=2)
         loopLabel = tk.Label(backgroundWindow, text='Background video/image')
         loopLabel.grid(row=1, column=0)
@@ -252,7 +252,7 @@ class Cards:
         loopEntry.delete(0, tkinter.END)
         loopEntry.insert(0, loop.get())
         loopEntry.grid(row=1, column=1)
-        loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: utils.browse(loopEntry))
+        loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: cardsUtils.browse(loopEntry))
         loopBrowse.grid(row=1, column=2)
 
         OKButton = tk.Button(backgroundWindow, text='OK', command=lambda: self.updateBackgroundCloseButton(
@@ -264,9 +264,9 @@ class Cards:
         self.introFile = introFile
         self.loopFile = loopFile
         if self.introFile != '':
-            utils.loadVideo(self.introFile, self.introImages)
+            cardsUtils.loadVideo(self.introFile, self.introImages)
         if self.loopFile != '':
-            utils.loadVideo(self.loopFile, self.loopImages)
+            cardsUtils.loadVideo(self.loopFile, self.loopImages)
         self.width = width
         self.height = height
         self.nameFont = nameFont
@@ -591,42 +591,42 @@ class Cards:
         managerAvatar = DragManager.DragManager(exampleCanvas, exampleAvatarImage, avatarXVariable, avatarYVariable)
         managerName = DragManager.DragManager(exampleCanvas, exampleName, nameXVariable, nameYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
-        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=utils.cleverInt(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=utils.cleverInt(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=utils.cleverInt(widthVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=utils.cleverInt(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=utils.cleverInt(heightVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=cardsUtils.cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=cardsUtils.cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=cardsUtils.cleverInt(widthVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=cardsUtils.cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=cardsUtils.cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=cardsUtils.cleverInt(heightVariable.get())))
         nameFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
         nameSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
         nameXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleName, utils.cleverInt(nameXVariable.get()), utils.cleverInt(nameYVariable.get())))
+            exampleName, cardsUtils.cleverInt(nameXVariable.get()), cardsUtils.cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleName, utils.cleverInt(nameXVariable.get()), utils.cleverInt(nameYVariable.get())))
+            exampleName, cardsUtils.cleverInt(nameXVariable.get()), cardsUtils.cleverInt(nameYVariable.get())))
         textFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
         textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
+            exampleText, cardsUtils.cleverInt(textXVariable.get()), cardsUtils.cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, utils.cleverInt(textXVariable.get()), utils.cleverInt(textYVariable.get())))
+            exampleText, cardsUtils.cleverInt(textXVariable.get()), cardsUtils.cleverInt(textYVariable.get())))
         flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, utils.cleverInt(flagHeightVariable.get())))
+            exampleCanvas, exampleFlagImage, cardsUtils.cleverInt(flagHeightVariable.get())))
         flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
+            exampleFlagImage, cardsUtils.cleverInt(flagXVariable.get()), cardsUtils.cleverInt(flagYVariable.get())))
         flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, utils.cleverInt(flagXVariable.get()), utils.cleverInt(flagYVariable.get())))
+            exampleFlagImage, cardsUtils.cleverInt(flagXVariable.get()), cardsUtils.cleverInt(flagYVariable.get())))
         avatarWidthVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarHeightVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarXVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarYVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, utils.cleverInt(avatarXVariable.get()), utils.cleverInt(avatarYVariable.get()), utils.cleverInt(avatarWidthVariable.get()), utils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
 
         self.enableButtonCallback(self.flagEnable, [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage])
         self.enableButtonCallback(self.avatarEnable,

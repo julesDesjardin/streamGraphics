@@ -7,12 +7,13 @@ import WCIFParse
 
 class InterfaceFrame:
 
-    def __init__(self, root, wcif, bot, buttonRows, buttonCols, x, y, index):
+    def __init__(self, root, wcif, cardText, bot, buttonRows, buttonCols, x, y, index):
 
         self.emptyPixel = tk.PhotoImage(width=1, height=1)
 
         self.root = root
         self.wcif = wcif
+        self.cardText = cardText
         self.bot = bot
         self.buttonRows = buttonRows
         self.buttonCols = buttonCols
@@ -70,6 +71,26 @@ class InterfaceFrame:
             dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, self.activeCuber), 0)
             dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, competitorId), 1)
         self.activeCuber = competitorId
+
+    def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
+        if not visible:
+            self.buttonFrames[buttonIndex].grid_forget()
+        else:
+            if int(round) > 1:
+                previousRound = int(round) - 1
+            else:
+                previousRound = None
+            id = competitor[0]
+            seed = competitor[1]
+            name = competitor[2]
+            previousRank = WCIFParse.getRoundRank(self.wcif, id, event, previousRound)
+            extraButtonText = f'Seed {seed}'
+            if previousRank is not None:
+                extraButtonText = extraButtonText + f', Placed {previousRank}'
+            cardTextReplaced = utils.replaceText(self.cardText, self.wcif, id, seed, event, round)
+            self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
+                buttonIndex, WCIFParse.getCountry(self.wcif, id), name, WCIFParse.getAvatar(self.wcif, id), cardTextReplaced, id))
+            self.buttonFrames[buttonIndex].grid(row=row, column=column)
 
     def showFrame(self):
         self.frame.grid(column=self.x, row=self.y)

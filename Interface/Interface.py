@@ -8,6 +8,7 @@ import Stage
 import WCIFParse
 import utils
 import InterfaceFrame
+import dataWrite
 
 import sys
 import os
@@ -15,13 +16,14 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
 
 
-class InterfaceSettings:
+class Interface:
 
     BG_COLOR = '#F4ECE1'
 
-    def __init__(self, root, mainFrame):
+    def __init__(self, root):
         self.root = root
-        self.mainFrame = mainFrame
+        self.mainFrame = tk.Frame(root)
+        self.OKFrame = tk.Frame(root)
         self.compId = ''
         self.wcif = {}
         self.rounds = {}
@@ -38,6 +40,18 @@ class InterfaceSettings:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
+
+        self.timeTowerEventVariable = tk.IntVar()
+        self.TimeTowerCheckbox = tk.Checkbutton(self.OKFrame, text="Update TimeTower", variable=self.timeTowerEventVariable)
+        self.TimeTowerCheckbox.pack()
+        self.OKButton = tk.Button(self.OKFrame, text="OK", command=self.OKButtonCommand)
+        self.OKButton.pack()
+        self.presentationButton = tk.Button(self.OKFrame, text='Start presentation', command=self.presentationButtonCommand)
+        self.presentationButton.pack(pady=30)
+
+        self.showSettingsFrame()
+        self.mainFrame.pack(side=tk.TOP, padx=10)
+        self.OKFrame.pack(side=tk.BOTTOM, pady=20)
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -159,7 +173,7 @@ class InterfaceSettings:
         for cameraY in range(0, utils.CAMERAS_ROWS):
             for cameraX in range(0, utils.CAMERAS_COLS):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * utils.CAMERAS_COLS + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardText, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * utils.CAMERAS_COLS + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
 
@@ -291,6 +305,7 @@ class InterfaceSettings:
     def updateCardTextCloseButton(self, text, isCard, window):
         if isCard:
             self.cardText = text
+            self.reloadInterfaceFrames()
         else:
             self.presentationText = text
         window.destroy()
@@ -360,7 +375,79 @@ This supports the following characters to be replaced by the appropriate value:
                                         command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
         telegramCloseButton.pack(pady=20)
 
-    def showFrame(self):
+    def updateCubers(self):
+        index = 0
+        fullCompetitors = []
+        bg = []
+        fg = []
+        events = []
+        rounds = []
+        for stage in self.stages:
+            if stage.stageEnabled:
+                activities = WCIFParse.getActivities(self.wcif, stage.venue, stage.room)
+                event = stage.eventVar.get()
+                round = stage.roundVar.get()
+                group = stage.groupVar.get()
+                if group != '0':
+                    activityId = WCIFParse.getActivityId(self.wcif, stage.venue, stage.room, event, round, group)
+                    competitors = WCIFParse.getCompetitors(self.wcif, activityId, event)
+                    newCompetitors = [(id, seed, WCIFParse.getCompetitorName(self.wcif, id)) for (id, seed) in competitors]
+                    newCompetitors.sort(key=lambda x: x[2])
+                    for competitor in newCompetitors:
+                        if competitor[1] <= self.maxSeed:
+                            fullCompetitors.append(competitor)
+                            bg.append(stage.backgroundColor)
+                            fg.append(stage.textColor)
+                            events.append(event)
+                            rounds.append(round)
+
+        # If too many competitors : keep top X only
+        sortedCompetitors = sorted(fullCompetitors, key=lambda x: x[1])
+        if len(sortedCompetitors) > self.buttonCount:
+            for competitor in sortedCompetitors[self.buttonCount:]:
+                indexCompetitor = fullCompetitors.index(competitor)
+                del fullCompetitors[indexCompetitor]
+                del bg[indexCompetitor]
+                del fg[indexCompetitor]
+                del events[indexCompetitor]
+                del rounds[indexCompetitor]
+
+        for i in range(0, self.buttonRows):
+            for j in range(0, self.buttonCols):
+                buttonIndex = i * self.buttonCols + j
+                if index < len(fullCompetitors):
+                    for frame in self.interfaceFrames:
+                        frame.configureButton(buttonIndex, events[index], rounds[index],
+                                              fullCompetitors[index], True, i + 3, j, bg[index], fg[index])
+                    index = index + 1
+                else:
+                    for frame in self.interfaceFrames:
+                        frame.configureButton(buttonIndex, '', '', (0, 0, ''), False, i + 3, j, '#000000', '#000000')
+
+    def getStageInfo(self):
+        for stage in self.stages:
+            if stage.stageEnabled:
+                return (stage.venue, stage.room, stage.eventVar.get(), stage.roundVar.get(), stage.groupVar.get())
+        tkinter.messagebox.showerror(
+            title='Stages error !', message='All stages are disabled (or no stages exist), please enable a stage')
+        return (None, None, None, None, None)
+
+    def OKButtonCommand(self):
+        if self.timeTowerEventVariable.get():
+            (_, _, event, round, _) = self.getStageInfo()
+            if event is not None:
+                dataWrite.sendTimeTowerEvent(self.bot, utils.EVENTS[event], round)
+        self.updateCubers()
+        for frame in self.interfaceFrames:
+            frame.buttonCommand(-1, '', '', '', '', -1)
+
+    def presentationButtonCommand(self):
+        (venue, room, event, round, group) = self.getStageInfo()
+        if event is not None:
+            presentation = PresentationInterface.PresentationInterface(
+                self.root, self.wcif, self.presentationText, venue, room, event, int(round), group, self.bot)
+
+    def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
         settingsLabel = tk.Label(frame, text='Interface Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)

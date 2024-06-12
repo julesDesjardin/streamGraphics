@@ -10,7 +10,6 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import cv2
 
-import constants
 import utils
 import DragManager
 import sys
@@ -19,15 +18,15 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
 
 
-class CardsSettings:
+class Cards:
 
     BG_COLOR = '#F4ECE1'
 
-    def __init__(self, root, camerasX, camerasY):
+    def __init__(self, root):
         self.root = root
         self.mainFrame = tk.Frame(self.root)
-        self.camerasX = camerasX
-        self.camerasY = camerasY
+        self.camerasX = utils.CAMERAS_COLS
+        self.camerasY = utils.CAMERAS_ROWS
         self.camerasCount = self.camerasX * self.camerasY
         self.botToken = ''
         self.botChannelId = ''
@@ -46,28 +45,28 @@ class CardsSettings:
         self.loopImages = []
         self.introFile = ''
         self.introImages = []
-        self.width = constants.DEFAULT_WIDTH
-        self.height = constants.DEFAULT_HEIGHT
+        self.width = utils.DEFAULT_WIDTH
+        self.height = utils.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
         self.exampleBackgroundImage = None
-        self.nameFont = constants.DEFAULT_FONT_FAMILY
-        self.nameSize = constants.DEFAULT_FONT_SIZE
+        self.nameFont = utils.DEFAULT_FONT_FAMILY
+        self.nameSize = utils.DEFAULT_FONT_SIZE
         self.nameX = 0
         self.nameY = 0
-        self.textFont = constants.DEFAULT_FONT_FAMILY
-        self.textSize = constants.DEFAULT_FONT_SIZE
+        self.textFont = utils.DEFAULT_FONT_FAMILY
+        self.textSize = utils.DEFAULT_FONT_SIZE
         self.textX = 0
         self.textY = 0
         self.flagEnable = True
-        self.flagX = constants.DEFAULT_FLAG_X
-        self.flagY = constants.DEFAULT_FLAG_Y
-        self.flagHeight = constants.DEFAULT_FLAG_HEIGHT
+        self.flagX = utils.DEFAULT_FLAG_X
+        self.flagY = utils.DEFAULT_FLAG_Y
+        self.flagHeight = utils.DEFAULT_FLAG_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         self.avatarEnable = True
-        self.avatarX = constants.DEFAULT_AVATAR_X
-        self.avatarY = constants.DEFAULT_AVATAR_Y
-        self.avatarWidth = constants.DEFAULT_AVATAR_WIDTH
-        self.avatarHeight = constants.DEFAULT_AVATAR_HEIGHT
+        self.avatarX = utils.DEFAULT_AVATAR_X
+        self.avatarY = utils.DEFAULT_AVATAR_Y
+        self.avatarWidth = utils.DEFAULT_AVATAR_WIDTH
+        self.avatarHeight = utils.DEFAULT_AVATAR_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         for i in range(0, self.camerasCount):
@@ -83,10 +82,14 @@ class CardsSettings:
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
             self.avatarImages.append(self.canvases[i].create_image(self.avatarX, self.avatarY, image=self.avatars[i]))
-        for cameraX in range(0, camerasX):
+        for cameraX in range(0, self.camerasX):
             self.mainFrame.columnconfigure(cameraX, pad=20)
-        for cameraY in range(0, camerasY):
+        for cameraY in range(0, self.camerasY):
             self.mainFrame.rowconfigure(cameraY, pad=20)
+
+        self.showSettingsFrame()
+        self.mainFrame.pack()
+        self.checkAllQueues()
 
     def botCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
@@ -712,7 +715,7 @@ class CardsSettings:
                     self.backgroundLoopIndices[i] = self.backgroundLoopIndices[i] + 1
         self.root.after(int(1000 / 25), self.checkAllQueues)
 
-    def showFrame(self):
+    def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
         settingsLabel = tk.Label(frame, text='Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)

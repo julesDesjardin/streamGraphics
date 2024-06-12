@@ -2,6 +2,23 @@ import tkinter as tk
 import tkinter.filedialog
 import cv2
 
+CAMERAS_ROWS = 2
+CAMERAS_COLS = 2
+CAMERAS_COUNT = CAMERAS_ROWS * CAMERAS_COLS
+
+DEFAULT_WIDTH = 300
+DEFAULT_HEIGHT = 300
+DEFAULT_FONT_FAMILY = 'Arial'
+DEFAULT_FONT_SIZE = 20
+DEFAULT_FLAG_WIDTH = 150
+DEFAULT_FLAG_HEIGHT = 100
+DEFAULT_FLAG_X = 100
+DEFAULT_FLAG_Y = 100
+DEFAULT_AVATAR_WIDTH = 100
+DEFAULT_AVATAR_HEIGHT = 100
+DEFAULT_AVATAR_X = 100
+DEFAULT_AVATAR_Y = 200
+
 
 def browse(entry):
     fileName = tkinter.filedialog.askopenfilename(initialdir='./')

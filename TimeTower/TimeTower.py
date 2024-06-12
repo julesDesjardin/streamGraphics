@@ -12,10 +12,9 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
 import TimeTowerContent
-import constants
 
 
-class TimeTowerSettings:
+class TimeTower:
 
     BG_COLOR = '#F4ECE1'
 
@@ -30,10 +29,12 @@ class TimeTowerSettings:
         self.queueRound = queue.Queue()
         self.queueUpdate = queue.Queue()
         self.content = None
-        self.FPSX = constants.DEFAULT_FPS_X
-        self.FPSY = constants.DEFAULT_FPS_Y
-        self.durationX = constants.DEFAULT_DURATION_X
-        self.durationY = constants.DEFAULT_DURATION_Y
+        self.FPSX = utils.DEFAULT_FPS_X
+        self.FPSY = utils.DEFAULT_FPS_Y
+        self.durationX = utils.DEFAULT_DURATION_X
+        self.durationY = utils.DEFAULT_DURATION_Y
+
+        self.showSettingsFrame()
 
     def timeTowerEventCallback(self, message):
 
@@ -82,7 +83,7 @@ class TimeTowerSettings:
         stepXmax = int(self.FPSX * self.durationX / 1000)
         stepYmax = int(self.FPSY * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *constants.DEFAULT_TIMETOWER_PARAMETERS,
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *utils.DEFAULT_TIMETOWER_PARAMETERS,
                                                              self.delay, stepXmax, stepYmax, durationX, durationY)
             self.content.showFrame()
             self.content.mainLoop()
@@ -190,7 +191,7 @@ class TimeTowerSettings:
         delayCloseButton.pack(padx=20, pady=5)
 
     def checkRegionSeparator(self, regionBox):
-        if regionBox.get() == constants.SEPARATOR:
+        if regionBox.get() == utils.SEPARATOR:
             regionBox.set('World')
 
     def updateRegionCloseButton(self, region, window):
@@ -205,7 +206,7 @@ class TimeTowerSettings:
             regionWindow, text='Please choose a region (country or continent) if you want local competitors to be highlighted, so you can see the local results more easily.\nThe "World" option highlights everyone the same.')
         regionLabel.pack(padx=20, pady=5)
         regionBox = ttk.Combobox(regionWindow)
-        regionBox['values'] = constants.REGION_OPTIONS
+        regionBox['values'] = utils.REGION_OPTIONS
         regionBox.set(self.region)
         regionBox['state'] = 'readonly'
         regionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(regionBox))
@@ -305,7 +306,7 @@ class TimeTowerSettings:
                                         command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
         telegramCloseButton.pack(pady=20)
 
-    def showFrame(self):
+    def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
         settingsLabel = tk.Label(frame, text='Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)

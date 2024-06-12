@@ -1,23 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
-
-import TimeTowerSettings
-import utils
-
-##############################################################################
-# ROOT
-##############################################################################
+import TimeTower
 
 root = tk.Tk()
 root.title('Stream Time Tower')
 
-##############################################################################
-# SETTINGS
-##############################################################################
-
-localSettings = TimeTowerSettings.TimeTowerSettings(root)
-localSettings.showFrame()
-
-##############################################################################
+timeTower = TimeTower.TimeTower(root)
 
 root.mainloop()

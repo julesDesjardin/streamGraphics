@@ -3,7 +3,6 @@ from tkinter import ttk
 import json
 import utils
 import TimeTowerLine
-import constants
 import threading
 import queue
 import time
@@ -80,7 +79,7 @@ class TimeTowerContent:
 
         queryResult = utils.getQueryResult(query)
         for person in queryResult['round']['results']:
-            if self.region == 'World' or self.region in constants.COUNTRIES[person['person']['country']['iso2']]:
+            if self.region == 'World' or self.region in utils.COUNTRIES[person['person']['country']['iso2']]:
                 bgName = self.bgLocalName
                 bgResult = self.bgLocalResult
                 colorName = self.colorLocalName

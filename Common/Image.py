@@ -3,15 +3,31 @@ from urllib.request import urlopen
 import os
 from PIL import Image, ImageTk
 
+storedImages = dict([])
 
-def getLocalImage(width, height, path):
-    imageFull = Image.open(path)
+
+def getLocalImage(width, height, path, keepImage):
+    if keepImage:
+        if path in storedImages:
+            imageFull = storedImages[path]
+        else:
+            imageFull = Image.open(path)
+            storedImages[path] = imageFull
+    else:
+        imageFull = Image.open(path)
     imageFull.thumbnail((width, height))
     return ImageTk.PhotoImage(imageFull)
 
 
-def getInternetImage(width, height, url):
-    imageFull = Image.open(urlopen(url))
+def getInternetImage(width, height, url, keepImage):
+    if keepImage:
+        if url in storedImages:
+            imageFull = storedImages[url]
+        else:
+            imageFull = Image.open(urlopen(url))
+            storedImages[url] = imageFull
+    else:
+        imageFull = Image.open(urlopen(url))
     imageFull.thumbnail((width, height))
     return ImageTk.PhotoImage(imageFull)
 
@@ -19,9 +35,9 @@ def getInternetImage(width, height, url):
 def getAvatar(width, height, url):
     if url == 'local':
         image_path = f'{os.path.dirname(__file__)}/noAvatar.png'
-        return getLocalImage(width, height, image_path)
+        return getLocalImage(width, height, image_path, True)
     else:
-        return getInternetImage(width, height, url)
+        return getInternetImage(width, height, url, False)
 
 
 def getFlag(height, country):
@@ -29,7 +45,7 @@ def getFlag(height, country):
     if country == 'local':
         # For debug/example purpose : use a local US flag to avoid losing time getting an actual flag from the internet
         image_path = f'{os.path.dirname(__file__)}/us.png'
-        return getLocalImage(width, height, image_path)
+        return getLocalImage(width, height, image_path, True)
     else:
         image_url = f'https://flagcdn.com/w320/{country.lower()}.png'
-        return getInternetImage(width, height, image_url)
+        return getInternetImage(width, height, image_url, True)

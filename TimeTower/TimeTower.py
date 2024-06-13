@@ -29,6 +29,32 @@ class TimeTower:
         self.queueRound = queue.Queue()
         self.queueUpdate = queue.Queue()
         self.content = None
+        self.bgLocalName = timeTowerUtils.DEFAULT_BG_LOCAL_NAME
+        self.bgLocalResult = timeTowerUtils.DEFAULT_BG_LOCAL_RESULT
+        self.bgForeignerName = timeTowerUtils.DEFAULT_BG_FOREIGNER_NAME
+        self.bgForeignerResult = timeTowerUtils.DEFAULT_BG_FOREIGNER_RESULT
+        self.widthRanking = timeTowerUtils.DEFAULT_WIDTH_RANKING
+        self.widthFlagRectangle = timeTowerUtils.DEFAULT_WIDTH_FLAG_RECTANGLE
+        self.heightFlag = timeTowerUtils.DEFAULT_HEIGHT_FLAG
+        self.widthName = timeTowerUtils.DEFAULT_WIDTH_NAME
+        self.widthFullName = timeTowerUtils.DEFAULT_WIDTH_FULL_NAME
+        self.widthCount = timeTowerUtils.DEFAULT_WIDTH_COUNT
+        self.widthResult = timeTowerUtils.DEFAULT_WIDTH_RESULT
+        self.widthFullResult = timeTowerUtils.DEFAULT_WIDTH_FULL_RESULT
+        self.fontFamily = timeTowerUtils.DEFAULT_FONT_FAMILY
+        self.rankingSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.nameSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.countSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.incompleteResultSize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+        self.resultSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.fullResultSize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+        self.height = timeTowerUtils.DEFAULT_HEIGHT
+        self.heightSeparator = timeTowerUtils.DEFAULT_HEIGHT_SEPARATOR
+        self.colorLocalName = timeTowerUtils.DEFAULT_COLOR_LOCAL_NAME
+        self.colorLocalResult = timeTowerUtils.DEFAULT_COLOR_LOCAL_RESULT
+        self.colorForeignerName = timeTowerUtils.DEFAULT_COLOR_FOREIGNER_NAME
+        self.colorForeignerResult = timeTowerUtils.DEFAULT_COLOR_FOREIGNER_RESULT
+        self.maxNumber = timeTowerUtils.DEFAULT_MAX_NUMBER
         self.FPSX = timeTowerUtils.DEFAULT_FPS_X
         self.FPSY = timeTowerUtils.DEFAULT_FPS_Y
         self.durationX = timeTowerUtils.DEFAULT_DURATION_X
@@ -83,8 +109,13 @@ class TimeTower:
         stepXmax = int(self.FPSX * self.durationX / 1000)
         stepYmax = int(self.FPSY * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, *timeTowerUtils.DEFAULT_TIMETOWER_PARAMETERS,
-                                                             self.delay, stepXmax, stepYmax, durationX, durationY)
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             (self.fontFamily, self.rankingSize), (self.fontFamily, self.nameSize),
+                                                             (self.fontFamily, self.countSize), (self.fontFamily, self.incompleteResultSize),
+                                                             (self.fontFamily, self.resultSize), (self.fontFamily, self.fullResultSize),
+                                                             self.colorLocalName, self.colorLocalResult, self.colorForeignerName, self.colorForeignerResult,
+                                                             self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY)
             self.content.showFrame()
             self.content.mainLoop()
         else:
@@ -97,6 +128,31 @@ class TimeTower:
             'compId': self.compId,
             'delay': self.delay,
             'region': self.region,
+            'bgLocalName': self.bgLocalName,
+            'bgLocalResult': self.bgLocalResult,
+            'bgForeignerName': self.bgForeignerName,
+            'bgForeignerResult': self.bgForeignerResult,
+            'widthRanking': self.widthRanking,
+            'widthFlagRectangle': self.widthFlagRectangle,
+            'heightFlag': self.heightFlag,
+            'widthName': self.widthName,
+            'widthFullName': self.widthFullName,
+            'widthCount': self.widthCount,
+            'widthResult': self.widthResult,
+            'widthFullResult': self.widthFullResult,
+            'fontFamily': self.fontFamily,
+            'rankingSize': self.rankingSize,
+            'nameSize': self.nameSize,
+            'countSize': self.countSize,
+            'incompleteResultSize': self.incompleteResultSize,
+            'resultSize': self.resultSize,
+            'fullResultSize': self.fullResultSize,
+            'height': self.height,
+            'heightSeparator': self.heightSeparator,
+            'colorLocalName': self.colorLocalName,
+            'colorLocalResult': self.colorLocalResult,
+            'colorForeignerName': self.colorForeignerName,
+            'colorForeignerResult': self.colorForeignerResult,
             'durationX': self.durationX,
             'FPSX': self.FPSX,
             'durationY': self.durationY,
@@ -120,6 +176,31 @@ class TimeTower:
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
+            self.bgLocalName = loadSettingsJson['bgLocalName']
+            self.bgLocalResult = loadSettingsJson['bgLocalResult']
+            self.bgForeignerName = loadSettingsJson['bgForeignerName']
+            self.bgForeignerResult = loadSettingsJson['bgForeignerResult']
+            self.widthRanking = loadSettingsJson['widthRanking']
+            self.widthFlagRectangle = loadSettingsJson['widthFlagRectangle']
+            self.heightFlag = loadSettingsJson['heightFlag']
+            self.widthName = loadSettingsJson['widthName']
+            self.widthFullName = loadSettingsJson['widthFullName']
+            self.widthCount = loadSettingsJson['widthCount']
+            self.widthResult = loadSettingsJson['widthResult']
+            self.widthFullResult = loadSettingsJson['widthFullResult']
+            self.fontFamily = loadSettingsJson['fontFamily']
+            self.rankingSize = loadSettingsJson['rankingSize']
+            self.nameSize = loadSettingsJson['nameSize']
+            self.countSize = loadSettingsJson['countSize']
+            self.incompleteResultSize = loadSettingsJson['incompleteResultSize']
+            self.resultSize = loadSettingsJson['resultSize']
+            self.fullResultSize = loadSettingsJson['fullResultSize']
+            self.height = loadSettingsJson['height']
+            self.heightSeparator = loadSettingsJson['heightSeparator']
+            self.colorLocalName = loadSettingsJson['colorLocalName']
+            self.colorLocalResult = loadSettingsJson['colorLocalResult']
+            self.colorForeignerName = loadSettingsJson['colorForeignerName']
+            self.colorForeignerResult = loadSettingsJson['colorForeignerResult']
             self.durationX = loadSettingsJson['durationX']
             self.FPSX = loadSettingsJson['FPSX']
             self.durationY = loadSettingsJson['durationY']

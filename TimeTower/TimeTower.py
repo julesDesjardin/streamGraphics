@@ -43,11 +43,17 @@ class TimeTower:
         self.widthFullResult = timeTowerUtils.DEFAULT_WIDTH_FULL_RESULT
         self.fontFamily = timeTowerUtils.DEFAULT_FONT_FAMILY
         self.rankingSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.rankingModifiers = 'bold'
         self.nameSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.nameModifiers = 'bold'
         self.countSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.countModifiers = ''
         self.incompleteResultSize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+        self.incompleteResultModifiers = 'italic'
         self.resultSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
+        self.resultModifiers = 'bold'
         self.fullResultSize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+        self.fullResultModifiers = ''
         self.height = timeTowerUtils.DEFAULT_HEIGHT
         self.heightSeparator = timeTowerUtils.DEFAULT_HEIGHT_SEPARATOR
         self.colorLocalName = timeTowerUtils.DEFAULT_COLOR_LOCAL_NAME
@@ -111,9 +117,12 @@ class TimeTower:
         if self.content is None:
             self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
-                                                             (self.fontFamily, self.rankingSize), (self.fontFamily, self.nameSize),
-                                                             (self.fontFamily, self.countSize), (self.fontFamily, self.incompleteResultSize),
-                                                             (self.fontFamily, self.resultSize), (self.fontFamily, self.fullResultSize),
+                                                             (self.fontFamily, self.rankingSize, self.rankingModifiers),
+                                                             (self.fontFamily, self.nameSize, self.nameModifiers),
+                                                             (self.fontFamily, self.countSize, self.countModifiers),
+                                                             (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
+                                                             (self.fontFamily, self.resultSize, self.resultModifiers),
+                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
                                                              self.colorLocalName, self.colorLocalResult, self.colorForeignerName, self.colorForeignerResult,
                                                              self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY)
             self.content.showFrame()
@@ -142,11 +151,17 @@ class TimeTower:
             'widthFullResult': self.widthFullResult,
             'fontFamily': self.fontFamily,
             'rankingSize': self.rankingSize,
+            'rankingModifiers': self.rankingModifiers,
             'nameSize': self.nameSize,
+            'nameModifiers': self.nameModifiers,
             'countSize': self.countSize,
+            'countModifiers': self.countModifiers,
             'incompleteResultSize': self.incompleteResultSize,
+            'incompleteResultModifiers': self.incompleteResultModifiers,
             'resultSize': self.resultSize,
+            'resultModifiers': self.resultModifiers,
             'fullResultSize': self.fullResultSize,
+            'fullResultModifiers': self.fullResultModifiers,
             'height': self.height,
             'heightSeparator': self.heightSeparator,
             'colorLocalName': self.colorLocalName,
@@ -190,11 +205,17 @@ class TimeTower:
             self.widthFullResult = loadSettingsJson['widthFullResult']
             self.fontFamily = loadSettingsJson['fontFamily']
             self.rankingSize = loadSettingsJson['rankingSize']
+            self.rankingModifiers = loadSettingsJson['rankingModifiers']
             self.nameSize = loadSettingsJson['nameSize']
+            self.nameModifiers = loadSettingsJson['nameModifiers']
             self.countSize = loadSettingsJson['countSize']
+            self.countModifiers = loadSettingsJson['countModifiers']
             self.incompleteResultSize = loadSettingsJson['incompleteResultSize']
+            self.incompleteResultModifiers = loadSettingsJson['incompleteResultModifiers']
             self.resultSize = loadSettingsJson['resultSize']
+            self.resultModifiers = loadSettingsJson['resultModifiers']
             self.fullResultSize = loadSettingsJson['fullResultSize']
+            self.fullResultModifiers = loadSettingsJson['fullResultModifiers']
             self.height = loadSettingsJson['height']
             self.heightSeparator = loadSettingsJson['heightSeparator']
             self.colorLocalName = loadSettingsJson['colorLocalName']

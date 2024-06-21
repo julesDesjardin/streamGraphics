@@ -123,6 +123,7 @@ class TimeTowerContent:
         try:
             (self.region,
              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+             self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
              self.height, self.heightSeparator, self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY
              ) = self.queueUpdate.get(block=False)
             for line in self.lines:
@@ -137,6 +138,12 @@ class TimeTowerContent:
                 line.widthFullResult = self.widthFullResult
                 line.height = self.height
                 line.heightSeparator = self.heightSeparator
+                line.fontRanking = fontRanking
+                line.fontName = fontName
+                line.fontCount = fontCount
+                line.fontIncompleteResult = fontIncompleteResult
+                line.fontResult = fontResult
+                line.fontFullResult = fontFullResult
                 line.stepXmax = self.stepXmax
                 line.stepYmax = self.stepYmax
         except:

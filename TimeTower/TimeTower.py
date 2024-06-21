@@ -147,6 +147,12 @@ class TimeTower:
         else:
             self.queueUpdate.put((self.region,
                                   self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                  (self.fontFamily, self.rankingSize, self.rankingModifiers),
+                                  (self.fontFamily, self.nameSize, self.nameModifiers),
+                                  (self.fontFamily, self.countSize, self.countModifiers),
+                                  (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
+                                  (self.fontFamily, self.resultSize, self.resultModifiers),
+                                  (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
                                   self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY))
 
     def saveSettings(self):
@@ -431,7 +437,7 @@ class TimeTower:
         for line in self.exampleLines:
             line.showLine(0, 0)
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -443,6 +449,19 @@ class TimeTower:
             self.widthFullResult = widthFullResult
             self.height = height
             self.heightSeparator = heightSeparator
+            self.fontFamily = fontFamily
+            self.rankingSize = rankingSize
+            self.rankingModifiers = rankingModifiers
+            self.nameSize = nameSize
+            self.nameModifiers = nameModifiers
+            self.countSize = countSize
+            self.countModifiers = countModifiers
+            self.incompleteResultSize = incompleteResultSize
+            self.incompleteResultModifiers = incompleteResultModifiers
+            self.resultSize = resultSize
+            self.resultModifiers = resultModifiers
+            self.fullResultSize = fullResultSize
+            self.fullResultModifiers = fullResultModifiers
         except:
             tkinter.messagebox.showerror(title='Layout Settings Error !', message='Error in the settings! Please check all values.')
         else:
@@ -453,7 +472,7 @@ class TimeTower:
         layoutWindow = tk.Toplevel(self.root)
         layoutWindow.grab_set()
 
-        layoutLabel = tk.Label(layoutWindow, text='Customize the tower layout')
+        layoutLabel = tk.Label(layoutWindow, text='Customize the tower layout with the following tabs:')
         layoutLabel.pack(pady=5)
 
         layoutNotebook = ttk.Notebook(layoutWindow)
@@ -465,11 +484,6 @@ class TimeTower:
         layoutNotebook.add(sizeFrame, text='Size')
         self.currentRow = 0
         emptyFrames = []
-
-        self.layoutEndRow(sizeFrame, 10)
-        emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(sizeFrame, 30)
 
         widthRankingLabel = tk.Label(sizeFrame, text='Ranking width:')
         widthRankingLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -595,10 +609,226 @@ class TimeTower:
         heightSeparatorVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             heightSeparator=cleverInt(heightSeparatorVariable.get())))
 
+        # Font
+
+        fontFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(fontFrame, text='Fonts')
+        self.currentRow = 0
+        emptyFrames = []
+
+        fonts = list(font.families())
+        fonts.sort()
+
+        layoutLabel = tk.Label(fontFrame, text='Customize the tower fonts')
+        layoutLabel.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 30)
+
+        fontFamilyLabel = tk.Label(fontFrame, text='Font:')
+        fontFamilyLabel.grid(column=0, row=self.currentRow, sticky='e')
+        fontFamilyVariable = tk.StringVar()
+        fontFamilyMenu = ttk.Combobox(fontFrame, textvariable=fontFamilyVariable)
+        fontFamilyMenu['values'] = fonts
+        fontFamilyVariable.set(self.fontFamily)
+        fontFamilyMenu.set(self.fontFamily)
+        fontFamilyMenu['state'] = 'readonly'
+        fontFamilyMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        rankingSizeLabel = tk.Label(fontFrame, text='Ranking text size:')
+        rankingSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        rankingSizeVariable = tk.StringVar()
+        rankingSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=rankingSizeVariable)
+        rankingSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        rankingSizeVariable.set(f'{self.rankingSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.rankingBoldVariable = tk.BooleanVar()
+        rankingBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.rankingBoldVariable)
+        rankingBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.rankingItalicVariable = tk.BooleanVar()
+        rankingItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.rankingItalicVariable)
+        rankingItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.rankingModifiers, self.rankingBoldVariable, self.rankingItalicVariable)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        nameSizeLabel = tk.Label(fontFrame, text='Name text size:')
+        nameSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        nameSizeVariable = tk.StringVar()
+        nameSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=nameSizeVariable)
+        nameSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        nameSizeVariable.set(f'{self.nameSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.nameBoldVariable = tk.BooleanVar()
+        nameBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.nameBoldVariable)
+        nameBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.nameItalicVariable = tk.BooleanVar()
+        nameItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.nameItalicVariable)
+        nameItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        countSizeLabel = tk.Label(fontFrame, text='Solves count text size:')
+        countSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        countSizeVariable = tk.StringVar()
+        countSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=countSizeVariable)
+        countSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        countSizeVariable.set(f'{self.countSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.countBoldVariable = tk.BooleanVar()
+        countBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.countBoldVariable)
+        countBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.countItalicVariable = tk.BooleanVar()
+        countItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.countItalicVariable)
+        countItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.countModifiers, self.countBoldVariable, self.countItalicVariable)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        incompleteResultSizeLabel = tk.Label(fontFrame, text='Incomplete result text size:')
+        incompleteResultSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        incompleteResultSizeVariable = tk.StringVar()
+        incompleteResultSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT,
+                                                 textvariable=incompleteResultSizeVariable)
+        incompleteResultSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        incompleteResultSizeVariable.set(f'{self.incompleteResultSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.incompleteResultBoldVariable = tk.BooleanVar()
+        incompleteResultBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.incompleteResultBoldVariable)
+        incompleteResultBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.incompleteResultItalicVariable = tk.BooleanVar()
+        incompleteResultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.incompleteResultItalicVariable)
+        incompleteResultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.incompleteResultModifiers, self.incompleteResultBoldVariable, self.incompleteResultItalicVariable)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        resultSizeLabel = tk.Label(fontFrame, text='Result text size:')
+        resultSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        resultSizeVariable = tk.StringVar()
+        resultSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=resultSizeVariable)
+        resultSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        resultSizeVariable.set(f'{self.resultSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.resultBoldVariable = tk.BooleanVar()
+        resultBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.resultBoldVariable)
+        resultBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.resultItalicVariable = tk.BooleanVar()
+        resultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.resultItalicVariable)
+        resultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.resultModifiers, self.resultBoldVariable, self.resultItalicVariable)
+
+        self.layoutEndRow(fontFrame, 10)
+        emptyFrames.append(tk.Frame(fontFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(fontFrame, 10)
+
+        fullResultSizeLabel = tk.Label(fontFrame, text='Full result text size:')
+        fullResultSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        fullResultSizeVariable = tk.StringVar()
+        fullResultSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=fullResultSizeVariable)
+        fullResultSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        fullResultSizeVariable.set(f'{self.fullResultSize}')
+        self.layoutEndRow(fontFrame, 10)
+
+        self.fullResultBoldVariable = tk.BooleanVar()
+        fullResultBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.fullResultBoldVariable)
+        fullResultBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.fullResultItalicVariable = tk.BooleanVar()
+        fullResultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.fullResultItalicVariable)
+        fullResultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        timeTowerUtils.setModifiersVariables(self.fullResultModifiers, self.fullResultBoldVariable, self.fullResultItalicVariable)
+
+        fontFamilyVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()),
+                         timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get())),
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()),
+                      timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get())),
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()),
+                       timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get())),
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()),
+                                  timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get())),
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()),
+                        timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get())),
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()),
+                            timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+        rankingSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+        self.rankingBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+        self.rankingItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+        nameSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        self.nameBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        self.nameItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        countSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+        self.countBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+        self.countItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+        incompleteResultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+        self.incompleteResultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+        self.incompleteResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+        resultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        self.resultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        self.resultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        fullResultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+        self.fullResultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+        self.fullResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+
         # End
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get()), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()), layoutWindow))
+            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get(
+            )), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()),
+            fontFamilyVariable.get(),
+            cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()),
+            cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()),
+            cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()),
+            cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(
+                self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()),
+            cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
+            cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(
+                self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
+            layoutWindow))
         OKButton.pack(pady=30)
 
         self.createExampleLines(layoutWindow)

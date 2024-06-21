@@ -68,7 +68,6 @@ class TimeTower:
         self.durationX = timeTowerUtils.DEFAULT_DURATION_X
         self.durationY = timeTowerUtils.DEFAULT_DURATION_Y
 
-        self.layoutWindow = None
         self.currentRow = 0
         self.rankingBoldVariable = None
         self.rankingItalicVariable = None
@@ -337,15 +336,14 @@ class TimeTower:
                                       command=lambda: self.updateRegionCloseButton(regionBox.get(), regionWindow))
         regionCloseButton.pack(padx=20, pady=5)
 
-    def layoutEndRow(self, pad):
-        self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
+    def layoutEndRow(self, frame, pad):
+        frame.rowconfigure(self.currentRow, pad=pad)
         self.currentRow = self.currentRow + 1
 
-    def createExampleLines(self, columnspan, pad):
-        self.exampleCanvas = tk.Canvas(self.layoutWindow, width=timeTowerUtils.LAYOUT_CANVAS_WIDTH,
+    def createExampleLines(self, window):
+        self.exampleCanvas = tk.Canvas(window, width=timeTowerUtils.LAYOUT_CANVAS_WIDTH,
                                        height=timeTowerUtils.LAYOUT_CANVAS_HEIGHT, bg='#FFF')
-        self.exampleCanvas.grid(column=0, columnspan=columnspan, row=self.currentRow)
-        self.layoutEndRow(pad)
+        self.exampleCanvas.pack(pady=5)
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgLocalName, self.bgLocalResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
@@ -451,131 +449,130 @@ class TimeTower:
             window.destroy()
 
     def updateLayout(self):
-        self.layoutWindow = tk.Toplevel(self.root)
-        self.layoutWindow.grab_set()
+        layoutWindow = tk.Toplevel(self.root)
+        layoutWindow.grab_set()
 
+        layoutLabel = tk.Label(layoutWindow, text='Customize the tower layout')
+        layoutLabel.pack(pady=5)
+
+        layoutNotebook = ttk.Notebook(layoutWindow)
+        layoutNotebook.pack(pady=5)
+
+        # Size
+
+        sizeFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(sizeFrame, text='Size')
         self.currentRow = 0
-
         emptyFrames = []
 
-        layoutLabel = tk.Label(self.layoutWindow, text='Customize the tower layout')
-        layoutLabel.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(sizeFrame, 30)
 
-        widthRankingLabel = tk.Label(self.layoutWindow, text='Ranking width:')
+        widthRankingLabel = tk.Label(sizeFrame, text='Ranking width:')
         widthRankingLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthRankingVariable = tk.StringVar()
-        widthRankingSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthRankingVariable)
+        widthRankingSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthRankingVariable)
         widthRankingSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthRankingVariable.set(f'{self.widthRanking}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(sizeFrame, 30)
 
-        flagLabel = tk.Label(self.layoutWindow, text='The flag width will adjust to the given height to keep the flag\'s ratio.\nThe "Flag container width" should be big enough to contain any flag, and allows you to have some padding on the sides of the flag.')
+        flagLabel = tk.Label(sizeFrame, text='The flag width will adjust to the given height to keep the flag\'s ratio.\nThe "Flag container width" should be big enough to contain any flag, and allows you to have some padding on the sides of the flag.')
         flagLabel.grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        widthFlagRectangleLabel = tk.Label(self.layoutWindow, text='Flag container width:')
+        widthFlagRectangleLabel = tk.Label(sizeFrame, text='Flag container width:')
         widthFlagRectangleLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthFlagRectangleVariable = tk.StringVar()
-        widthFlagRectangleSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH,
+        widthFlagRectangleSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH,
                                                textvariable=widthFlagRectangleVariable)
         widthFlagRectangleSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthFlagRectangleVariable.set(f'{self.widthFlagRectangle}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        heightFlagLabel = tk.Label(self.layoutWindow, text='Flag height:')
+        heightFlagLabel = tk.Label(sizeFrame, text='Flag height:')
         heightFlagLabel.grid(column=0, row=self.currentRow, sticky='e')
         heightFlagVariable = tk.StringVar()
-        heightFlagSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=heightFlagVariable)
+        heightFlagSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=heightFlagVariable)
         heightFlagSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         heightFlagVariable.set(f'{self.heightFlag}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(sizeFrame, 30)
 
-        widthNameLabel = tk.Label(self.layoutWindow, text='Abbreviated name width:')
+        widthNameLabel = tk.Label(sizeFrame, text='Abbreviated name width:')
         widthNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthNameVariable = tk.StringVar()
-        widthNameSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthNameVariable)
+        widthNameSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthNameVariable)
         widthNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthNameVariable.set(f'{self.widthName}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        widthFullNameLabel = tk.Label(self.layoutWindow, text='Full name width:')
+        widthFullNameLabel = tk.Label(sizeFrame, text='Full name width:')
         widthFullNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthFullNameVariable = tk.StringVar()
-        widthFullNameSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+        widthFullNameSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
                                           textvariable=widthFullNameVariable)
         widthFullNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthFullNameVariable.set(f'{self.widthFullName}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(sizeFrame, 30)
 
-        widthCountLabel = tk.Label(self.layoutWindow, text='Solve count width:')
+        widthCountLabel = tk.Label(sizeFrame, text='Solve count width:')
         widthCountLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthCountVariable = tk.StringVar()
-        widthCountSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthCountVariable)
+        widthCountSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthCountVariable)
         widthCountSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthCountVariable.set(f'{self.widthCount}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        widthResultLabel = tk.Label(self.layoutWindow, text='Result width:')
+        widthResultLabel = tk.Label(sizeFrame, text='Result width:')
         widthResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthResultVariable = tk.StringVar()
-        widthResultSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthResultVariable)
+        widthResultSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthResultVariable)
         widthResultSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthResultVariable.set(f'{self.widthResult}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        widthFullResultLabel = tk.Label(self.layoutWindow, text='Full results width:')
+        widthFullResultLabel = tk.Label(sizeFrame, text='Full results width:')
         widthFullResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthFullResultVariable = tk.StringVar()
-        widthFullResultSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+        widthFullResultSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
                                             textvariable=widthFullResultVariable)
         widthFullResultSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthFullResultVariable.set(f'{self.widthFullResult}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(sizeFrame, 30)
 
-        heightLabel = tk.Label(self.layoutWindow, text='Line height:')
+        heightLabel = tk.Label(sizeFrame, text='Line height:')
         heightLabel.grid(column=0, row=self.currentRow, sticky='e')
         heightVariable = tk.StringVar()
-        heightSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightVariable)
+        heightSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightVariable)
         heightSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         heightVariable.set(f'{self.height}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        heightSeparatorLabel = tk.Label(self.layoutWindow, text='Height between lines:')
+        heightSeparatorLabel = tk.Label(sizeFrame, text='Height between lines:')
         heightSeparatorLabel.grid(column=0, row=self.currentRow, sticky='e')
         heightSeparatorVariable = tk.StringVar()
-        heightSeparatorSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightSeparatorVariable)
+        heightSeparatorSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightSeparatorVariable)
         heightSeparatorSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         heightSeparatorVariable.set(f'{self.heightSeparator}')
-        self.layoutEndRow(10)
+        self.layoutEndRow(sizeFrame, 10)
 
-        OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get()), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()), self.layoutWindow))
-        OKButton.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(10)
-
-        self.createExampleLines(2, 10)
         widthRankingVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthRanking=cleverInt(widthRankingVariable.get())))
         widthFlagRectangleVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
@@ -596,6 +593,14 @@ class TimeTower:
             height=cleverInt(heightVariable.get())))
         heightSeparatorVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             heightSeparator=cleverInt(heightSeparatorVariable.get())))
+
+        # End
+
+        OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
+            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get()), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()), layoutWindow))
+        OKButton.pack(pady=30)
+
+        self.createExampleLines(layoutWindow)
 
     def updateAnimationSettingsCloseButton(self, durationX, FPSX, durationY, FPSY, window):
         try:

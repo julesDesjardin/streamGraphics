@@ -16,6 +16,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
+from Common.commonUtils import cleverInt
 
 
 class Cards:
@@ -591,42 +592,42 @@ class Cards:
         managerAvatar = DragManager.DragManager(exampleCanvas, exampleAvatarImage, avatarXVariable, avatarYVariable)
         managerName = DragManager.DragManager(exampleCanvas, exampleName, nameXVariable, nameYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
-        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=cardsUtils.cleverInt(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=cardsUtils.cleverInt(widthVariable.get())))
-        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=cardsUtils.cleverInt(widthVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=cardsUtils.cleverInt(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=cardsUtils.cleverInt(heightVariable.get())))
-        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=cardsUtils.cleverInt(heightVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=cleverInt(widthVariable.get())))
+        widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=cleverInt(widthVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(height=cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=cleverInt(heightVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=cleverInt(heightVariable.get())))
         nameFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
         nameSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
         nameXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleName, cardsUtils.cleverInt(nameXVariable.get()), cardsUtils.cleverInt(nameYVariable.get())))
+            exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleName, cardsUtils.cleverInt(nameXVariable.get()), cardsUtils.cleverInt(nameYVariable.get())))
+            exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         textFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
         textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, cardsUtils.cleverInt(textXVariable.get()), cardsUtils.cleverInt(textYVariable.get())))
+            exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleText, cardsUtils.cleverInt(textXVariable.get()), cardsUtils.cleverInt(textYVariable.get())))
+            exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
         flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
-            exampleCanvas, exampleFlagImage, cardsUtils.cleverInt(flagHeightVariable.get())))
+            exampleCanvas, exampleFlagImage, cleverInt(flagHeightVariable.get())))
         flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, cardsUtils.cleverInt(flagXVariable.get()), cardsUtils.cleverInt(flagYVariable.get())))
+            exampleFlagImage, cleverInt(flagXVariable.get()), cleverInt(flagYVariable.get())))
         flagYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
-            exampleFlagImage, cardsUtils.cleverInt(flagXVariable.get()), cardsUtils.cleverInt(flagYVariable.get())))
+            exampleFlagImage, cleverInt(flagXVariable.get()), cleverInt(flagYVariable.get())))
         avatarWidthVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cleverInt(avatarXVariable.get()), cleverInt(avatarYVariable.get()), cleverInt(avatarWidthVariable.get()), cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarHeightVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cleverInt(avatarXVariable.get()), cleverInt(avatarYVariable.get()), cleverInt(avatarWidthVariable.get()), cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarXVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cleverInt(avatarXVariable.get()), cleverInt(avatarYVariable.get()), cleverInt(avatarWidthVariable.get()), cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
         avatarYVariable.trace_add('write', lambda var, index, mode: self.updateAvatar(
-            exampleCanvas, exampleAvatarImage, cardsUtils.cleverInt(avatarXVariable.get()), cardsUtils.cleverInt(avatarYVariable.get()), cardsUtils.cleverInt(avatarWidthVariable.get()), cardsUtils.cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
+            exampleCanvas, exampleAvatarImage, cleverInt(avatarXVariable.get()), cleverInt(avatarYVariable.get()), cleverInt(avatarWidthVariable.get()), cleverInt(avatarHeightVariable.get()), exampleAvatarRectangle))
 
         self.enableButtonCallback(self.flagEnable, [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage])
         self.enableButtonCallback(self.avatarEnable,

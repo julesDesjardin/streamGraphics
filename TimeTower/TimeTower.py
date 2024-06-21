@@ -344,6 +344,7 @@ class TimeTower:
         self.exampleCanvas = tk.Canvas(window, width=timeTowerUtils.LAYOUT_CANVAS_WIDTH,
                                        height=timeTowerUtils.LAYOUT_CANVAS_HEIGHT, bg='#FFF')
         self.exampleCanvas.pack(pady=5)
+        self.exampleLines = []
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgLocalName, self.bgLocalResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),

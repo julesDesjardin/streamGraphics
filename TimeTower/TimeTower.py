@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
-from tkinter import ttk
+from tkinter import ttk, font
 import json
 import queue
 import threading
@@ -10,8 +10,10 @@ import timeTowerUtils
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot
+from Common import TelegramBot, Image
+from Common.commonUtils import cleverInt
 import TimeTowerContent
+import TimeTowerLine
 
 
 class TimeTower:
@@ -65,6 +67,22 @@ class TimeTower:
         self.FPSY = timeTowerUtils.DEFAULT_FPS_Y
         self.durationX = timeTowerUtils.DEFAULT_DURATION_X
         self.durationY = timeTowerUtils.DEFAULT_DURATION_Y
+
+        self.layoutWindow = None
+        self.currentRow = 0
+        self.rankingBoldVariable = None
+        self.rankingItalicVariable = None
+        self.nameBoldVariable = None
+        self.nameItalicVariable = None
+        self.countBoldVariable = None
+        self.countItalicVariable = None
+        self.incompleteResultBoldVariable = None
+        self.incompleteResultItalicVariable = None
+        self.resultBoldVariable = None
+        self.resultItalicVariable = None
+        self.fullResultBoldVariable = None
+        self.fullResultItalicVariable = None
+        self.exampleLines = []
 
         self.showSettingsFrame()
 
@@ -128,7 +146,9 @@ class TimeTower:
             self.content.showFrame()
             self.content.mainLoop()
         else:
-            self.queueUpdate.put((self.region, self.delay, stepXmax, stepYmax, durationX, durationY))
+            self.queueUpdate.put((self.region,
+                                  self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                  self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -317,6 +337,266 @@ class TimeTower:
                                       command=lambda: self.updateRegionCloseButton(regionBox.get(), regionWindow))
         regionCloseButton.pack(padx=20, pady=5)
 
+    def layoutEndRow(self, pad):
+        self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
+        self.currentRow = self.currentRow + 1
+
+    def createExampleLines(self, columnspan, pad):
+        self.exampleCanvas = tk.Canvas(self.layoutWindow, width=timeTowerUtils.LAYOUT_CANVAS_WIDTH,
+                                       height=timeTowerUtils.LAYOUT_CANVAS_HEIGHT, bg='#FFF')
+        self.exampleCanvas.grid(column=0, columnspan=columnspan, row=self.currentRow)
+        self.layoutEndRow(pad)
+        self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgLocalName, self.bgLocalResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             (self.fontFamily, self.rankingSize, self.rankingModifiers),
+                                                             (self.fontFamily, self.nameSize, self.nameModifiers),
+                                                             (self.fontFamily, self.countSize, self.countModifiers),
+                                                             (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
+                                                             (self.fontFamily, self.resultSize, self.resultModifiers),
+                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                                             self.colorLocalName, self.colorLocalResult, self.height, self.heightSeparator, 0, 0, 0, 'PL', 'Tymon Kolasiński', 'average', 1, 1))
+        self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgForeignerName, self.bgForeignerResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             (self.fontFamily, self.rankingSize, self.rankingModifiers),
+                                                             (self.fontFamily, self.nameSize, self.nameModifiers),
+                                                             (self.fontFamily, self.countSize, self.countModifiers),
+                                                             (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
+                                                             (self.fontFamily, self.resultSize, self.resultModifiers),
+                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                                             self.colorForeignerName, self.colorForeignerResult, self.height, self.heightSeparator, 0, 0, 0, 'US', 'Max Park', 'average', 1, 1))
+        self.exampleLines[0].ranking = 1
+        self.exampleLines[0].nextRanking = 1
+        self.exampleLines[0].results = [500, 600, 700, 800, timeTowerUtils.DNF_ATTEMPT]
+        self.exampleLines[0].currentResult = 700
+        self.exampleLines[0].expanded = True
+        self.exampleLines[1].ranking = 2
+        self.exampleLines[1].nextRanking = 2
+        self.exampleLines[1].results = [0, 0, 0, 0]
+        self.exampleLines[1].currentResult = 500
+        for line in self.exampleLines:
+            line.showLine(0, 0)
+
+    def updateExampleLines(self, widthRanking=None, widthFlagRectangle=None, heightFlag=None, widthName=None, widthFullName=None, widthCount=None, widthResult=None, widthFullResult=None, height=None, heightSeparator=None, bgLocalName=None, bgLocalResult=None, bgForeignerName=None, bgForeignerResult=None, fontRanking=None, fontName=None, fontCount=None, fontIncompleteResult=None, fontResult=None, fontFullResult=None, colorLocalName=None, colorLocalResult=None, colorForeignerName=None, colorForeignerResult=None):
+        for line in self.exampleLines:
+            if widthRanking is not None:
+                line.widthRanking = widthRanking
+            if widthFlagRectangle is not None:
+                line.widthFlagRectangle = widthFlagRectangle
+            if heightFlag is not None:
+                line.heightFlag = heightFlag
+                line.flagImage = Image.getFlag(heightFlag, line.country)
+            if widthName is not None:
+                line.widthName = widthName
+            if widthFullName is not None:
+                line.widthFullName = widthFullName
+            if widthCount is not None:
+                line.widthCount = widthCount
+            if widthResult is not None:
+                line.widthResult = widthResult
+            if widthFullResult is not None:
+                line.widthFullResult = widthFullResult
+            if height is not None:
+                line.height = height
+            if heightSeparator is not None:
+                line.heightSeparator = heightSeparator
+            if fontRanking is not None:
+                line.fontRanking = fontRanking
+            if fontName is not None:
+                line.fontName = fontName
+            if fontCount is not None:
+                line.fontCount = fontCount
+            if fontIncompleteResult is not None:
+                line.fontIncompleteResult = fontIncompleteResult
+            if fontResult is not None:
+                line.fontResult = fontResult
+            if fontFullResult is not None:
+                line.fontFullResult = fontFullResult
+        if bgLocalName is not None:
+            self.exampleLines[0].bgName = bgLocalName
+        if bgLocalResult is not None:
+            self.exampleLines[0].bgResult = bgLocalResult
+        if bgForeignerName is not None:
+            self.exampleLines[0].bgName = bgForeignerName
+        if bgForeignerResult is not None:
+            self.exampleLines[0].bgResult = bgForeignerResult
+        if colorLocalName is not None:
+            self.exampleLines[0].colorName = colorLocalName
+        if colorLocalResult is not None:
+            self.exampleLines[0].colorResult = colorLocalResult
+        if colorForeignerName is not None:
+            self.exampleLines[0].colorName = colorForeignerName
+        if colorForeignerResult is not None:
+            self.exampleLines[0].colorResult = colorForeignerResult
+
+        self.exampleCanvas.delete('all')
+        for line in self.exampleLines:
+            line.showLine(0, 0)
+
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, window):
+        try:
+            self.widthRanking = widthRanking
+            self.widthFlagRectangle = widthFlagRectangle
+            self.heightFlag = heightFlag
+            self.widthName = widthName
+            self.widthFullName = widthFullName
+            self.widthCount = widthCount
+            self.widthResult = widthResult
+            self.widthFullResult = widthFullResult
+            self.height = height
+            self.heightSeparator = heightSeparator
+        except:
+            tkinter.messagebox.showerror(title='Layout Settings Error !', message='Error in the settings! Please check all values.')
+        else:
+            self.loadContent()
+            window.destroy()
+
+    def updateLayout(self):
+        self.layoutWindow = tk.Toplevel(self.root)
+        self.layoutWindow.grab_set()
+
+        self.currentRow = 0
+
+        emptyFrames = []
+
+        layoutLabel = tk.Label(self.layoutWindow, text='Customize the tower layout')
+        layoutLabel.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
+        widthRankingLabel = tk.Label(self.layoutWindow, text='Ranking width:')
+        widthRankingLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthRankingVariable = tk.StringVar()
+        widthRankingSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthRankingVariable)
+        widthRankingSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthRankingVariable.set(f'{self.widthRanking}')
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
+        flagLabel = tk.Label(self.layoutWindow, text='The flag width will adjust to the given height to keep the flag\'s ratio.\nThe "Flag container width" should be big enough to contain any flag, and allows you to have some padding on the sides of the flag.')
+        flagLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(10)
+
+        widthFlagRectangleLabel = tk.Label(self.layoutWindow, text='Flag container width:')
+        widthFlagRectangleLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthFlagRectangleVariable = tk.StringVar()
+        widthFlagRectangleSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH,
+                                               textvariable=widthFlagRectangleVariable)
+        widthFlagRectangleSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthFlagRectangleVariable.set(f'{self.widthFlagRectangle}')
+        self.layoutEndRow(10)
+
+        heightFlagLabel = tk.Label(self.layoutWindow, text='Flag height:')
+        heightFlagLabel.grid(column=0, row=self.currentRow, sticky='e')
+        heightFlagVariable = tk.StringVar()
+        heightFlagSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=heightFlagVariable)
+        heightFlagSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        heightFlagVariable.set(f'{self.heightFlag}')
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
+        widthNameLabel = tk.Label(self.layoutWindow, text='Abbreviated name width:')
+        widthNameLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthNameVariable = tk.StringVar()
+        widthNameSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthNameVariable)
+        widthNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthNameVariable.set(f'{self.widthName}')
+        self.layoutEndRow(10)
+
+        widthFullNameLabel = tk.Label(self.layoutWindow, text='Full name width:')
+        widthFullNameLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthFullNameVariable = tk.StringVar()
+        widthFullNameSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+                                          textvariable=widthFullNameVariable)
+        widthFullNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthFullNameVariable.set(f'{self.widthFullName}')
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
+        widthCountLabel = tk.Label(self.layoutWindow, text='Solve count width:')
+        widthCountLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthCountVariable = tk.StringVar()
+        widthCountSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthCountVariable)
+        widthCountSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthCountVariable.set(f'{self.widthCount}')
+        self.layoutEndRow(10)
+
+        widthResultLabel = tk.Label(self.layoutWindow, text='Result width:')
+        widthResultLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthResultVariable = tk.StringVar()
+        widthResultSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthResultVariable)
+        widthResultSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthResultVariable.set(f'{self.widthResult}')
+        self.layoutEndRow(10)
+
+        widthFullResultLabel = tk.Label(self.layoutWindow, text='Full results width:')
+        widthFullResultLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthFullResultVariable = tk.StringVar()
+        widthFullResultSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+                                            textvariable=widthFullResultVariable)
+        widthFullResultSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthFullResultVariable.set(f'{self.widthFullResult}')
+
+        self.layoutEndRow(10)
+        emptyFrames.append(tk.Frame(self.layoutWindow))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(30)
+
+        heightLabel = tk.Label(self.layoutWindow, text='Line height:')
+        heightLabel.grid(column=0, row=self.currentRow, sticky='e')
+        heightVariable = tk.StringVar()
+        heightSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightVariable)
+        heightSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        heightVariable.set(f'{self.height}')
+        self.layoutEndRow(10)
+
+        heightSeparatorLabel = tk.Label(self.layoutWindow, text='Height between lines:')
+        heightSeparatorLabel.grid(column=0, row=self.currentRow, sticky='e')
+        heightSeparatorVariable = tk.StringVar()
+        heightSeparatorSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightSeparatorVariable)
+        heightSeparatorSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        heightSeparatorVariable.set(f'{self.heightSeparator}')
+        self.layoutEndRow(10)
+
+        OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
+            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get()), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()), self.layoutWindow))
+        OKButton.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(10)
+
+        self.createExampleLines(2, 10)
+        widthRankingVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthRanking=cleverInt(widthRankingVariable.get())))
+        widthFlagRectangleVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthFlagRectangle=cleverInt(widthFlagRectangleVariable.get())))
+        heightFlagVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            heightFlag=cleverInt(heightFlagVariable.get())))
+        widthNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthName=cleverInt(widthNameVariable.get())))
+        widthFullNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthFullName=cleverInt(widthFullNameVariable.get())))
+        widthCountVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthCount=cleverInt(widthCountVariable.get())))
+        widthResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthResult=cleverInt(widthResultVariable.get())))
+        widthFullResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthFullResult=cleverInt(widthFullResultVariable.get())))
+        heightVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            height=cleverInt(heightVariable.get())))
+        heightSeparatorVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            heightSeparator=cleverInt(heightSeparatorVariable.get())))
+
     def updateAnimationSettingsCloseButton(self, durationX, FPSX, durationY, FPSY, window):
         try:
             self.durationX = int(durationX)
@@ -418,14 +698,16 @@ class TimeTower:
         delayButton.grid(column=0, row=2)
         regionButton = tk.Button(frame, text='Update championship region', command=self.updateRegion)
         regionButton.grid(column=0, row=3)
+        layoutButton = tk.Button(frame, text='Update layout', command=self.updateLayout)
+        layoutButton.grid(column=0, row=4)
         animationButton = tk.Button(frame, text='Update animation Settings', command=self.updateAnimationSettings)
-        animationButton.grid(column=0, row=4)
+        animationButton.grid(column=0, row=5)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=5)
+        telegramButton.grid(column=0, row=6)
         saveButton = tk.Button(frame, text='Save TimeTower Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=6)
-        saveButton = tk.Button(frame, text='Load TimeTower Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=7)
+        saveButton = tk.Button(frame, text='Load TimeTower Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=8)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -436,3 +718,4 @@ class TimeTower:
         frame.rowconfigure(5, pad=20)
         frame.rowconfigure(6, pad=20)
         frame.rowconfigure(7, pad=20)
+        frame.rowconfigure(8, pad=20)

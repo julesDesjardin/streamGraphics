@@ -267,6 +267,13 @@ DEFAULT_DURATION_Y = 1000
 DEFAULT_FPS_X = 50
 DEFAULT_FPS_Y = 50
 
+LAYOUT_MAX_WIDTH = 200
+LAYOUT_MAX_HEIGHT = 200
+LAYOUT_MAX_EXTENDED_WIDTH = 500
+LAYOUT_MAX_FONT = 50
+LAYOUT_CANVAS_WIDTH = 1000
+LAYOUT_CANVAS_HEIGHT = 400
+
 
 def getQueryResult(query):
     if (DEBUG_MODE_LOCALHOST_LIVE):
@@ -306,3 +313,23 @@ def getAllResults(results, criteria):
         else:
             outputArray.append(f'{getReadableResult(result)}')
     return ' '.join(outputArray)
+
+
+def setModifiersVariables(modifiers, boldVar, italicVar):
+    if 'bold' in modifiers:
+        boldVar.set(True)
+    else:
+        boldVar.set(False)
+    if 'italic' in modifiers:
+        italicVar.set(True)
+    else:
+        italicVar.set(False)
+
+
+def getModifiers(bold, italic):
+    modifiers = []
+    if bold:
+        modifiers.append('bold')
+    if italic:
+        modifiers.append('italic')
+    return ' '.join(modifiers)

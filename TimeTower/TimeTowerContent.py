@@ -121,8 +121,22 @@ class TimeTowerContent:
         # Update layout
 
         try:
-            (self.region, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY) = self.queueUpdate.get(block=False)
+            (self.region,
+             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+             self.height, self.heightSeparator, self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY
+             ) = self.queueUpdate.get(block=False)
             for line in self.lines:
+                line.widthRanking = self.widthRanking
+                line.widthFlagRectangle = self.widthFlagRectangle
+                line.heightFlag = self.heightFlag
+                line.flagImage = Image.getFlag(heightFlag, line.country)
+                line.widthName = self.widthName
+                line.widthFullName = self.widthFullName
+                line.widthCount = self.widthCount
+                line.widthResult = self.widthResult
+                line.widthFullResult = self.widthFullResult
+                line.height = self.height
+                line.heightSeparator = self.heightSeparator
                 line.stepXmax = self.stepXmax
                 line.stepYmax = self.stepYmax
         except:

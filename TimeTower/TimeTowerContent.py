@@ -126,6 +126,8 @@ class TimeTowerContent:
              self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
              self.height, self.heightSeparator, self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY
              ) = self.queueUpdate.get(block=False)
+            self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthFullName + self.widthCount + self.widthResult + self.widthFullResult,
+                                  height=self.maxNumber * (self.height + self.heightSeparator))
             for line in self.lines:
                 line.widthRanking = self.widthRanking
                 line.widthFlagRectangle = self.widthFlagRectangle

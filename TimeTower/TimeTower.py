@@ -505,6 +505,8 @@ class TimeTower:
 
         sizeFrame = tk.Frame(layoutNotebook)
         layoutNotebook.add(sizeFrame, text='Size')
+        sizeFrame.columnconfigure(0, weight=1)
+        sizeFrame.columnconfigure(1, weight=1)
         self.currentRow = 0
         emptyFrames = []
 
@@ -517,7 +519,7 @@ class TimeTower:
 
         self.layoutEndRow(sizeFrame, 10)
         emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(sizeFrame, 30)
 
         flagLabel = tk.Label(sizeFrame, text='The flag width will adjust to the given height to keep the flag\'s ratio.\nThe "Flag container width" should be big enough to contain any flag, and allows you to have some padding on the sides of the flag.')
@@ -542,7 +544,7 @@ class TimeTower:
 
         self.layoutEndRow(sizeFrame, 10)
         emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(sizeFrame, 30)
 
         widthNameLabel = tk.Label(sizeFrame, text='Abbreviated name width:')
@@ -563,7 +565,7 @@ class TimeTower:
 
         self.layoutEndRow(sizeFrame, 10)
         emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(sizeFrame, 30)
 
         widthCountLabel = tk.Label(sizeFrame, text='Solve count width:')
@@ -592,7 +594,7 @@ class TimeTower:
 
         self.layoutEndRow(sizeFrame, 10)
         emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(sizeFrame, 30)
 
         heightLabel = tk.Label(sizeFrame, text='Line height:')
@@ -636,6 +638,8 @@ class TimeTower:
 
         fontFrame = tk.Frame(layoutNotebook)
         layoutNotebook.add(fontFrame, text='Fonts')
+        fontFrame.columnconfigure(0, weight=1)
+        fontFrame.columnconfigure(1, weight=1)
         self.currentRow = 0
         emptyFrames = []
 
@@ -647,7 +651,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 30)
 
         fontFamilyLabel = tk.Label(fontFrame, text='Font:')
@@ -662,7 +666,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         rankingSizeLabel = tk.Label(fontFrame, text='Ranking text size:')
@@ -683,7 +687,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         nameSizeLabel = tk.Label(fontFrame, text='Name text size:')
@@ -704,7 +708,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         countSizeLabel = tk.Label(fontFrame, text='Solves count text size:')
@@ -725,7 +729,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         incompleteResultSizeLabel = tk.Label(fontFrame, text='Incomplete result text size:')
@@ -747,7 +751,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         resultSizeLabel = tk.Label(fontFrame, text='Result text size:')
@@ -768,7 +772,7 @@ class TimeTower:
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
         fullResultSizeLabel = tk.Label(fontFrame, text='Full result text size:')
@@ -841,6 +845,8 @@ class TimeTower:
 
         colorFrame = tk.Frame(layoutNotebook)
         layoutNotebook.add(colorFrame, text='Colors')
+        colorFrame.columnconfigure(0, weight=1)
+        colorFrame.columnconfigure(1, weight=1)
         self.currentRow = 0
         emptyFrames = []
 
@@ -849,7 +855,7 @@ class TimeTower:
 
         self.layoutEndRow(colorFrame, 10)
         emptyFrames.append(tk.Frame(colorFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 30)
 
         localColorLabel = tk.Label(colorFrame, text='Local competitors:')
@@ -859,26 +865,26 @@ class TimeTower:
         bgLocalNameVariable = tk.StringVar()
         bgLocalNameVariable.set(self.bgLocalName)
         bgLocalNameButton = tk.Button(colorFrame, text='Local name background', command=lambda: self.updateColorButton(bgLocalNameVariable))
-        bgLocalNameButton.grid(column=0, row=self.currentRow)
+        bgLocalNameButton.grid(column=0, row=self.currentRow, sticky='e')
         colorLocalNameVariable = tk.StringVar()
         colorLocalNameVariable.set(self.colorLocalName)
         colorLocalNameButton = tk.Button(colorFrame, text='Local name text color', command=lambda: self.updateColorButton(colorLocalNameVariable))
-        colorLocalNameButton.grid(column=1, row=self.currentRow)
+        colorLocalNameButton.grid(column=1, row=self.currentRow, sticky='w')
         self.layoutEndRow(colorFrame, 10)
 
         bgLocalResultVariable = tk.StringVar()
         bgLocalResultVariable.set(self.bgLocalResult)
         bgLocalResultButton = tk.Button(colorFrame, text='Local results background', command=lambda: self.updateColorButton(bgLocalResultVariable))
-        bgLocalResultButton.grid(column=0, row=self.currentRow)
+        bgLocalResultButton.grid(column=0, row=self.currentRow, sticky='e')
         colorLocalResultVariable = tk.StringVar()
         colorLocalResultVariable.set(self.colorLocalResult)
         colorLocalResultButton = tk.Button(colorFrame, text='Local results text color',
                                            command=lambda: self.updateColorButton(colorLocalResultVariable))
-        colorLocalResultButton.grid(column=1, row=self.currentRow)
+        colorLocalResultButton.grid(column=1, row=self.currentRow, sticky='w')
 
         self.layoutEndRow(colorFrame, 10)
         emptyFrames.append(tk.Frame(colorFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 30)
 
         localColorLabel = tk.Label(colorFrame, text='Foreign competitors:')
@@ -889,24 +895,24 @@ class TimeTower:
         bgForeignerNameVariable.set(self.bgForeignerName)
         bgForeignerNameButton = tk.Button(colorFrame, text='Foreigner name background',
                                           command=lambda: self.updateColorButton(bgForeignerNameVariable))
-        bgForeignerNameButton.grid(column=0, row=self.currentRow)
+        bgForeignerNameButton.grid(column=0, row=self.currentRow, sticky='e')
         colorForeignerNameVariable = tk.StringVar()
         colorForeignerNameVariable.set(self.colorForeignerName)
         colorForeignerNameButton = tk.Button(colorFrame, text='Foreigner name text color',
                                              command=lambda: self.updateColorButton(colorForeignerNameVariable))
-        colorForeignerNameButton.grid(column=1, row=self.currentRow)
+        colorForeignerNameButton.grid(column=1, row=self.currentRow, sticky='w')
         self.layoutEndRow(colorFrame, 10)
 
         bgForeignerResultVariable = tk.StringVar()
         bgForeignerResultVariable.set(self.bgForeignerResult)
         bgForeignerResultButton = tk.Button(colorFrame, text='Foreigner results background',
                                             command=lambda: self.updateColorButton(bgForeignerResultVariable))
-        bgForeignerResultButton.grid(column=0, row=self.currentRow)
+        bgForeignerResultButton.grid(column=0, row=self.currentRow, sticky='e')
         colorForeignerResultVariable = tk.StringVar()
         colorForeignerResultVariable.set(self.colorForeignerResult)
         colorForeignerResultButton = tk.Button(colorFrame, text='Foreigner results text color',
                                                command=lambda: self.updateColorButton(colorForeignerResultVariable))
-        colorForeignerResultButton.grid(column=1, row=self.currentRow)
+        colorForeignerResultButton.grid(column=1, row=self.currentRow, sticky='w')
         self.layoutEndRow(colorFrame, 10)
 
         bgLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalName=bgLocalNameVariable.get()))
@@ -926,6 +932,8 @@ class TimeTower:
 
         animationFrame = tk.Frame(layoutNotebook)
         layoutNotebook.add(animationFrame, text='Animation')
+        animationFrame.columnconfigure(0, weight=1)
+        animationFrame.columnconfigure(1, weight=1)
         self.currentRow = 0
         emptyFrames = []
 

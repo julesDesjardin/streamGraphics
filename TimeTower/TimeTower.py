@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk, font
+from tkinter.colorchooser import askcolor
 import json
 import queue
 import threading
@@ -153,7 +154,12 @@ class TimeTower:
                                   (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                   (self.fontFamily, self.resultSize, self.resultModifiers),
                                   (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
-                                  self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY))
+                                  self.height, self.heightSeparator,
+                                  self.bgLocalName, self.bgLocalResult,
+                                  self.bgForeignerName, self.bgForeignerResult,
+                                  self.colorLocalName, self.colorLocalResult,
+                                  self.colorForeignerName, self.colorForeignerResult,
+                                  self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -421,23 +427,28 @@ class TimeTower:
         if bgLocalResult is not None:
             self.exampleLines[0].bgResult = bgLocalResult
         if bgForeignerName is not None:
-            self.exampleLines[0].bgName = bgForeignerName
+            self.exampleLines[1].bgName = bgForeignerName
         if bgForeignerResult is not None:
-            self.exampleLines[0].bgResult = bgForeignerResult
+            self.exampleLines[1].bgResult = bgForeignerResult
         if colorLocalName is not None:
             self.exampleLines[0].colorName = colorLocalName
         if colorLocalResult is not None:
             self.exampleLines[0].colorResult = colorLocalResult
         if colorForeignerName is not None:
-            self.exampleLines[0].colorName = colorForeignerName
+            self.exampleLines[1].colorName = colorForeignerName
         if colorForeignerResult is not None:
-            self.exampleLines[0].colorResult = colorForeignerResult
+            self.exampleLines[1].colorResult = colorForeignerResult
 
         self.exampleCanvas.delete('all')
         for line in self.exampleLines:
             line.showLine(0, 0)
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, window):
+    def updateColorButton(self, variable):
+        colors = askcolor(variable.get(), title='Pick a color')
+        if colors[1] is not None:
+            variable.set(colors[1])
+
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -462,6 +473,14 @@ class TimeTower:
             self.resultModifiers = resultModifiers
             self.fullResultSize = fullResultSize
             self.fullResultModifiers = fullResultModifiers
+            self.bgLocalName = bgLocalName
+            self.bgLocalResult = bgLocalResult
+            self.bgForeignerName = bgForeignerName
+            self.bgForeignerResult = bgForeignerResult
+            self.colorLocalName = colorLocalName
+            self.colorLocalResult = colorLocalResult
+            self.colorForeignerName = colorForeignerName
+            self.colorForeignerResult = colorForeignerResult
         except:
             tkinter.messagebox.showerror(title='Layout Settings Error !', message='Error in the settings! Please check all values.')
         else:
@@ -814,6 +833,91 @@ class TimeTower:
         self.fullResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
 
+        # Colors
+
+        colorFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(colorFrame, text='Colors')
+        self.currentRow = 0
+        emptyFrames = []
+
+        colorLabel = tk.Label(colorFrame, text='Customize the colors')
+        colorLabel.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(colorFrame, 10)
+        emptyFrames.append(tk.Frame(colorFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 30)
+
+        localColorLabel = tk.Label(colorFrame, text='Local competitors:')
+        localColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        bgLocalNameVariable = tk.StringVar()
+        bgLocalNameVariable.set(self.bgLocalName)
+        bgLocalNameButton = tk.Button(colorFrame, text='Local name background', command=lambda: self.updateColorButton(bgLocalNameVariable))
+        bgLocalNameButton.grid(column=0, row=self.currentRow)
+        colorLocalNameVariable = tk.StringVar()
+        colorLocalNameVariable.set(self.colorLocalName)
+        colorLocalNameButton = tk.Button(colorFrame, text='Local name text color', command=lambda: self.updateColorButton(colorLocalNameVariable))
+        colorLocalNameButton.grid(column=1, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        bgLocalResultVariable = tk.StringVar()
+        bgLocalResultVariable.set(self.bgLocalResult)
+        bgLocalResultButton = tk.Button(colorFrame, text='Local results background', command=lambda: self.updateColorButton(bgLocalResultVariable))
+        bgLocalResultButton.grid(column=0, row=self.currentRow)
+        colorLocalResultVariable = tk.StringVar()
+        colorLocalResultVariable.set(self.colorLocalResult)
+        colorLocalResultButton = tk.Button(colorFrame, text='Local results text color',
+                                           command=lambda: self.updateColorButton(colorLocalResultVariable))
+        colorLocalResultButton.grid(column=1, row=self.currentRow)
+
+        self.layoutEndRow(colorFrame, 10)
+        emptyFrames.append(tk.Frame(colorFrame))
+        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 30)
+
+        localColorLabel = tk.Label(colorFrame, text='Foreign competitors:')
+        localColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        bgForeignerNameVariable = tk.StringVar()
+        bgForeignerNameVariable.set(self.bgForeignerName)
+        bgForeignerNameButton = tk.Button(colorFrame, text='Foreigner name background',
+                                          command=lambda: self.updateColorButton(bgForeignerNameVariable))
+        bgForeignerNameButton.grid(column=0, row=self.currentRow)
+        colorForeignerNameVariable = tk.StringVar()
+        colorForeignerNameVariable.set(self.colorForeignerName)
+        colorForeignerNameButton = tk.Button(colorFrame, text='Foreigner name text color',
+                                             command=lambda: self.updateColorButton(colorForeignerNameVariable))
+        colorForeignerNameButton.grid(column=1, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        bgForeignerResultVariable = tk.StringVar()
+        bgForeignerResultVariable.set(self.bgForeignerResult)
+        bgForeignerResultButton = tk.Button(colorFrame, text='Foreigner results background',
+                                            command=lambda: self.updateColorButton(bgForeignerResultVariable))
+        bgForeignerResultButton.grid(column=0, row=self.currentRow)
+        colorForeignerResultVariable = tk.StringVar()
+        colorForeignerResultVariable.set(self.colorForeignerResult)
+        colorForeignerResultButton = tk.Button(colorFrame, text='Foreigner results text color',
+                                               command=lambda: self.updateColorButton(colorForeignerResultVariable))
+        colorForeignerResultButton.grid(column=1, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        bgLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalName=bgLocalNameVariable.get()))
+        colorLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(colorLocalName=colorLocalNameVariable.get()))
+        bgLocalResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalResult=bgLocalResultVariable.get()))
+        colorLocalResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            colorLocalResult=colorLocalResultVariable.get()))
+        bgForeignerNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgForeignerName=bgForeignerNameVariable.get()))
+        colorForeignerNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            colorForeignerName=colorForeignerNameVariable.get()))
+        bgForeignerResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            bgForeignerResult=bgForeignerResultVariable.get()))
+        colorForeignerResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            colorForeignerResult=colorForeignerResultVariable.get()))
+
         # End
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
@@ -828,6 +932,10 @@ class TimeTower:
             cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
             cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(
                 self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
+            bgLocalNameVariable.get(), bgLocalResultVariable.get(),
+            bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),
+            colorLocalNameVariable.get(), colorLocalResultVariable.get(),
+            colorForeignerNameVariable.get(), colorForeignerResultVariable.get(),
             layoutWindow))
         OKButton.pack(pady=30)
 

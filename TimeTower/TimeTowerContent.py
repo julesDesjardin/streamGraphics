@@ -145,12 +145,12 @@ class TimeTowerContent:
                 line.widthFullResult = self.widthFullResult
                 line.height = self.height
                 line.heightSeparator = self.heightSeparator
-                line.fontRanking = fontRanking
-                line.fontName = fontName
-                line.fontCount = fontCount
-                line.fontIncompleteResult = fontIncompleteResult
-                line.fontResult = fontResult
-                line.fontFullResult = fontFullResult
+                line.fontRanking = self.fontRanking
+                line.fontName = self.fontName
+                line.fontCount = self.fontCount
+                line.fontIncompleteResult = self.fontIncompleteResult
+                line.fontResult = self.fontResult
+                line.fontFullResult = self.fontFullResult
                 line.stepXmax = self.stepXmax
                 line.stepYmax = self.stepYmax
         except:

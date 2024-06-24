@@ -510,6 +510,14 @@ class TimeTower:
         self.currentRow = 0
         emptyFrames = []
 
+        sizeLabel = tk.Label(sizeFrame, text='Customize the tower size')
+        sizeLabel.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(sizeFrame, 30)
+
         widthRankingLabel = tk.Label(sizeFrame, text='Ranking width:')
         widthRankingLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthRankingVariable = tk.StringVar()
@@ -646,8 +654,8 @@ class TimeTower:
         fonts = list(font.families())
         fonts.sort()
 
-        layoutLabel = tk.Label(fontFrame, text='Customize the tower fonts')
-        layoutLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        fontLabel = tk.Label(fontFrame, text='Customize the tower fonts')
+        fontLabel.grid(column=0, columnspan=2, row=self.currentRow)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -937,7 +945,7 @@ class TimeTower:
         self.currentRow = 0
         emptyFrames = []
 
-        animationLabel = tk.Label(colorFrame, text='Customize the animation parameters')
+        animationLabel = tk.Label(animationFrame, text='Customize the animation parameters')
         animationLabel.grid(column=0, columnspan=2, row=self.currentRow)
 
         self.layoutEndRow(animationFrame, 10)

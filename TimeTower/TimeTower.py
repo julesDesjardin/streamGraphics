@@ -448,7 +448,7 @@ class TimeTower:
         if colors[1] is not None:
             variable.set(colors[1])
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -481,6 +481,10 @@ class TimeTower:
             self.colorLocalResult = colorLocalResult
             self.colorForeignerName = colorForeignerName
             self.colorForeignerResult = colorForeignerResult
+            self.durationX = durationX
+            self.FPSX = FPSX
+            self.durationY = durationY
+            self.FPSY = FPSY
         except:
             tkinter.messagebox.showerror(title='Layout Settings Error !', message='Error in the settings! Please check all values.')
         else:
@@ -918,6 +922,56 @@ class TimeTower:
         colorForeignerResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             colorForeignerResult=colorForeignerResultVariable.get()))
 
+        # Animation
+
+        animationFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(animationFrame, text='Animation')
+        self.currentRow = 0
+        emptyFrames = []
+
+        animationLabel = tk.Label(colorFrame, text='Customize the animation parameters')
+        animationLabel.grid(column=0, columnspan=2, row=self.currentRow)
+
+        self.layoutEndRow(animationFrame, 10)
+        emptyFrames.append(tk.Frame(animationFrame))
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(animationFrame, 30)
+
+        durationXLabel = tk.Label(animationFrame, text='Duration of expansion/reduction of a focused line (in milliseconds)')
+        durationXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        durationXVariable = tk.StringVar()
+        durationXSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=10000, textvariable=durationXVariable)
+        durationXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        durationXVariable.set(f'{self.durationX}')
+        self.layoutEndRow(animationFrame, 10)
+
+        FPSXLabel = tk.Label(animationFrame, text='FPS for expansion/reduction of a focused line')
+        FPSXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        FPSXVariable = tk.StringVar()
+        FPSXSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSXVariable)
+        FPSXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        FPSXVariable.set(f'{self.FPSX}')
+
+        self.layoutEndRow(animationFrame, 10)
+        emptyFrames.append(tk.Frame(animationFrame))
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(animationFrame, 30)
+
+        durationYLabel = tk.Label(animationFrame, text='Duration of ranking update')
+        durationYLabel.grid(column=0, row=self.currentRow, sticky='e')
+        durationYVariable = tk.StringVar()
+        durationYSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=10000, textvariable=durationYVariable)
+        durationYSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        durationYVariable.set(f'{self.durationY}')
+        self.layoutEndRow(animationFrame, 10)
+
+        FPSYLabel = tk.Label(animationFrame, text='FPS for ranking update')
+        FPSYLabel.grid(column=0, row=self.currentRow, sticky='e')
+        FPSYVariable = tk.StringVar()
+        FPSYSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSYVariable)
+        FPSYSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        FPSYVariable.set(f'{self.FPSY}')
+
         # End
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
@@ -936,6 +990,8 @@ class TimeTower:
             bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),
             colorLocalNameVariable.get(), colorLocalResultVariable.get(),
             colorForeignerNameVariable.get(), colorForeignerResultVariable.get(),
+            cleverInt(durationXVariable.get()), cleverInt(FPSXVariable.get()),
+            cleverInt(durationYVariable.get()), cleverInt(FPSYVariable.get()),
             layoutWindow))
         OKButton.pack(pady=30)
 
@@ -952,48 +1008,6 @@ class TimeTower:
         else:
             self.loadContent()
             window.destroy()
-
-    def updateAnimationSettings(self):
-        animationWindow = tk.Toplevel(self.root)
-        animationWindow.grab_set()
-        animationWindow.columnconfigure(0, pad=10)
-        animationWindow.columnconfigure(1, pad=10)
-        animationWindow.rowconfigure(0, pad=10)
-        animationWindow.rowconfigure(1, pad=10)
-        animationWindow.rowconfigure(2, pad=10)
-        animationWindow.rowconfigure(3, pad=10)
-        animationWindow.rowconfigure(4, pad=10)
-        animationWindow.rowconfigure(5, pad=50)
-        animationLabel = tk.Label(animationWindow, text='Update animation settings for expanding lines and updating results')
-        animationLabel.grid(row=0, column=0, columnspan=2)
-        durationXLabel = tk.Label(animationWindow, text='Duration of expansion/reduction of a focused line (in milliseconds)')
-        durationXLabel.grid(row=1, column=0, sticky='e')
-        durationXVariable = tk.StringVar()
-        durationXSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=10000, textvariable=durationXVariable)
-        durationXSpinbox.grid(row=1, column=1, sticky='w')
-        durationXVariable.set(f'{self.durationX}')
-        FPSXLabel = tk.Label(animationWindow, text='FPS for expansion/reduction of a focused line')
-        FPSXLabel.grid(row=2, column=0, sticky='e')
-        FPSXVariable = tk.StringVar()
-        FPSXSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=100, textvariable=FPSXVariable)
-        FPSXSpinbox.grid(row=2, column=1, sticky='w')
-        FPSXVariable.set(f'{self.FPSX}')
-        durationYLabel = tk.Label(animationWindow, text='Duration of ranking update')
-        durationYLabel.grid(row=3, column=0, sticky='e')
-        durationYVariable = tk.StringVar()
-        durationYSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=10000, textvariable=durationYVariable)
-        durationYSpinbox.grid(row=3, column=1, sticky='w')
-        durationYVariable.set(f'{self.durationY}')
-        FPSYLabel = tk.Label(animationWindow, text='FPS for ranking update')
-        FPSYLabel.grid(row=4, column=0, sticky='e')
-        FPSYVariable = tk.StringVar()
-        FPSYSpinbox = tk.Spinbox(animationWindow, width=20, from_=0, to=100, textvariable=FPSYVariable)
-        FPSYSpinbox.grid(row=4, column=1, sticky='w')
-        FPSYVariable.set(f'{self.FPSY}')
-
-        OKButton = tk.Button(animationWindow, text='OK', command=lambda: self.updateAnimationSettingsCloseButton(
-            durationXVariable.get(), FPSXVariable.get(), durationYVariable.get(), FPSYVariable.get(), animationWindow))
-        OKButton.grid(row=5, column=0, columnspan=2)
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
@@ -1044,14 +1058,12 @@ class TimeTower:
         regionButton.grid(column=0, row=3)
         layoutButton = tk.Button(frame, text='Update layout', command=self.updateLayout)
         layoutButton.grid(column=0, row=4)
-        animationButton = tk.Button(frame, text='Update animation Settings', command=self.updateAnimationSettings)
-        animationButton.grid(column=0, row=5)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=6)
+        telegramButton.grid(column=0, row=5)
         saveButton = tk.Button(frame, text='Save TimeTower Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=7)
+        saveButton.grid(column=0, row=6)
         saveButton = tk.Button(frame, text='Load TimeTower Settings...', command=self.loadSettings)
-        saveButton.grid(column=0, row=8)
+        saveButton.grid(column=0, row=7)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -1062,4 +1074,3 @@ class TimeTower:
         frame.rowconfigure(5, pad=20)
         frame.rowconfigure(6, pad=20)
         frame.rowconfigure(7, pad=20)
-        frame.rowconfigure(8, pad=20)

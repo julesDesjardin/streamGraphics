@@ -16,7 +16,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify
 
 
 class Cards:
@@ -53,11 +53,13 @@ class Cards:
         self.nameFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.nameSize = cardsUtils.DEFAULT_FONT_SIZE
         self.nameModifiers = ''
+        self.nameAnchor = 'nw'
         self.nameX = 0
         self.nameY = 0
         self.textFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.textSize = cardsUtils.DEFAULT_FONT_SIZE
         self.textModifiers = ''
+        self.textAnchor = 'nw'
         self.textX = 0
         self.textY = 0
         self.flagEnable = True
@@ -78,9 +80,9 @@ class Cards:
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.backgroundLoopIndices.append(-1)
             self.names.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.nameFont, self.nameSize), text=f'Camera {i+1} competitor', anchor='nw'))
+                              font=(self.nameFont, self.nameSize), text=f'Camera {i+1} competitor', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.textFont, self.textSize), text=f'Camera {i+1} text', anchor='nw'))
+                              font=(self.textFont, self.textSize), text=f'Camera {i+1} text', anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
             self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
@@ -262,7 +264,7 @@ class Cards:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height, intro, loop))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameX, nameY, textFont, textSize, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameAnchor, nameX, nameY, textFont, textSize, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
@@ -274,10 +276,12 @@ class Cards:
         self.height = height
         self.nameFont = nameFont
         self.nameSize = nameSize
+        self.nameAnchor = nameAnchor
         self.nameX = nameX
         self.nameY = nameY
         self.textFont = textFont
         self.textSize = textSize
+        self.textAnchor = textAnchor
         self.textX = textX
         self.textY = textY
         self.flagEnable = flagEnable
@@ -437,6 +441,25 @@ class Cards:
         nameYVariable.set(f'{self.nameY}')
 
         self.layoutEndRow(10)
+
+        nameAnchorXVariable = tk.StringVar()
+        nameAnchorYVariable = tk.StringVar()
+        setAnchorVariables(self.nameAnchor, nameAnchorXVariable, nameAnchorYVariable)
+        nameAnchorXLabel = tk.Label(self.layoutWindow, text='Horizontal alignment')
+        nameAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        nameAnchorXMenu = ttk.Combobox(self.layoutWindow, textvariable=nameAnchorXVariable, values=['Left', 'Center', 'Right'])
+        nameAnchorXMenu.set(nameAnchorXVariable.get())
+        nameAnchorXMenu['state'] = 'readonly'
+        nameAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        nameAnchorYLabel = tk.Label(self.layoutWindow, text='Vertical alignment')
+        nameAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
+        nameAnchorYMenu = ttk.Combobox(self.layoutWindow, textvariable=nameAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        nameAnchorYMenu.set(nameAnchorYVariable.get())
+        nameAnchorYMenu['state'] = 'readonly'
+        nameAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
+
+        self.layoutEndRow(10)
         emptyFrames.append(tk.Frame(self.layoutWindow))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
@@ -487,6 +510,25 @@ class Cards:
         textYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=textYVariable)
         textYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         textYVariable.set(f'{self.textY}')
+
+        self.layoutEndRow(10)
+
+        textAnchorXVariable = tk.StringVar()
+        textAnchorYVariable = tk.StringVar()
+        setAnchorVariables(self.textAnchor, textAnchorXVariable, textAnchorYVariable)
+        textAnchorXLabel = tk.Label(self.layoutWindow, text='Horizontal alignment')
+        textAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        textAnchorXMenu = ttk.Combobox(self.layoutWindow, textvariable=textAnchorXVariable, values=['Left', 'Center', 'Right'])
+        textAnchorXMenu.set(textAnchorXVariable.get())
+        textAnchorXMenu['state'] = 'readonly'
+        textAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        textAnchorYLabel = tk.Label(self.layoutWindow, text='Vertical alignment')
+        textAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
+        textAnchorYMenu = ttk.Combobox(self.layoutWindow, textvariable=textAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        textAnchorYMenu.set(textAnchorYVariable.get())
+        textAnchorYMenu['state'] = 'readonly'
+        textAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
 
         self.layoutEndRow(10)
         emptyFrames.append(tk.Frame(self.layoutWindow))
@@ -593,7 +635,14 @@ class Cards:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), int(widthVariable.get()), int(heightVariable.get()), nameFontVariable.get(), int(nameSizeVariable.get()), int(nameXVariable.get()), int(nameYVariable.get()), textFontVariable.get(), int(textSizeVariable.get()), int(textXVariable.get()), int(textYVariable.get()), flagEnableVariable.get(), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()), avatarEnableVariable.get(), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
+            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(),
+            int(widthVariable.get()), int(heightVariable.get()),
+            nameFontVariable.get(), int(nameSizeVariable.get()), getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
+            int(nameXVariable.get()), int(nameYVariable.get()),
+            textFontVariable.get(), int(textSizeVariable.get()), getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
+            int(textXVariable.get()), int(textYVariable.get()),
+            flagEnableVariable.get(), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()),
+            avatarEnableVariable.get(), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
         OKButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
@@ -612,9 +661,9 @@ class Cards:
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
         exampleName = exampleCanvas.create_text(
-            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), text=f'Competitor name', anchor='nw')
+            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize),
-                                                text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor='nw')
+                                                text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor=self.textAnchor, justify=getJustify(self.textAnchor))
         exampleAvatarRectangle = exampleCanvas.create_rectangle(
             self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))
 
@@ -636,6 +685,12 @@ class Cards:
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         self.nameItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        nameAnchorXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, anchor=getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
+            justify=getJustify(getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()))))
+        nameAnchorYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, anchor=getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
+            justify=getJustify(getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()))))
         nameXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
@@ -648,6 +703,12 @@ class Cards:
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         self.textItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
+        textAnchorXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, anchor=getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
+            justify=getJustify(getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()))))
+        textAnchorYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, anchor=getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
+            justify=getJustify(getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()))))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

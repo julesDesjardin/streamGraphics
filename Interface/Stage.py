@@ -1,8 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
-import utils
 import WCIFParse
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+from Common.commonUtils import colorButtonCommand, getTextColorFromBackground
 
 
 class Stage:
@@ -109,37 +113,6 @@ class Stage:
     def setRound(self, round):
         self.roundVar.set(round)
 
-    def updateTextColorFromBackground(self):
-        red = int(self.backgroundColor[1:3], 16)
-        green = int(self.backgroundColor[3:5], 16)
-        blue = int(self.backgroundColor[5:7], 16)
-        if (red * 0.299 + green * 0.587 + blue * 0.114) > 186:
-            self.textColor = '#000000'
-        else:
-            self.textColor = '#ffffff'
-
-    def updateButtonsAndFrame(self, sampleUnclickedButton, sampleClickedButton):
-        self.frame.configure(bg=self.backgroundColor)
-        self.eventLabel.configure(bg=self.backgroundColor, fg=self.textColor)
-        self.roundLabel.configure(bg=self.backgroundColor, fg=self.textColor)
-        self.groupLabel.configure(bg=self.backgroundColor, fg=self.textColor)
-        sampleUnclickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
-        sampleClickedButton.configure(bg=self.backgroundColor, fg=self.textColor)
-
-    def getColorSchedule(self, venue, room, sampleUnclickedButton, sampleClickedButton):
-        venueId = WCIFParse.getVenueId(self.wcif, venue)
-        roomId = WCIFParse.getRoomId(self.wcif, venueId, room)
-        color = WCIFParse.getRoomColor(self.wcif, venueId, roomId)
-        self.backgroundColor = color
-        self.updateTextColorFromBackground()
-        self.updateButtonsAndFrame(sampleUnclickedButton, sampleClickedButton)
-
-    def updateColor(self, sampleUnclickedButton, sampleClickedButton):
-        colors = askcolor(self.backgroundColor, title='Background color')
-        self.backgroundColor = colors[1]
-        self.updateTextColorFromBackground()
-        self.updateButtonsAndFrame(sampleUnclickedButton, sampleClickedButton)
-
     def updateRoomMenu(self, venueVar, roomMenu, roomVar):
         menu = roomMenu['menu']
         menu.delete(0, 'end')
@@ -148,9 +121,15 @@ class Stage:
             menu.add_command(label=room, command=lambda value=room: roomVar.set(value))
         roomVar.set(rooms[0])
 
-    def updateWindowCloseButton(self, venue, room, window):
+    def updateWindowCloseButton(self, venue, room, color, window):
         self.venue = WCIFParse.getVenueId(self.wcif, venue)
         self.room = WCIFParse.getRoomId(self.wcif, self.venue, room)
+        self.backgroundColor = color
+        self.textColor = getTextColorFromBackground(self.backgroundColor)
+        self.frame.configure(bg=self.backgroundColor)
+        self.eventLabel.configure(bg=self.backgroundColor, fg=self.textColor)
+        self.roundLabel.configure(bg=self.backgroundColor, fg=self.textColor)
+        self.groupLabel.configure(bg=self.backgroundColor, fg=self.textColor)
         self.eventVar.set('3x3x3')  # Will reload rounds and groups in the display
         window.destroy()
 
@@ -174,7 +153,20 @@ class Stage:
             self.wcif, self.venue, self.room), *WCIFParse.getRooms(self.wcif, self.venue))
         roomMenu.grid(sticky='W', row=2, column=1)
         venueVar.trace_add('write', lambda var, index, mode: self.updateRoomMenu(venueVar, roomMenu, roomVar))
-        # Defining sample buttons before edit buttons because they are needed for the callback
+
+        getColorScheduleButton = tk.Button(window, text='Get color from schedule',
+                                           command=lambda: bgColorVariable.set(WCIFParse.getColorFromSchedule(self.wcif, venueVar.get(), roomVar.get())))
+        getColorScheduleButton.grid(row=3, column=0, columnspan=2)
+        bgColorLabel = tk.Label(window, text='Color:')
+        bgColorLabel.grid(row=4, column=0, sticky='e')
+        bgColorVariable = tk.StringVar()
+        bgColorVariable.set(self.backgroundColor)
+        bgColorButtonFrame = tk.Frame(window, highlightbackground='black', highlightthickness=1)
+        bgColorButtonFrame.grid(row=4, column=1, sticky='w')
+        bgColorButton = tk.Button(bgColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
+        bgColorButton.configure(command=lambda: colorButtonCommand(bgColorButton, bgColorVariable, 'Stage color'))
+        bgColorButton.pack()
+
         sampleUnclickedFrame = tk.Frame(window, highlightbackground='white', highlightthickness=2)
         sampleUnclickedFrame.grid(sticky='E', row=5, column=0)
         sampleUnclickedButton = tk.Button(sampleUnclickedFrame, text='Sample unclicked button', bg=self.backgroundColor, fg=self.textColor)
@@ -185,12 +177,15 @@ class Stage:
         sampleClickedButton = tk.Button(sampleClickedFrame, text='Sample clicked button', bg=self.backgroundColor, fg=self.textColor)
         sampleClickedButton.configure(relief=tk.SUNKEN)
         sampleClickedButton.pack()
-        getColorScheduleButton = tk.Button(window, text='Get color from schedule',
-                                           command=lambda: self.getColorSchedule(venueVar.get(), roomVar.get(), sampleUnclickedButton, sampleClickedButton))
-        getColorScheduleButton.grid(row=3, column=0, columnspan=2)
-        bgColorButton = tk.Button(window, text='Choose color', command=lambda: self.updateColor(sampleUnclickedButton, sampleClickedButton))
-        bgColorButton.grid(row=4, column=0, columnspan=2)
-        OKButton = tk.Button(window, text='OK', command=lambda: self.updateWindowCloseButton(venueVar.get(), roomVar.get(), window))
+
+        bgColorVariable.trace_add('write', lambda var, index, mode:
+                                  sampleUnclickedButton.configure(bg=bgColorVariable.get(), fg=getTextColorFromBackground(bgColorVariable.get())))
+        bgColorVariable.trace_add('write', lambda var, index, mode:
+                                  sampleClickedButton.configure(bg=bgColorVariable.get(), fg=getTextColorFromBackground(bgColorVariable.get())))
+        bgColorVariable.trace_add('write', lambda var, index, mode: bgColorButton.configure(bg=bgColorVariable.get()))
+
+        OKButton = tk.Button(window, text='OK', command=lambda:
+                             self.updateWindowCloseButton(venueVar.get(), roomVar.get(), bgColorVariable.get(), window))
         OKButton.grid(row=6, column=0, columnspan=2)
 
         window.rowconfigure(0, pad=20)

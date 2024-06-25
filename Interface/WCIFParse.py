@@ -168,3 +168,9 @@ def getCompetitorName(wcif, competitor):
 
 def getAvatar(wcif, competitor):
     return wcif['persons'][competitor]['avatar']['url']
+
+
+def getColorFromSchedule(wcif, venue, room):
+    venueId = getVenueId(wcif, venue)
+    roomId = getRoomId(wcif, venueId, room)
+    return getRoomColor(wcif, venueId, roomId)

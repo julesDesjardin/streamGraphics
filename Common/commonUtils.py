@@ -103,3 +103,13 @@ def colorButtonCommand(button, var, title):
     if colors[1] is not None:
         button.configure(background=colors[1])
         var.set(colors[1])
+
+
+def getTextColorFromBackground(bg):
+    red = int(bg[1:3], 16)
+    green = int(bg[3:5], 16)
+    blue = int(bg[5:7], 16)
+    if (red * 0.299 + green * 0.587 + blue * 0.114) > 186:
+        return '#000000'
+    else:
+        return '#ffffff'

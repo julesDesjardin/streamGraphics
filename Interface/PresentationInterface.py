@@ -4,7 +4,7 @@ import json
 import dataWrite
 import WCIFParse
 import InterfaceSettings
-import utils
+import interfaceUtils
 
 
 class PresentationInterface:
@@ -25,10 +25,10 @@ class PresentationInterface:
         self.competitorsId = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)]
         if round == 1:
             self.competitorsId.sort(key=lambda x: WCIFParse.getRanking(
-                wcif, x, event, utils.SEED_TYPE[utils.EVENTS[event]], 'world'), reverse=True)
+                wcif, x, event, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[event]], 'world'), reverse=True)
         else:
             self.competitorsId.sort(key=lambda x: WCIFParse.getRoundResult(
-                wcif, x, event, round - 1, utils.SEED_TYPE[utils.EVENTS[event]]), reverse=True)
+                wcif, x, event, round - 1, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[event]]), reverse=True)
 
         self.avatars = []
         self.competitorsName = []
@@ -71,7 +71,7 @@ class PresentationInterface:
         if self.id == -1:
             dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
         else:
-            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitorsId[self.id]), self.competitorsName[self.id], self.avatars[self.id], utils.replaceText(
+            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitorsId[self.id]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
                 self.text, self.wcif, self.competitorsId[self.id], len(self.competitorsId) - self.id, self.event, self.round), True)
 
     def previousButtonCommand(self):

@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
-import utils
+import interfaceUtils
 import dataWrite
 import WCIFParse
 
@@ -22,12 +22,14 @@ class InterfaceFrame:
         self.index = index
         self.activeCuber = -1
 
-        frameWidth = 2 * utils.FRAME_THICKNESS + self.buttonCols * (utils.BUTTON_WIDTH + 2 * utils.BUTTON_PADX + 2 * utils.BUTTON_THICKNESS + 3)
-        frameHeight = 2 * utils.FRAME_THICKNESS + utils.LABEL_HEIGHT + \
-            (self.buttonRows + 2) * (utils.BUTTON_HEIGHT + 2 * utils.BUTTON_PADY + 2 * utils.BUTTON_THICKNESS + 3)
-        self.frame = tk.Frame(self.root, highlightbackground='black', highlightthickness=utils.FRAME_THICKNESS, width=frameWidth, height=frameHeight)
+        frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + self.buttonCols * \
+            (interfaceUtils.BUTTON_WIDTH + 2 * interfaceUtils.BUTTON_PADX + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
+        frameHeight = 2 * interfaceUtils.FRAME_THICKNESS + interfaceUtils.LABEL_HEIGHT + \
+            (self.buttonRows + 2) * (interfaceUtils.BUTTON_HEIGHT + 2 * interfaceUtils.BUTTON_PADY + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
+        self.frame = tk.Frame(self.root, highlightbackground='black',
+                              highlightthickness=interfaceUtils.FRAME_THICKNESS, width=frameWidth, height=frameHeight)
         self.frame.grid_propagate(0)
-        self.frame.grid_rowconfigure(0, minsize=utils.LABEL_HEIGHT)
+        self.frame.grid_rowconfigure(0, minsize=interfaceUtils.LABEL_HEIGHT)
 
         self.label = tk.Label(self.frame, text=f'Cuber on camera {index+1}')
         self.label.grid(column=0, row=0, columnspan=self.buttonCols)
@@ -38,21 +40,21 @@ class InterfaceFrame:
         self.timeTowerButton.grid(column=0, row=1, columnspan=self.buttonCols)
 
         self.cleanButton = tk.Button(self.frame)
-        self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=utils.BUTTON_WIDTH, height=utils.BUTTON_HEIGHT,
+        self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT,
                                    command=lambda: self.buttonCommand(-1, '', '', '', '', -1))
         self.cleanButton.grid(column=0, row=2, columnspan=self.buttonCols)
 
         self.buttonFrames = []
         self.buttons = []
         for button in range(0, self.buttonCols + 2):
-            self.frame.columnconfigure(button, pad=utils.BUTTON_PADX)
+            self.frame.columnconfigure(button, pad=interfaceUtils.BUTTON_PADX)
         for button in range(0, self.buttonRows):
-            self.frame.rowconfigure(button, pad=utils.BUTTON_PADY)
+            self.frame.rowconfigure(button, pad=interfaceUtils.BUTTON_PADY)
 
         for button in range(0, self.buttonCols * self.buttonRows):
-            self.buttonFrames.append(tk.Frame(self.frame, highlightthickness=utils.BUTTON_THICKNESS))
+            self.buttonFrames.append(tk.Frame(self.frame, highlightthickness=interfaceUtils.BUTTON_THICKNESS))
             self.buttons.append(tk.Button(self.buttonFrames[-1], image=self.emptyPixel,
-                                compound='c', width=utils.BUTTON_WIDTH, height=utils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
+                                compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
             self.buttons[-1].pack()
 
     def timeTowerCommand(self):
@@ -87,7 +89,7 @@ class InterfaceFrame:
             extraButtonText = f'Seed {seed}'
             if previousRank is not None:
                 extraButtonText = extraButtonText + f', Placed {previousRank}'
-            cardTextReplaced = utils.replaceText(self.cardText, self.wcif, id, seed, event, round)
+            cardTextReplaced = interfaceUtils.replaceText(self.cardText, self.wcif, id, seed, event, round)
             self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
                 buttonIndex, WCIFParse.getCountry(self.wcif, id), name, WCIFParse.getAvatar(self.wcif, id), cardTextReplaced, id))
             self.buttonFrames[buttonIndex].grid(row=row, column=column)

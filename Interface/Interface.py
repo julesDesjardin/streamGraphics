@@ -6,7 +6,7 @@ import json
 import urllib.request
 import Stage
 import WCIFParse
-import utils
+import interfaceUtils
 import InterfaceFrame
 import dataWrite
 
@@ -29,9 +29,9 @@ class Interface:
         self.wcif = {}
         self.rounds = {}
         self.groups = {}
-        self.maxSeed = utils.MAX_SEED
-        self.buttonRows = utils.BUTTONS_ROWS
-        self.buttonCols = utils.BUTTONS_COLS
+        self.maxSeed = interfaceUtils.MAX_SEED
+        self.buttonRows = interfaceUtils.BUTTONS_ROWS
+        self.buttonCols = interfaceUtils.BUTTONS_COLS
         self.buttonCount = self.buttonRows * self.buttonCols
         self.interfaceFrames = []
         self.stages = []
@@ -178,10 +178,10 @@ class Interface:
         for frame in self.interfaceFrames:
             frame.hideFrame()
         self.interfaceFrames = []
-        for cameraY in range(0, utils.CAMERAS_ROWS):
-            for cameraX in range(0, utils.CAMERAS_COLS):
+        for cameraY in range(0, interfaceUtils.CAMERAS_ROWS):
+            for cameraX in range(0, interfaceUtils.CAMERAS_COLS):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardText, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * utils.CAMERAS_COLS + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardText, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
 
@@ -448,7 +448,7 @@ This supports the following characters to be replaced by the appropriate value:
         if self.timeTowerEventVariable.get():
             (_, _, event, round, _) = self.getStageInfo()
             if event is not None:
-                dataWrite.sendTimeTowerEvent(self.bot, utils.EVENTS[event], round)
+                dataWrite.sendTimeTowerEvent(self.bot, interfaceUtils.EVENTS[event], round)
         self.updateCubers()
         for frame in self.interfaceFrames:
             frame.buttonCommand(-1, '', '', '', '', -1)

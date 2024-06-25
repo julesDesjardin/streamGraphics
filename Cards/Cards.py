@@ -709,10 +709,9 @@ class Cards:
         exampleFlagImage = exampleCanvas.create_image(self.flagX, self.flagY, image=self.exampleFlag)
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
-        exampleName = exampleCanvas.create_text(
-            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), fill=self.nameColor,
-            text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
-        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize), fill=self.textColor,
+        exampleName = exampleCanvas.create_text(self.nameX, self.nameY, font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
+                                                text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
+        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor=self.textAnchor, justify=getJustify(self.textAnchor))
         exampleAvatarRectangle = exampleCanvas.create_rectangle(
             self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))

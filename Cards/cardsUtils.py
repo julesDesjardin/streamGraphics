@@ -26,27 +26,35 @@ def browse(entry):
     entry.insert(0, fileName)
 
 
-def loadVideo(videoFile, imageList):
-    return loadVideoOrFirstFrame(videoFile, imageList, False)
+def loadVideo(file, imageList):
+    return loadVideoOrFirstFrame(file, imageList, False)
 
 
-def loadFirstFrame(videoFile):
+def loadFirstFrame(file):
     imageList = []
-    (width, height) = loadVideoOrFirstFrame(videoFile, imageList, True)
+    (width, height) = loadVideoOrFirstFrame(file, imageList, True)
     return (imageList[0], width, height)
 
 
-def loadVideoOrFirstFrame(videoFile, imageList, firstFrameOnly):
+def loadVideoOrFirstFrame(file, imageList, firstFrameOnly):
     imageList.clear()
-    vidcap = cv2.VideoCapture(videoFile)
-    success, image = vidcap.read()
-    (height, width, _) = image.shape
-    while success:
+    try:
+        vidcap = cv2.VideoCapture(file)
+        success, image = vidcap.read()
+        (height, width, _) = image.shape
+        while success:
+            pngImage = cv2.imencode('.png', image)[1]
+            imageFull = tk.PhotoImage(data=pngImage.tobytes())
+            imageList.append(imageFull)
+            success, image = vidcap.read()
+            if firstFrameOnly:
+                success = False
+
+        return (width, height)
+    except:
+        image = cv2.imread(file)
+        (height, width, _) = image.shape
         pngImage = cv2.imencode('.png', image)[1]
         imageFull = tk.PhotoImage(data=pngImage.tobytes())
         imageList.append(imageFull)
-        success, image = vidcap.read()
-        if firstFrameOnly:
-            success = False
-
-    return (width, height)
+        return (width, height)

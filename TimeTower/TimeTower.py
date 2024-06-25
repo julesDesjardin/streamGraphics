@@ -1089,18 +1089,6 @@ class TimeTower:
 
         self.createExampleLines(layoutWindow)
 
-    def updateAnimationSettingsCloseButton(self, durationX, FPSX, durationY, FPSY, window):
-        try:
-            self.durationX = int(durationX)
-            self.FPSX = int(FPSX)
-            self.durationY = int(durationY)
-            self.FPSY = int(FPSY)
-        except:
-            tkinter.messagebox.showerror(title='Animation Settings Error !', message='All numbers must be integer!')
-        else:
-            self.loadContent()
-            window.destroy()
-
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id

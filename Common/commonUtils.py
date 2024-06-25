@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
+from tkinter.colorchooser import askcolor
 
 
 def cleverInt(string):
@@ -95,3 +96,10 @@ def checkSettingsChanged(root, checkSettings):
                     saveSettings()
     if destroy:
         root.destroy()
+
+
+def colorButtonCommand(button, var, title):
+    colors = askcolor(var.get(), title=title)
+    if colors[1] is not None:
+        button.configure(background=colors[1])
+        var.set(colors[1])

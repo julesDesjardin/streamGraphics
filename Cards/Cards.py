@@ -2,7 +2,6 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk, font
-from tkinter.colorchooser import askcolor
 import json
 import queue
 import threading
@@ -16,7 +15,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify, addCheckSettingsChanged
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify, addCheckSettingsChanged, colorButtonCommand
 
 
 class Cards:
@@ -367,12 +366,6 @@ class Cards:
                       avatarX - int(avatarWidth / 2), avatarY - int(avatarHeight / 2), avatarX + int(avatarWidth / 2), avatarY + int(avatarHeight / 2))
         canvas.coords(avatar, avatarX, avatarY)
 
-    def updateBackgroundColor(self, canvas, button, var):
-        colors = askcolor(var.get(), title='Background color')
-        button.configure(background=colors[1])
-        canvas.configure(background=colors[1])
-        var.set(colors[1])
-
     def layoutEndRow(self, pad):
         self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
         self.currentRow = self.currentRow + 1
@@ -651,7 +644,7 @@ class Cards:
         backgroundColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
         backgroundColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         backgroundColorButton = tk.Button(backgroundColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
-        backgroundColorButton.configure(command=lambda: self.updateBackgroundColor(exampleCanvas, backgroundColorButton, backgroundColorVariable))
+        backgroundColorButton.configure(command=lambda: colorButtonCommand(backgroundColorButton, backgroundColorVariable, 'Background color'))
         backgroundColorButton.pack()
 
         self.layoutEndRow(10)
@@ -753,6 +746,7 @@ class Cards:
         self.enableButtonCallback(self.flagEnable, [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage])
         self.enableButtonCallback(self.avatarEnable,
                                   [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle])
+        backgroundColorVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(background=backgroundColorVariable.get()))
 
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token

@@ -80,9 +80,9 @@ class Cards:
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.backgroundLoopIndices.append(-1)
             self.names.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.nameFont, self.nameSize), text=f'Camera {i+1} competitor', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
+                              font=(self.nameFont, self.nameSize, self.nameModifiers), text=f'Camera {i+1} competitor', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.textFont, self.textSize), text=f'Camera {i+1} text', anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
+                              font=(self.textFont, self.textSize, self.textModifiers), text=f'Camera {i+1} text', anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
             self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
@@ -119,10 +119,14 @@ class Cards:
             'loopFile': self.loopFile,
             'nameFont': self.nameFont,
             'nameSize': self.nameSize,
+            'nameModifiers': self.nameModifiers,
+            'nameAnchor': self.nameAnchor,
             'nameX': self.nameX,
             'nameY': self.nameY,
             'textFont': self.textFont,
             'textSize': self.textSize,
+            'textModifiers': self.textModifiers,
+            'textAnchor': self.textAnchor,
             'textX': self.textX,
             'textY': self.textY,
             'flagEnable': self.flagEnable,
@@ -157,10 +161,14 @@ class Cards:
             self.loopFile = loadSettingsJson['loopFile']
             self.nameFont = loadSettingsJson['nameFont']
             self.nameSize = loadSettingsJson['nameSize']
+            self.nameModifiers = loadSettingsJson['nameModifiers']
+            self.nameAnchor = loadSettingsJson['nameAnchor']
             self.nameX = loadSettingsJson['nameX']
             self.nameY = loadSettingsJson['nameY']
             self.textFont = loadSettingsJson['textFont']
             self.textSize = loadSettingsJson['textSize']
+            self.textModifiers = loadSettingsJson['textModifiers']
+            self.textAnchor = loadSettingsJson['textAnchor']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
             self.flagEnable = loadSettingsJson['flagEnable']
@@ -185,7 +193,11 @@ class Cards:
                 for cameraX in range(0, self.camerasX):
                     i = self.camerasX * cameraY + cameraX
                     self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
+                    self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers),
+                                                anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
                     self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
+                    self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers),
+                                                anchor=self.textAnchor, justify=getJustify(self.textAnchor))
                     self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                     self.flags.append(Image.getFlag(self.flagHeight, 'local'))
                     self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
@@ -299,9 +311,11 @@ class Cards:
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                 if self.loopFile != '':
                     self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
-                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize))
+                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers),
+                                            anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
                 self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
-                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize))
+                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers),
+                                            anchor=self.textAnchor, justify=getJustify(self.textAnchor))
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                 self.flags[i] = Image.getFlag(self.flagHeight, 'local')
                 self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])

@@ -527,7 +527,7 @@ class TimeTower:
             line.showLine(0, 0)
         self.exampleCanvas.update()
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, FPSX, durationY, FPSY, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -561,6 +561,7 @@ class TimeTower:
             self.colorLocalResult = colorLocalResult
             self.colorForeignerName = colorForeignerName
             self.colorForeignerResult = colorForeignerResult
+            self.maxNumber = maxNumber
             self.durationX = durationX
             self.FPSX = FPSX
             self.durationY = durationY
@@ -700,7 +701,18 @@ class TimeTower:
         heightSeparatorSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_HEIGHT, textvariable=heightSeparatorVariable)
         heightSeparatorSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         heightSeparatorVariable.set(f'{self.heightSeparator}')
+
         self.layoutEndRow(sizeFrame, 10)
+        emptyFrames.append(tk.Frame(sizeFrame))
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(sizeFrame, 30)
+
+        maxNumberLabel = tk.Label(sizeFrame, text='Maximum number of lines shown:')
+        maxNumberLabel.grid(column=0, row=self.currentRow, sticky='e')
+        maxNumberVariable = tk.StringVar()
+        maxNumberSpinbox = tk.Spinbox(sizeFrame, from_=0, to=50, textvariable=maxNumberVariable)
+        maxNumberSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        maxNumberVariable.set(f'{self.maxNumber}')
 
         widthRankingVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthRanking=cleverInt(widthRankingVariable.get())))
@@ -1164,6 +1176,7 @@ class TimeTower:
             bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),
             colorLocalNameVariable.get(), colorLocalResultVariable.get(),
             colorForeignerNameVariable.get(), colorForeignerResultVariable.get(),
+            cleverInt(maxNumberVariable.get()),
             cleverInt(durationXVariable.get()), cleverInt(FPSXVariable.get()),
             cleverInt(durationYVariable.get()), cleverInt(FPSYVariable.get()),
             layoutWindow))

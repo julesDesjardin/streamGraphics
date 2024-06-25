@@ -16,7 +16,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers
 
 
 class Cards:
@@ -52,10 +52,12 @@ class Cards:
         self.exampleBackgroundImage = None
         self.nameFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.nameSize = cardsUtils.DEFAULT_FONT_SIZE
+        self.nameModifiers = ''
         self.nameX = 0
         self.nameY = 0
         self.textFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.textSize = cardsUtils.DEFAULT_FONT_SIZE
+        self.textModifiers = ''
         self.textX = 0
         self.textY = 0
         self.flagEnable = True
@@ -387,6 +389,10 @@ class Cards:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        nameLabel = tk.Label(self.layoutWindow, text='Name:')
+        nameLabel.grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(10)
+
         nameFontLabel = tk.Label(self.layoutWindow, text='Name Font')
         nameFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameFontVariable = tk.StringVar()
@@ -403,6 +409,16 @@ class Cards:
         nameSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=nameSizeVariable)
         nameSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         nameSizeVariable.set(f'{self.nameSize}')
+
+        self.layoutEndRow(10)
+
+        self.nameBoldVariable = tk.BooleanVar()
+        nameBoldCheckbox = tk.Checkbutton(self.layoutWindow, text='Bold', variable=self.nameBoldVariable)
+        nameBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        self.nameItalicVariable = tk.BooleanVar()
+        nameItalicCheckbox = tk.Checkbutton(self.layoutWindow, text='Italic', variable=self.nameItalicVariable)
+        nameItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
 
         self.layoutEndRow(10)
 
@@ -425,6 +441,10 @@ class Cards:
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(30)
 
+        textLabel = tk.Label(self.layoutWindow, text='Text:')
+        textLabel.grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(10)
+
         textFontLabel = tk.Label(self.layoutWindow, text='Text Font')
         textFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         textFontVariable = tk.StringVar()
@@ -441,6 +461,16 @@ class Cards:
         textSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=textSizeVariable)
         textSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         textSizeVariable.set(f'{self.textSize}')
+
+        self.layoutEndRow(10)
+
+        self.textBoldVariable = tk.BooleanVar()
+        textBoldCheckbox = tk.Checkbutton(self.layoutWindow, text='Bold', variable=self.textBoldVariable)
+        textBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        self.textItalicVariable = tk.BooleanVar()
+        textItalicCheckbox = tk.Checkbutton(self.layoutWindow, text='Italic', variable=self.textItalicVariable)
+        textItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        setModifiersVariables(self.textModifiers, self.textBoldVariable, self.textItalicVariable)
 
         self.layoutEndRow(10)
 
@@ -599,17 +629,25 @@ class Cards:
         heightVariable.trace_add('write', lambda var, index, mode: flagYSpinbox.configure(to=cleverInt(heightVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: textYSpinbox.configure(to=cleverInt(heightVariable.get())))
         nameFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
-            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         nameSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
-            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get())))
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        self.nameBoldVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        self.nameItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         nameXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         textFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
-            exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
-            exampleText, font=(textFontVariable.get(), textSizeVariable.get())))
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
+        self.textBoldVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
+        self.textItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         textXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(

@@ -13,7 +13,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged
 import TimeTowerContent
 import TimeTowerLine
 
@@ -69,6 +69,9 @@ class TimeTower:
         self.FPSY = timeTowerUtils.DEFAULT_FPS_Y
         self.durationX = timeTowerUtils.DEFAULT_DURATION_X
         self.durationY = timeTowerUtils.DEFAULT_DURATION_Y
+        self.settingsChanged = tk.BooleanVar()
+        self.settingsChanged.set(False)
+        addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Time Tower')
 
         self.currentRow = 0
         self.rankingBoldVariable = None
@@ -290,6 +293,7 @@ class TimeTower:
                                          message='The ID must be a number! This is the WCA Live ID, not the WCA competition ID.')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateCompId(self):
         compIdWindow = tk.Toplevel(self.root)
@@ -311,6 +315,7 @@ class TimeTower:
         else:
             self.loadContent()
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateDelay(self):
         delayWindow = tk.Toplevel(self.root)
@@ -332,6 +337,7 @@ class TimeTower:
         self.region = region
         self.loadContent()
         window.destroy()
+        self.settingsChanged.set(True)
 
     def updateRegion(self):
         regionWindow = tk.Toplevel(self.root)
@@ -557,6 +563,7 @@ class TimeTower:
         else:
             self.loadContent()
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateLayout(self):
         layoutWindow = tk.Toplevel(self.root)
@@ -1106,6 +1113,7 @@ class TimeTower:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox
 
 
 def cleverInt(string):
@@ -70,3 +71,27 @@ def getJustify(anchor):
     if 'e' in anchor:
         return tk.RIGHT
     return tk.CENTER
+
+
+checkSettings = []
+
+
+def addCheckSettingsChanged(root, settingsChanged, saveSettings, name):
+    checkSettings.append((settingsChanged, saveSettings, name))
+    root.protocol('WM_DELETE_WINDOW', lambda: checkSettingsChanged(root, checkSettings))
+
+
+def checkSettingsChanged(root, checkSettings):
+    destroy = True
+    for (settingsChanged, saveSettings, name) in checkSettings:
+        if settingsChanged.get():
+            confirmation = tkinter.messagebox.askyesnocancel(
+                title='Unsaved settings', message=f'You currently have unsaved {name} settings! Do you want to save your {name} settings before quitting?', icon=tkinter.messagebox.WARNING)
+            if confirmation is None:
+                destroy = False
+                break
+            else:
+                if confirmation:
+                    saveSettings()
+    if destroy:
+        root.destroy()

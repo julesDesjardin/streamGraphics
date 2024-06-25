@@ -16,7 +16,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify, addCheckSettingsChanged
 
 
 class Cards:
@@ -74,6 +74,10 @@ class Cards:
         self.avatarHeight = cardsUtils.DEFAULT_AVATAR_HEIGHT
         self.exampleFlag = Image.getFlag(self.flagHeight, 'local')
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
+        self.settingsChanged = tk.BooleanVar()
+        self.settingsChanged.set(False)
+        addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Cards')
+
         for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
@@ -142,6 +146,7 @@ class Cards:
             'botChannelId': self.botChannelId
         }
         saveFile.write(json.dumps(saveSettingsJson, indent=4))
+        self.settingsChanged.set(False)
 
     def loadSettings(self):
         loadFile = tkinter.filedialog.askopenfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -239,6 +244,7 @@ class Cards:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
+        self.settingsChanged.set(False)
 
     def updateBackgroundCloseButton(self, window, introFile, loopFile, canvas, background, width, height, intro, loop):
         intro.set(introFile)
@@ -250,6 +256,7 @@ class Cards:
             height.set(heightVideo)
             canvas.itemconfig(background, image=self.exampleBackgroundImage)
         window.destroy()
+        self.settingsChanged.set(True)
 
     def updateBackground(self, window, canvas, background, width, height, intro, loop):
         backgroundWindow = tk.Toplevel(window)
@@ -335,6 +342,7 @@ class Cards:
                     self.canvases[i].grid(row=cameraY, column=cameraX)
 
         window.destroy()
+        self.settingsChanged.set(True)
 
     def enableButtonCallback(self, enable, spinboxes, canvas, images):
         if enable:
@@ -762,6 +770,7 @@ class Cards:
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

@@ -14,6 +14,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
+from Common.commonUtils import addCheckSettingsChanged
 
 
 class Interface:
@@ -40,6 +41,9 @@ class Interface:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
+        self.settingsChanged = tk.BooleanVar()
+        self.settingsChanged.set(False)
+        addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Interface')
 
         self.timeTowerEventVariable = tk.IntVar()
         self.TimeTowerCheckbox = tk.Checkbutton(self.OKFrame, text="Update TimeTower", variable=self.timeTowerEventVariable)
@@ -68,6 +72,7 @@ class Interface:
             'botChannelId': self.botChannelId
         }
         saveFile.write(json.dumps(saveSettingsJson, indent=4))
+        self.settingsChanged.set(False)
 
     def loadSettings(self):
         loadFile = tkinter.filedialog.askopenfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -119,6 +124,7 @@ class Interface:
             return
 
         self.reloadInterfaceFrames()
+        self.settingsChanged.set(False)
 
     def updateCompIdCloseButton(self, compId, window):
         self.compId = compId
@@ -129,6 +135,7 @@ class Interface:
                 title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateCompId(self):
         compIdWindow = tk.Toplevel(self.root)
@@ -153,6 +160,7 @@ class Interface:
             tkinter.messagebox.showerror(title='Max Seed Error !', message='Error ! Please make sure the seed is a number')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateMaxSeed(self):
         maxSeedWindow = tk.Toplevel(self.root)
@@ -187,6 +195,7 @@ class Interface:
             tkinter.messagebox.showerror(title='Buttons Error !', message='Error ! Please make sure both values are numbers')
         else:
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateButtons(self):
         buttonsWindow = tk.Toplevel(self.root)
@@ -272,7 +281,6 @@ class Interface:
         frame.grid(row=1, column=0)
 
     def updateStagesCloseWindow(self, window):
-        window.destroy()
         for stage in self.stages:
             stage.hideStage()
         self.stages = []
@@ -280,6 +288,8 @@ class Interface:
             self.stages.append(stage.copy())
         for stage in reversed(self.stages):
             stage.showStage()
+        window.destroy()
+        self.settingsChanged.set(True)
 
     def updateStages(self):
         self.exampleStages = []
@@ -309,6 +319,7 @@ class Interface:
         else:
             self.presentationText = text
         window.destroy()
+        self.settingsChanged.set(True)
 
     def updateCardText(self, isCard):
         cardTextWindow = tk.Toplevel(self.root)
@@ -355,6 +366,7 @@ This supports the following characters to be replaced by the appropriate value:
         else:
             self.reloadInterfaceFrames()
             window.destroy()
+            self.settingsChanged.set(True)
 
     def updateTelegramSettings(self):
         telegramWindow = tk.Toplevel(self.root)

@@ -13,7 +13,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand
 import TimeTowerContent
 import TimeTowerLine
 
@@ -449,11 +449,6 @@ class TimeTower:
         self.exampleCanvas.delete('all')
         for line in self.exampleLines:
             line.showLine(0, 0)
-
-    def updateColorButton(self, variable):
-        colors = askcolor(variable.get(), title='Pick a color')
-        if colors[1] is not None:
-            variable.set(colors[1])
 
     def testAnimation(self, durationX, FPSX, durationY, FPSY):
         trueDurationX = durationX / 1000
@@ -944,57 +939,107 @@ class TimeTower:
         localColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 10)
 
+        bgLocalNameLabel = tk.Label(colorFrame, text='Local name background:')
+        bgLocalNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         bgLocalNameVariable = tk.StringVar()
         bgLocalNameVariable.set(self.bgLocalName)
-        bgLocalNameButton = tk.Button(colorFrame, text='Local name background', command=lambda: self.updateColorButton(bgLocalNameVariable))
-        bgLocalNameButton.grid(column=0, row=self.currentRow, sticky='e')
-        colorLocalNameVariable = tk.StringVar()
-        colorLocalNameVariable.set(self.colorLocalName)
-        colorLocalNameButton = tk.Button(colorFrame, text='Local name text color', command=lambda: self.updateColorButton(colorLocalNameVariable))
-        colorLocalNameButton.grid(column=1, row=self.currentRow, sticky='w')
+        bgLocalNameButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        bgLocalNameButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        bgLocalNameButton = tk.Button(bgLocalNameButtonFrame, text='', background=self.bgLocalName, relief=tk.FLAT, width=10)
+        bgLocalNameButton.configure(command=lambda: colorButtonCommand(bgLocalNameButton, bgLocalNameVariable, 'Local name background'))
+        bgLocalNameButton.pack()
         self.layoutEndRow(colorFrame, 10)
 
+        colorLocalNameLabel = tk.Label(colorFrame, text='Local name text color:')
+        colorLocalNameLabel.grid(column=0, row=self.currentRow, sticky='e')
+        colorLocalNameVariable = tk.StringVar()
+        colorLocalNameVariable.set(self.colorLocalName)
+        colorLocalNameButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        colorLocalNameButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        colorLocalNameButton = tk.Button(colorLocalNameButtonFrame, text='', background=self.colorLocalName, relief=tk.FLAT, width=10)
+        colorLocalNameButton.configure(command=lambda: colorButtonCommand(colorLocalNameButton, colorLocalNameVariable, 'Local name text color'))
+        colorLocalNameButton.pack()
+        self.layoutEndRow(colorFrame, 10)
+
+        bgLocalResultLabel = tk.Label(colorFrame, text='Local results background:')
+        bgLocalResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         bgLocalResultVariable = tk.StringVar()
         bgLocalResultVariable.set(self.bgLocalResult)
-        bgLocalResultButton = tk.Button(colorFrame, text='Local results background', command=lambda: self.updateColorButton(bgLocalResultVariable))
-        bgLocalResultButton.grid(column=0, row=self.currentRow, sticky='e')
+        bgLocalResultButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        bgLocalResultButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        bgLocalResultButton = tk.Button(bgLocalResultButtonFrame, text='', background=self.bgLocalResult, relief=tk.FLAT, width=10)
+        bgLocalResultButton.configure(command=lambda: colorButtonCommand(bgLocalResultButton, bgLocalResultVariable, 'Local results background'))
+        bgLocalResultButton.pack()
+        self.layoutEndRow(colorFrame, 10)
+
+        colorLocalResultLabel = tk.Label(colorFrame, text='Local results text color:')
+        colorLocalResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         colorLocalResultVariable = tk.StringVar()
         colorLocalResultVariable.set(self.colorLocalResult)
-        colorLocalResultButton = tk.Button(colorFrame, text='Local results text color',
-                                           command=lambda: self.updateColorButton(colorLocalResultVariable))
-        colorLocalResultButton.grid(column=1, row=self.currentRow, sticky='w')
+        colorLocalResultButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        colorLocalResultButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        colorLocalResultButton = tk.Button(colorLocalResultButtonFrame, text='', background=self.colorLocalResult, relief=tk.FLAT, width=10)
+        colorLocalResultButton.configure(command=lambda: colorButtonCommand(
+            colorLocalResultButton, colorLocalResultVariable, 'Local results text color'))
+        colorLocalResultButton.pack()
+        self.layoutEndRow(colorFrame, 10)
 
         self.layoutEndRow(colorFrame, 10)
         emptyFrames.append(tk.Frame(colorFrame))
         emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 30)
 
-        localColorLabel = tk.Label(colorFrame, text='Foreign competitors:')
-        localColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        ForeignerColorLabel = tk.Label(colorFrame, text='Foreign competitors:')
+        ForeignerColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 10)
 
+        bgForeignerNameLabel = tk.Label(colorFrame, text='Foreigner name background:')
+        bgForeignerNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         bgForeignerNameVariable = tk.StringVar()
         bgForeignerNameVariable.set(self.bgForeignerName)
-        bgForeignerNameButton = tk.Button(colorFrame, text='Foreigner name background',
-                                          command=lambda: self.updateColorButton(bgForeignerNameVariable))
-        bgForeignerNameButton.grid(column=0, row=self.currentRow, sticky='e')
-        colorForeignerNameVariable = tk.StringVar()
-        colorForeignerNameVariable.set(self.colorForeignerName)
-        colorForeignerNameButton = tk.Button(colorFrame, text='Foreigner name text color',
-                                             command=lambda: self.updateColorButton(colorForeignerNameVariable))
-        colorForeignerNameButton.grid(column=1, row=self.currentRow, sticky='w')
+        bgForeignerNameButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        bgForeignerNameButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        bgForeignerNameButton = tk.Button(bgForeignerNameButtonFrame, text='', background=self.bgForeignerName, relief=tk.FLAT, width=10)
+        bgForeignerNameButton.configure(command=lambda: colorButtonCommand(
+            bgForeignerNameButton, bgForeignerNameVariable, 'Foreigner name background'))
+        bgForeignerNameButton.pack()
         self.layoutEndRow(colorFrame, 10)
 
+        colorForeignerNameLabel = tk.Label(colorFrame, text='Foreigner name text color:')
+        colorForeignerNameLabel.grid(column=0, row=self.currentRow, sticky='e')
+        colorForeignerNameVariable = tk.StringVar()
+        colorForeignerNameVariable.set(self.colorForeignerName)
+        colorForeignerNameButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        colorForeignerNameButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        colorForeignerNameButton = tk.Button(colorForeignerNameButtonFrame, text='', background=self.colorForeignerName, relief=tk.FLAT, width=10)
+        colorForeignerNameButton.configure(command=lambda: colorButtonCommand(
+            colorForeignerNameButton, colorForeignerNameVariable, 'Foreigner name text color'))
+        colorForeignerNameButton.pack()
+        self.layoutEndRow(colorFrame, 10)
+
+        bgForeignerResultLabel = tk.Label(colorFrame, text='Foreigner results background:')
+        bgForeignerResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         bgForeignerResultVariable = tk.StringVar()
         bgForeignerResultVariable.set(self.bgForeignerResult)
-        bgForeignerResultButton = tk.Button(colorFrame, text='Foreigner results background',
-                                            command=lambda: self.updateColorButton(bgForeignerResultVariable))
-        bgForeignerResultButton.grid(column=0, row=self.currentRow, sticky='e')
+        bgForeignerResultButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        bgForeignerResultButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        bgForeignerResultButton = tk.Button(bgForeignerResultButtonFrame, text='', background=self.bgForeignerResult, relief=tk.FLAT, width=10)
+        bgForeignerResultButton.configure(command=lambda: colorButtonCommand(
+            bgForeignerResultButton, bgForeignerResultVariable, 'Foreigner results background'))
+        bgForeignerResultButton.pack()
+        self.layoutEndRow(colorFrame, 10)
+
+        colorForeignerResultLabel = tk.Label(colorFrame, text='Foreigner results text color:')
+        colorForeignerResultLabel.grid(column=0, row=self.currentRow, sticky='e')
         colorForeignerResultVariable = tk.StringVar()
         colorForeignerResultVariable.set(self.colorForeignerResult)
-        colorForeignerResultButton = tk.Button(colorFrame, text='Foreigner results text color',
-                                               command=lambda: self.updateColorButton(colorForeignerResultVariable))
-        colorForeignerResultButton.grid(column=1, row=self.currentRow, sticky='w')
+        colorForeignerResultButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        colorForeignerResultButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        colorForeignerResultButton = tk.Button(colorForeignerResultButtonFrame, text='',
+                                               background=self.colorForeignerResult, relief=tk.FLAT, width=10)
+        colorForeignerResultButton.configure(command=lambda: colorButtonCommand(
+            colorForeignerResultButton, colorForeignerResultVariable, 'Foreigner results text color'))
+        colorForeignerResultButton.pack()
         self.layoutEndRow(colorFrame, 10)
 
         bgLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalName=bgLocalNameVariable.get()))

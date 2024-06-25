@@ -33,6 +33,7 @@ class TimeTower:
         self.queueRound = queue.Queue()
         self.queueUpdate = queue.Queue()
         self.content = None
+        self.backgroundColor = timeTowerUtils.DEFAULT_BACKGROUND_COLOR
         self.bgLocalName = timeTowerUtils.DEFAULT_BG_LOCAL_NAME
         self.bgLocalResult = timeTowerUtils.DEFAULT_BG_LOCAL_RESULT
         self.bgForeignerName = timeTowerUtils.DEFAULT_BG_FOREIGNER_NAME
@@ -137,7 +138,9 @@ class TimeTower:
         stepXmax = int(self.FPSX * self.durationX / 1000)
         stepYmax = int(self.FPSY * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region,
+                                                             self.backgroundColor,
+                                                             self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
                                                              (self.fontFamily, self.nameSize, self.nameModifiers),
@@ -159,6 +162,7 @@ class TimeTower:
                                   (self.fontFamily, self.resultSize, self.resultModifiers),
                                   (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
                                   self.height, self.heightSeparator,
+                                  self.backgroundColor,
                                   self.bgLocalName, self.bgLocalResult,
                                   self.bgForeignerName, self.bgForeignerResult,
                                   self.colorLocalName, self.colorLocalResult,
@@ -172,6 +176,7 @@ class TimeTower:
             'compId': self.compId,
             'delay': self.delay,
             'region': self.region,
+            'backgroundColor': self.backgroundColor,
             'bgLocalName': self.bgLocalName,
             'bgLocalResult': self.bgLocalResult,
             'bgForeignerName': self.bgForeignerName,
@@ -226,6 +231,7 @@ class TimeTower:
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
+            self.backgroundColor = loadSettingsJson['backgroundColor']
             self.bgLocalName = loadSettingsJson['bgLocalName']
             self.bgLocalResult = loadSettingsJson['bgLocalResult']
             self.bgForeignerName = loadSettingsJson['bgForeignerName']
@@ -361,7 +367,7 @@ class TimeTower:
 
     def createExampleLines(self, window):
         self.exampleCanvas = tk.Canvas(window, width=timeTowerUtils.LAYOUT_CANVAS_WIDTH,
-                                       height=timeTowerUtils.LAYOUT_CANVAS_HEIGHT, bg='#FFF')
+                                       height=timeTowerUtils.LAYOUT_CANVAS_HEIGHT, bg=self.backgroundColor)
         self.exampleCanvas.pack(pady=5)
         self.exampleLines = []
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgLocalName, self.bgLocalResult,
@@ -516,7 +522,7 @@ class TimeTower:
         self.exampleLines[0].ranking = 1
         self.exampleLines[1].ranking = 2
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -541,6 +547,7 @@ class TimeTower:
             self.resultModifiers = resultModifiers
             self.fullResultSize = fullResultSize
             self.fullResultModifiers = fullResultModifiers
+            self.backgroundColor = backgroundColor
             self.bgLocalName = bgLocalName
             self.bgLocalResult = bgLocalResult
             self.bgForeignerName = bgForeignerName
@@ -935,6 +942,22 @@ class TimeTower:
         emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 30)
 
+        backgroundColorLabel = tk.Label(
+            colorFrame, text='TimeTower background:\n(You can use a color like blue, green or magenta to remove it in your final layout)')
+        backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(colorFrame, 10)
+
+        backgroundLabel = tk.Label(colorFrame, text='Background color:')
+        backgroundLabel.grid(column=0, row=self.currentRow, sticky='e')
+        backgroundVariable = tk.StringVar()
+        backgroundVariable.set(self.backgroundColor)
+        backgroundButtonFrame = tk.Frame(colorFrame, highlightbackground='black', highlightthickness=1)
+        backgroundButtonFrame.grid(column=1, row=self.currentRow, sticky='w')
+        backgroundButton = tk.Button(backgroundButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
+        backgroundButton.configure(command=lambda: colorButtonCommand(backgroundButton, backgroundVariable, 'Background color'))
+        backgroundButton.pack()
+        self.layoutEndRow(colorFrame, 10)
+
         localColorLabel = tk.Label(colorFrame, text='Local competitors:')
         localColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(colorFrame, 10)
@@ -1042,6 +1065,7 @@ class TimeTower:
         colorForeignerResultButton.pack()
         self.layoutEndRow(colorFrame, 10)
 
+        backgroundVariable.trace_add('write', lambda var, index, mode: self.exampleCanvas.configure(bg=backgroundVariable.get()))
         bgLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalName=bgLocalNameVariable.get()))
         colorLocalNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(colorLocalName=colorLocalNameVariable.get()))
         bgLocalResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(bgLocalResult=bgLocalResultVariable.get()))
@@ -1130,6 +1154,7 @@ class TimeTower:
                 self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()),
             cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
             cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
+            backgroundVariable.get(),
             bgLocalNameVariable.get(), bgLocalResultVariable.get(),
             bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),
             colorLocalNameVariable.get(), colorLocalResultVariable.get(),

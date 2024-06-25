@@ -240,6 +240,7 @@ CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South Ame
 SEPARATOR = '-----'
 REGION_OPTIONS = ['World'] + [SEPARATOR] + CONTINENTS + [SEPARATOR] + [country[0] for country in COUNTRIES.values()]
 
+DEFAULT_BACKGROUND_COLOR = '#FFFFFF'
 DEFAULT_BG_LOCAL_NAME = '#000000'
 DEFAULT_BG_LOCAL_RESULT = '#555555'
 DEFAULT_BG_FOREIGNER_NAME = '#444444'

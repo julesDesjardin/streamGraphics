@@ -10,10 +10,11 @@ import time
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, queueUpdate, region, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, durationX, durationY):
+    def __init__(self, root, queueRound, queueUpdate, region, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, durationX, durationY):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
+        self.backgroundColor = backgroundColor
         self.bgLocalName = bgLocalName
         self.bgLocalResult = bgLocalResult
         self.bgForeignerName = bgForeignerName
@@ -39,7 +40,7 @@ class TimeTowerContent:
         self.height = height
         self.heightSeparator = heightSeparator
         self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthFullName + widthCount +
-                                widthResult + widthFullResult, height=maxNumber * (height + heightSeparator), bg='#FFF')
+                                widthResult + widthFullResult, height=maxNumber * (height + heightSeparator), bg=self.backgroundColor)
         self.queueRound = queueRound
         self.queueUpdate = queueUpdate
         self.queueRanking = queue.Queue()
@@ -125,6 +126,7 @@ class TimeTowerContent:
              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
              self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
              self.height, self.heightSeparator,
+             self.backgroundColor,
              self.bgLocalName, self.bgLocalResult,
              self.bgForeignerName, self.bgForeignerResult,
              self.colorLocalName, self.colorLocalResult,
@@ -132,7 +134,7 @@ class TimeTowerContent:
              self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY
              ) = self.queueUpdate.get(block=False)
             self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthFullName + self.widthCount + self.widthResult + self.widthFullResult,
-                                  height=self.maxNumber * (self.height + self.heightSeparator))
+                                  height=self.maxNumber * (self.height + self.heightSeparator), bg=self.backgroundColor)
             for line in self.lines:
                 line.widthRanking = self.widthRanking
                 line.widthFlagRectangle = self.widthFlagRectangle

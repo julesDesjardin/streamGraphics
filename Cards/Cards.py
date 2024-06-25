@@ -467,7 +467,7 @@ class Cards:
         flagEnableVariable.set(self.flagEnable)
         flagEnableButton = tk.Checkbutton(self.layoutWindow, text='Show flag', variable=flagEnableVariable,
                                           command=lambda: self.enableButtonCallback(flagEnableVariable.get(), [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage]))
-        flagEnableButton.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        flagEnableButton.grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(10)
 
         flagHeightLabel = tk.Label(self.layoutWindow, text='Flag height')
@@ -502,14 +502,14 @@ class Cards:
         avatarEnableVariable.set(self.avatarEnable)
         avatarEnableButton = tk.Checkbutton(self.layoutWindow, text='Show avatar', variable=avatarEnableVariable,
                                             command=lambda: self.enableButtonCallback(avatarEnableVariable.get(), [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle]))
-        avatarEnableButton.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        avatarEnableButton.grid(column=0, columnspan=4, row=self.currentRow)
         self.layoutEndRow(10)
 
         avatarWidthLabel = tk.Label(self.layoutWindow, text='Avatar Width')
         avatarWidthLabel.grid(column=0, row=self.currentRow, sticky='e')
         avatarWidthVariable = tk.StringVar()
         avatarWidthSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=avatarWidthVariable)
-        avatarWidthSpinbox.grid(column=1, columnspan=2, row=self.currentRow, sticky='w')
+        avatarWidthSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         avatarWidthVariable.set(f'{self.avatarWidth}')
 
         avatarHeightLabel = tk.Label(self.layoutWindow, text='Avatar height')

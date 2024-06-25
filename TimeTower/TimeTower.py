@@ -521,6 +521,11 @@ class TimeTower:
             time.sleep(trueDurationY / stepYmax)
         self.exampleLines[0].ranking = 1
         self.exampleLines[1].ranking = 2
+        self.exampleCanvas.delete('all')
+        for line in self.exampleLines:
+            line.showLine(0, 0)
+            line.showLine(0, 0)
+        self.exampleCanvas.update()
 
     def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
         try:

@@ -51,12 +51,14 @@ class Cards:
         self.exampleBackgroundImage = None
         self.nameFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.nameSize = cardsUtils.DEFAULT_FONT_SIZE
+        self.nameColor = cardsUtils.DEFAULT_FONT_COLOR
         self.nameModifiers = ''
         self.nameAnchor = 'nw'
         self.nameX = 0
         self.nameY = 0
         self.textFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.textSize = cardsUtils.DEFAULT_FONT_SIZE
+        self.textColor = cardsUtils.DEFAULT_FONT_COLOR
         self.textModifiers = ''
         self.textAnchor = 'nw'
         self.textX = 0
@@ -122,12 +124,14 @@ class Cards:
             'loopFile': self.loopFile,
             'nameFont': self.nameFont,
             'nameSize': self.nameSize,
+            'nameColor': self.nameColor,
             'nameModifiers': self.nameModifiers,
             'nameAnchor': self.nameAnchor,
             'nameX': self.nameX,
             'nameY': self.nameY,
             'textFont': self.textFont,
             'textSize': self.textSize,
+            'textColor': self.textColor,
             'textModifiers': self.textModifiers,
             'textAnchor': self.textAnchor,
             'textX': self.textX,
@@ -165,12 +169,14 @@ class Cards:
             self.loopFile = loadSettingsJson['loopFile']
             self.nameFont = loadSettingsJson['nameFont']
             self.nameSize = loadSettingsJson['nameSize']
+            self.nameColor = loadSettingsJson['nameColor']
             self.nameModifiers = loadSettingsJson['nameModifiers']
             self.nameAnchor = loadSettingsJson['nameAnchor']
             self.nameX = loadSettingsJson['nameX']
             self.nameY = loadSettingsJson['nameY']
             self.textFont = loadSettingsJson['textFont']
             self.textSize = loadSettingsJson['textSize']
+            self.textColor = loadSettingsJson['textColor']
             self.textModifiers = loadSettingsJson['textModifiers']
             self.textAnchor = loadSettingsJson['textAnchor']
             self.textX = loadSettingsJson['textX']
@@ -197,10 +203,10 @@ class Cards:
                 for cameraX in range(0, self.camerasX):
                     i = self.camerasX * cameraY + cameraX
                     self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-                    self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers),
+                    self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
                                                 anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
                     self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
-                    self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers),
+                    self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
                                                 anchor=self.textAnchor, justify=getJustify(self.textAnchor))
                     self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                     self.flags.append(Image.getFlag(self.flagHeight, 'local'))
@@ -282,7 +288,7 @@ class Cards:
             backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height, intro, loop))
         OKButton.grid(row=2, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameAnchor, nameX, nameY, textFont, textSize, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
@@ -294,11 +300,13 @@ class Cards:
         self.height = height
         self.nameFont = nameFont
         self.nameSize = nameSize
+        self.nameColor = nameColor
         self.nameAnchor = nameAnchor
         self.nameX = nameX
         self.nameY = nameY
         self.textFont = textFont
         self.textSize = textSize
+        self.textColor = textColor
         self.textAnchor = textAnchor
         self.textX = textX
         self.textY = textY
@@ -317,10 +325,10 @@ class Cards:
                 self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
                 if self.loopFile != '':
                     self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
-                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers),
+                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
                                             anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
                 self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
-                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers),
+                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
                                             anchor=self.textAnchor, justify=getJustify(self.textAnchor))
                 self.canvases[i].coords(self.texts[i], self.textX, self.textY)
                 self.flags[i] = Image.getFlag(self.flagHeight, 'local')
@@ -441,6 +449,18 @@ class Cards:
 
         self.layoutEndRow(10)
 
+        nameColorLabel = tk.Label(self.layoutWindow, text='Name color:')
+        nameColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        nameColorVariable = tk.StringVar()
+        nameColorVariable.set(self.nameColor)
+        nameColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        nameColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        nameColorButton = tk.Button(nameColorButtonFrame, text='', background=self.nameColor, relief=tk.FLAT, width=10)
+        nameColorButton.configure(command=lambda: colorButtonCommand(nameColorButton, nameColorVariable, 'Name color'))
+        nameColorButton.pack()
+
+        self.layoutEndRow(10)
+
         nameXLabel = tk.Label(self.layoutWindow, text='Name position X')
         nameXLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameXVariable = tk.StringVar()
@@ -509,6 +529,18 @@ class Cards:
         textItalicCheckbox = tk.Checkbutton(self.layoutWindow, text='Italic', variable=self.textItalicVariable)
         textItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         setModifiersVariables(self.textModifiers, self.textBoldVariable, self.textItalicVariable)
+
+        self.layoutEndRow(10)
+
+        textColorLabel = tk.Label(self.layoutWindow, text='Text color:')
+        textColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        textColorVariable = tk.StringVar()
+        textColorVariable.set(self.textColor)
+        textColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        textColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        textColorButton = tk.Button(textColorButtonFrame, text='', background=self.textColor, relief=tk.FLAT, width=10)
+        textColorButton.configure(command=lambda: colorButtonCommand(textColorButton, textColorVariable, 'Text color'))
+        textColorButton.pack()
 
         self.layoutEndRow(10)
 
@@ -652,9 +684,11 @@ class Cards:
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
             self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(),
             int(widthVariable.get()), int(heightVariable.get()),
-            nameFontVariable.get(), int(nameSizeVariable.get()), getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
+            nameFontVariable.get(), int(nameSizeVariable.get()), nameColorVariable.get(),
+            getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
             int(nameXVariable.get()), int(nameYVariable.get()),
-            textFontVariable.get(), int(textSizeVariable.get()), getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
+            textFontVariable.get(), int(textSizeVariable.get()), textColorVariable.get(),
+            getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
             int(textXVariable.get()), int(textYVariable.get()),
             flagEnableVariable.get(), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()),
             avatarEnableVariable.get(), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
@@ -676,8 +710,9 @@ class Cards:
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
         exampleName = exampleCanvas.create_text(
-            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
-        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize),
+            self.nameX, self.nameY, font=(self.nameFont, self.nameSize), fill=self.nameColor,
+            text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
+        exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize), fill=self.textColor,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor=self.textAnchor, justify=getJustify(self.textAnchor))
         exampleAvatarRectangle = exampleCanvas.create_rectangle(
             self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))
@@ -700,6 +735,7 @@ class Cards:
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         self.nameItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, font=(nameFontVariable.get(), nameSizeVariable.get(), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+        nameColorVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(exampleName, fill=nameColorVariable.get()))
         nameAnchorXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleName, anchor=getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
             justify=getJustify(getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()))))
@@ -714,6 +750,7 @@ class Cards:
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
+        textColorVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(exampleText, fill=textColorVariable.get()))
         self.textBoldVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         self.textItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(

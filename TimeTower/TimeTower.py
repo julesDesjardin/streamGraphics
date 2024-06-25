@@ -13,7 +13,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers
 import TimeTowerContent
 import TimeTowerLine
 
@@ -758,7 +758,7 @@ class TimeTower:
         self.rankingItalicVariable = tk.BooleanVar()
         rankingItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.rankingItalicVariable)
         rankingItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.rankingModifiers, self.rankingBoldVariable, self.rankingItalicVariable)
+        setModifiersVariables(self.rankingModifiers, self.rankingBoldVariable, self.rankingItalicVariable)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -779,7 +779,7 @@ class TimeTower:
         self.nameItalicVariable = tk.BooleanVar()
         nameItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.nameItalicVariable)
         nameItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
+        setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -800,7 +800,7 @@ class TimeTower:
         self.countItalicVariable = tk.BooleanVar()
         countItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.countItalicVariable)
         countItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.countModifiers, self.countBoldVariable, self.countItalicVariable)
+        setModifiersVariables(self.countModifiers, self.countBoldVariable, self.countItalicVariable)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -822,7 +822,7 @@ class TimeTower:
         self.incompleteResultItalicVariable = tk.BooleanVar()
         incompleteResultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.incompleteResultItalicVariable)
         incompleteResultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.incompleteResultModifiers, self.incompleteResultBoldVariable, self.incompleteResultItalicVariable)
+        setModifiersVariables(self.incompleteResultModifiers, self.incompleteResultBoldVariable, self.incompleteResultItalicVariable)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -843,7 +843,7 @@ class TimeTower:
         self.resultItalicVariable = tk.BooleanVar()
         resultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.resultItalicVariable)
         resultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.resultModifiers, self.resultBoldVariable, self.resultItalicVariable)
+        setModifiersVariables(self.resultModifiers, self.resultBoldVariable, self.resultItalicVariable)
 
         self.layoutEndRow(fontFrame, 10)
         emptyFrames.append(tk.Frame(fontFrame))
@@ -864,57 +864,57 @@ class TimeTower:
         self.fullResultItalicVariable = tk.BooleanVar()
         fullResultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.fullResultItalicVariable)
         fullResultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        timeTowerUtils.setModifiersVariables(self.fullResultModifiers, self.fullResultBoldVariable, self.fullResultItalicVariable)
+        setModifiersVariables(self.fullResultModifiers, self.fullResultBoldVariable, self.fullResultItalicVariable)
 
         fontFamilyVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()),
-                         timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get())),
+                         getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get())),
             fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()),
-                      timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get())),
+                      getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get())),
             fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()),
-                       timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get())),
+                       getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get())),
             fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()),
-                                  timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get())),
+                                  getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get())),
             fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()),
-                        timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get())),
+                        getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get())),
             fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()),
-                            timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+                            getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
         rankingSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
         self.rankingBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
         self.rankingItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
+            fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
         nameSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         self.nameBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         self.nameItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
+            fontName=(fontFamilyVariable.get(), cleverInt(nameSizeVariable.get()), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()))))
         countSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
         self.countBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
         self.countItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
+            fontCount=(fontFamilyVariable.get(), cleverInt(countSizeVariable.get()), getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()))))
         incompleteResultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
         self.incompleteResultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
         self.incompleteResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
+            fontIncompleteResult=(fontFamilyVariable.get(), cleverInt(incompleteResultSizeVariable.get()), getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()))))
         resultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
         self.resultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
         self.resultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+            fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
         fullResultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
         self.fullResultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
         self.fullResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
 
         # Colors
 
@@ -1071,14 +1071,13 @@ class TimeTower:
             cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get(
             )), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()),
             fontFamilyVariable.get(),
-            cleverInt(rankingSizeVariable.get()), timeTowerUtils.getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()),
-            cleverInt(nameSizeVariable.get()), timeTowerUtils.getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()),
-            cleverInt(countSizeVariable.get()), timeTowerUtils.getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()),
-            cleverInt(incompleteResultSizeVariable.get()), timeTowerUtils.getModifiers(
+            cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()),
+            cleverInt(nameSizeVariable.get()), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()),
+            cleverInt(countSizeVariable.get()), getModifiers(self.countBoldVariable.get(), self.countItalicVariable.get()),
+            cleverInt(incompleteResultSizeVariable.get()), getModifiers(
                 self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()),
-            cleverInt(resultSizeVariable.get()), timeTowerUtils.getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
-            cleverInt(fullResultSizeVariable.get()), timeTowerUtils.getModifiers(
-                self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
+            cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
+            cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
             bgLocalNameVariable.get(), bgLocalResultVariable.get(),
             bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),
             colorLocalNameVariable.get(), colorLocalResultVariable.get(),

@@ -6,6 +6,7 @@ from tkinter.colorchooser import askcolor
 import json
 import queue
 import threading
+import time
 import timeTowerUtils
 
 import sys
@@ -447,6 +448,72 @@ class TimeTower:
         colors = askcolor(variable.get(), title='Pick a color')
         if colors[1] is not None:
             variable.set(colors[1])
+
+    def testAnimation(self, durationX, FPSX, durationY, FPSY):
+        trueDurationX = durationX / 1000
+        trueDurationY = durationY / 1000
+        stepXmax = int(FPSX * durationX / 1000)
+        stepYmax = int(FPSY * durationY / 1000)
+
+        for line in self.exampleLines:
+            line.durationX = trueDurationX
+            line.stepXmax = stepXmax
+            line.durationY = trueDurationY
+            line.stepYmax = stepYmax
+
+        # 1 : Reduce line 0
+
+        self.exampleLines[0].reduceRequest = True
+        for stepX in range(0, stepXmax):
+            self.exampleCanvas.delete('all')
+            for line in self.exampleLines:
+                line.showLine(stepX, 0)
+                line.showLine(stepX, 0)
+            self.exampleCanvas.update()
+            time.sleep(trueDurationX / stepXmax)
+        self.exampleLines[0].expanded = False
+        self.exampleLines[0].reduceRequest = False
+
+        # 2 : Switch lines
+
+        self.exampleLines[0].nextRanking = 2
+        self.exampleLines[1].nextRanking = 1
+        for stepY in range(0, stepYmax):
+            self.exampleCanvas.delete('all')
+            for line in self.exampleLines:
+                line.showLine(0, stepY)
+                line.showLine(0, stepY)
+            self.exampleCanvas.update()
+            time.sleep(trueDurationY / stepYmax)
+        self.exampleLines[0].ranking = 2
+        self.exampleLines[1].ranking = 1
+
+        # 3 : Expand line 0 again
+
+        self.exampleLines[0].expandRequest = True
+        for stepX in range(0, stepXmax):
+            self.exampleCanvas.delete('all')
+            for line in self.exampleLines:
+                line.showLine(stepX, 0)
+                line.showLine(stepX, 0)
+            self.exampleCanvas.update()
+            time.sleep(trueDurationX / stepXmax)
+        self.exampleLines[0].expanded = True
+        self.exampleLines[0].expandRequest = False
+
+        # 4 : Switch lines again
+
+        self.exampleLines[0].nextRanking = 1
+        self.exampleLines[1].nextRanking = 2
+        for stepY in range(0, stepYmax):
+            self.exampleCanvas.delete('all')
+            for line in self.exampleLines:
+                line.showLine(0, stepY)
+                line.showLine(0, stepY)
+            self.exampleCanvas.update()
+            time.sleep(trueDurationY / stepYmax)
+        self.exampleLines[0].ranking = 1
+        self.exampleLines[1].ranking = 2
 
     def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, durationX, FPSX, durationY, FPSY, window):
         try:
@@ -987,6 +1054,16 @@ class TimeTower:
         FPSYSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSYVariable)
         FPSYSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         FPSYVariable.set(f'{self.FPSY}')
+
+        self.layoutEndRow(animationFrame, 10)
+        emptyFrames.append(tk.Frame(animationFrame))
+        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
+        self.layoutEndRow(animationFrame, 30)
+
+        testButton = tk.Button(animationFrame, text='Test animation', command=lambda: self.testAnimation(
+            cleverInt(durationXVariable.get()), cleverInt(FPSXVariable.get()),
+            cleverInt(durationYVariable.get()), cleverInt(FPSYVariable.get())))
+        testButton.grid(column=0, columnspan=2, row=self.currentRow)
 
         # End
 

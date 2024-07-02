@@ -7,6 +7,11 @@ import threading
 import queue
 import time
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+from Common.commonUtils import COUNTRIES
+
 
 class TimeTowerContent:
 
@@ -80,7 +85,7 @@ class TimeTowerContent:
 
         queryResult = timeTowerUtils.getQueryResult(query)
         for person in queryResult['round']['results']:
-            if self.region == 'World' or self.region in timeTowerUtils.COUNTRIES[person['person']['country']['iso2']]:
+            if self.region == 'World' or self.region in COUNTRIES[person['person']['country']['iso2']]:
                 bgName = self.bgLocalName
                 bgResult = self.bgLocalResult
                 colorName = self.colorLocalName

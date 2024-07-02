@@ -13,7 +13,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS
 import TimeTowerContent
 import TimeTowerLine
 
@@ -336,7 +336,7 @@ class TimeTower:
         delayCloseButton.pack(padx=20, pady=5)
 
     def checkRegionSeparator(self, regionBox):
-        if regionBox.get() == timeTowerUtils.SEPARATOR:
+        if regionBox.get() == SEPARATOR:
             regionBox.set('World')
 
     def updateRegionCloseButton(self, region, window):
@@ -352,7 +352,7 @@ class TimeTower:
             regionWindow, text='Please choose a region (country or continent) if you want local competitors to be highlighted, so you can see the local results more easily.\nThe "World" option highlights everyone the same.')
         regionLabel.pack(padx=20, pady=5)
         regionBox = ttk.Combobox(regionWindow)
-        regionBox['values'] = timeTowerUtils.REGION_OPTIONS
+        regionBox['values'] = REGION_OPTIONS
         regionBox.set(self.region)
         regionBox['state'] = 'readonly'
         regionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(regionBox))

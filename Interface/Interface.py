@@ -15,7 +15,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
-from Common.commonUtils import addCheckSettingsChanged
+from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS
 
 
 class Interface:
@@ -37,6 +37,7 @@ class Interface:
         self.interfaceFrames = []
         self.stages = []
         self.exampleStages = []
+        self.region = 'World'
         self.cardText = ''
         self.presentationText = ''
         self.botToken = ''
@@ -67,6 +68,7 @@ class Interface:
             'buttonRows': self.buttonRows,
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
+            'region': self.region,
             'cardText': self.cardText,
             'presentationText': self.presentationText,
             'botToken': self.botToken,
@@ -103,6 +105,7 @@ class Interface:
             self.stages = []
             for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
                 self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
+            self.region = loadSettingsJson['region']
             self.cardText = loadSettingsJson['cardText']
             self.presentationText = loadSettingsJson['presentationText']
             self.botToken = loadSettingsJson['botToken']
@@ -313,6 +316,31 @@ class Interface:
         OKButton = tk.Button(stagesWindow, text='OK', command=lambda: self.updateStagesCloseWindow(stagesWindow))
         OKButton.grid(row=3, column=0)
 
+    def checkRegionSeparator(self, regionBox):
+        if regionBox.get() == SEPARATOR:
+            regionBox.set('World')
+
+    def updateRegionCloseButton(self, region, window):
+        self.region = region
+        window.destroy()
+        self.settingsChanged.set(True)
+
+    def updateRegion(self):
+        regionWindow = tk.Toplevel(self.root)
+        regionWindow.grab_set()
+        regionLabel = tk.Label(
+            regionWindow, text='Please choose a region (country or continent) if you want foreign competitors to be shown first in the presentation.\nThe "World" option will keep the round order (last to first).')
+        regionLabel.pack(padx=20, pady=5)
+        regionBox = ttk.Combobox(regionWindow)
+        regionBox['values'] = REGION_OPTIONS
+        regionBox.set(self.region)
+        regionBox['state'] = 'readonly'
+        regionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(regionBox))
+        regionBox.pack(padx=20, pady=5)
+        regionCloseButton = tk.Button(regionWindow, text='Update region',
+                                      command=lambda: self.updateRegionCloseButton(regionBox.get(), regionWindow))
+        regionCloseButton.pack(padx=20, pady=5)
+
     def updateCardTextCloseButton(self, text, isCard, window):
         if isCard:
             self.cardText = text
@@ -458,7 +486,7 @@ This supports the following characters to be replaced by the appropriate value:
         (venue, room, event, round, group) = self.getStageInfo()
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
-                self.root, self.wcif, self.presentationText, venue, room, event, int(round), group, self.bot)
+                self.root, self.wcif, self.presentationText, self.region, venue, room, event, int(round), group, self.bot)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
@@ -474,16 +502,18 @@ This supports the following characters to be replaced by the appropriate value:
         buttonsButton.grid(column=0, row=4)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
         stagesButton.grid(column=0, row=5)
+        regionButton = tk.Button(frame, text='Change championship region for presentation', command=self.updateRegion)
+        regionButton.grid(column=0, row=6)
         cardTextButton = tk.Button(frame, text='Change text on card', command=lambda: self.updateCardText(True))
-        cardTextButton.grid(column=0, row=6)
-        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
         cardTextButton.grid(column=0, row=7)
+        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
+        cardTextButton.grid(column=0, row=8)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=8)
+        telegramButton.grid(column=0, row=9)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=9)
-        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=10)
+        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=11)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -497,3 +527,4 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(8, pad=20)
         frame.rowconfigure(9, pad=20)
         frame.rowconfigure(10, pad=20)
+        frame.rowconfigure(11, pad=20)

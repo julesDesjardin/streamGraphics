@@ -5,13 +5,20 @@ import dataWrite
 import WCIFParse
 import interfaceUtils
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+from Common import TelegramBot
+from Common.commonUtils import COUNTRIES
+
 
 class PresentationInterface:
-    def __init__(self, root, wcif, text, venue, room, event, round, group, bot):
+    def __init__(self, root, wcif, text, region, venue, room, event, round, group, bot):
 
         self.root = root
         self.wcif = wcif
         self.text = text
+        self.region = region
         self.event = event
         self.round = round
         self.bot = bot
@@ -21,7 +28,12 @@ class PresentationInterface:
 
         self.id = -1
         activityId = WCIFParse.getActivityId(wcif, venue, room, event, round, group)
-        self.competitorsId = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)]
+
+        foreignCompetitors = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+                              if self.region != 'World' and self.region not in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+        localCompetitors = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+                            if self.region == 'World' or self.region in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+        self.competitorsId = foreignCompetitors + localCompetitors
         if round == 1:
             self.competitorsId.sort(key=lambda x: WCIFParse.getRanking(
                 wcif, x, event, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[event]], 'world'), reverse=True)

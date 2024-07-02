@@ -3,7 +3,6 @@ from tkinter import ttk
 import json
 import dataWrite
 import WCIFParse
-import InterfaceSettings
 import interfaceUtils
 
 

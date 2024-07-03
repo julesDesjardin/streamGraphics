@@ -29,23 +29,22 @@ class PresentationInterface:
         self.id = -1
         activityId = WCIFParse.getActivityId(wcif, venue, room, event, round, group)
 
-        foreignCompetitors = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+        foreignCompetitors = [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
                               if self.region != 'World' and self.region not in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
-        localCompetitors = [competitor[0] for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+        localCompetitors = [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
                             if self.region == 'World' or self.region in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
-        self.competitorsId = foreignCompetitors + localCompetitors
-        if round == 1:
-            self.competitorsId.sort(key=lambda x: WCIFParse.getRanking(
-                wcif, x, event, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[event]], 'world'), reverse=True)
-        else:
-            self.competitorsId.sort(key=lambda x: WCIFParse.getRoundResult(
-                wcif, x, event, round - 1, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[event]]), reverse=True)
+        foreignCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
+        localCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
+
+        # This is an array of tuple: for each element, competitor[0] is the ID and competitor[1] is the seed
+        self.competitors = foreignCompetitors + localCompetitors
 
         self.avatars = []
         self.competitorsName = []
-        for competitor in self.competitorsId:
-            self.avatars.append(WCIFParse.getAvatar(wcif, competitor))
-            self.competitorsName.append(WCIFParse.getCompetitorName(wcif, competitor))
+        self.seeds = []
+        for competitor in self.competitors:
+            self.avatars.append(WCIFParse.getAvatar(wcif, competitor[0]))
+            self.competitorsName.append(WCIFParse.getCompetitorName(wcif, competitor[0]))
 
         self.previousButton = tk.Button(self.window, command=self.previousButtonCommand)
         self.previousButton.pack(pady=20, anchor='n')
@@ -61,6 +60,12 @@ class PresentationInterface:
 
         self.updateButtons()
 
+    def getKey(self, id):
+        if self.round == 1:
+            return WCIFParse.getRanking(self.wcif, id, self.event, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[self.event]], 'world')
+        else:
+            return WCIFParse.getRoundResult(self.wcif, id, self.event, self.round - 1, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[self.event]])
+
     def updateButtons(self):
         if self.id == -1:
             self.previousButton.configure(state='disabled', text='Previous: no previous competitor')
@@ -74,7 +79,7 @@ class PresentationInterface:
         else:
             self.currentLabel.configure(text=f'Current presentation: {self.competitorsName[self.id]}')
 
-        if self.id == len(self.competitorsId) - 1:
+        if self.id == len(self.competitors) - 1:
             self.nextButton.configure(text='Close presentation')
         else:
             self.nextButton.configure(text=f'Next: {self.competitorsName[self.id + 1]}')
@@ -82,15 +87,15 @@ class PresentationInterface:
         if self.id == -1:
             dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
         else:
-            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitorsId[self.id]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
-                self.text, self.wcif, self.competitorsId[self.id], len(self.competitorsId) - self.id, self.event, self.round), True)
+            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
+                self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round), True)
 
     def previousButtonCommand(self):
         self.id = self.id - 1
         self.updateButtons()
 
     def nextButtonCommand(self):
-        if self.id == len(self.competitorsId) - 1:
+        if self.id == len(self.competitors) - 1:
             dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
             self.window.destroy()
         else:

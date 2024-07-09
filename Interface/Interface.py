@@ -15,7 +15,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common import TelegramBot
-from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS
+from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS, SEPARATOR
 
 
 class Interface:

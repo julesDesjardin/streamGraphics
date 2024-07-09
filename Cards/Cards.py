@@ -5,6 +5,7 @@ from tkinter import ttk, font
 import json
 import queue
 import threading
+import time
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import cv2

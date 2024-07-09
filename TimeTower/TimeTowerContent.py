@@ -11,6 +11,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from Common.commonUtils import COUNTRIES
+from Common import Image
 
 
 class TimeTowerContent:
@@ -144,7 +145,7 @@ class TimeTowerContent:
                 line.widthRanking = self.widthRanking
                 line.widthFlagRectangle = self.widthFlagRectangle
                 line.heightFlag = self.heightFlag
-                line.flagImage = Image.getFlag(heightFlag, line.country)
+                line.flagImage = Image.getFlag(self.heightFlag, line.country)
                 line.widthName = self.widthName
                 line.widthFullName = self.widthFullName
                 line.widthCount = self.widthCount

@@ -46,6 +46,8 @@ class Cards:
         self.loopImages = []
         self.introFile = ''
         self.introImages = []
+        self.outroFile = ''
+        self.outroImages = []
         self.width = cardsUtils.DEFAULT_WIDTH
         self.height = cardsUtils.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
@@ -122,6 +124,7 @@ class Cards:
             'height': self.height,
             'backgroundColor': self.backgroundColor,
             'introFile': self.introFile,
+            'outroFile': self.outroFile,
             'loopFile': self.loopFile,
             'nameFont': self.nameFont,
             'nameSize': self.nameSize,
@@ -167,6 +170,7 @@ class Cards:
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']
             self.introFile = loadSettingsJson['introFile']
+            self.outroFile = loadSettingsJson['outroFile']
             self.loopFile = loadSettingsJson['loopFile']
             self.nameFont = loadSettingsJson['nameFont']
             self.nameSize = loadSettingsJson['nameSize']
@@ -238,6 +242,9 @@ class Cards:
         if self.introFile != '':
             cardsUtils.loadVideo(self.introFile, self.introImages)
 
+        if self.outroFile != '':
+            cardsUtils.loadVideo(self.outroFile, self.outroImages)
+
         try:
             if self.bot is None:
                 self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
@@ -252,9 +259,10 @@ class Cards:
             return
         self.settingsChanged.set(False)
 
-    def updateBackgroundCloseButton(self, window, introFile, loopFile, canvas, background, width, height, intro, loop):
+    def updateBackgroundCloseButton(self, window, introFile, loopFile, outroFile, canvas, background, width, height, intro, loop, outro):
         intro.set(introFile)
         loop.set(loopFile)
+        outro.set(outroFile)
         if loopFile != '':
             (self.exampleBackgroundImage, widthVideo, heightVideo) = cardsUtils.loadFirstFrame(loopFile)
             canvas.configure(width=widthVideo, height=heightVideo)
@@ -264,7 +272,7 @@ class Cards:
         window.destroy()
         self.settingsChanged.set(True)
 
-    def updateBackground(self, window, canvas, background, width, height, intro, loop):
+    def updateBackground(self, window, canvas, background, width, height, intro, loop, outro):
         backgroundWindow = tk.Toplevel(window)
         backgroundWindow.grab_set()
 
@@ -284,19 +292,30 @@ class Cards:
         loopEntry.grid(row=1, column=1)
         loopBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: cardsUtils.browse(loopEntry))
         loopBrowse.grid(row=1, column=2)
+        outroLabel = tk.Label(backgroundWindow, text='Outro video/image')
+        outroLabel.grid(row=2, column=0)
+        outroEntry = tk.Entry(backgroundWindow)
+        outroEntry.delete(0, tkinter.END)
+        outroEntry.insert(0, outro.get())
+        outroEntry.grid(row=2, column=1)
+        outroBrowse = tk.Button(backgroundWindow, text='Browse...', command=lambda: cardsUtils.browse(outroEntry))
+        outroBrowse.grid(row=2, column=2)
 
         OKButton = tk.Button(backgroundWindow, text='OK', command=lambda: self.updateBackgroundCloseButton(
-            backgroundWindow, introEntry.get(), loopEntry.get(), canvas, background, width, height, intro, loop))
-        OKButton.grid(row=2, column=0, columnspan=3)
+            backgroundWindow, introEntry.get(), loopEntry.get(), outroEntry.get(), canvas, background, width, height, intro, loop, outro))
+        OKButton.grid(row=3, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, outroFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
+        self.outroFile = outroFile
         if self.introFile != '':
             cardsUtils.loadVideo(self.introFile, self.introImages)
         if self.loopFile != '':
             cardsUtils.loadVideo(self.loopFile, self.loopImages)
+        if self.outroFile != '':
+            cardsUtils.loadVideo(self.outroFile, self.outroImages)
         self.width = width
         self.height = height
         self.nameFont = nameFont
@@ -662,10 +681,12 @@ class Cards:
 
         introFileVariable = tk.StringVar()
         loopFileVariable = tk.StringVar()
+        outroFileVariable = tk.StringVar()
         introFileVariable.set(self.introFile)
         loopFileVariable.set(self.loopFile)
+        outroFileVariable.set(self.outroFile)
         backgroundButton = tk.Button(self.layoutWindow, text='Update background image/video',
-                                     command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable))
+                                     command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable, outroFileVariable))
         backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
 
         self.layoutEndRow(10)
@@ -683,7 +704,7 @@ class Cards:
         self.layoutEndRow(10)
 
         OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(),
+            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), outroFileVariable.get(),
             int(widthVariable.get()), int(heightVariable.get()),
             nameFontVariable.get(), int(nameSizeVariable.get()), nameColorVariable.get(),
             getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
@@ -839,6 +860,12 @@ class Cards:
                     canvas.itemconfig(avatarImage, state='hidden')
                     canvas.itemconfig(name, state='hidden')
                     canvas.itemconfig(text, state='hidden')
+                    if self.outroFile != '':
+                        for image in self.outroImages:
+                                canvas.itemconfig(background, image=image, state='normal')
+                                canvas.update()
+                                time.sleep(1 / 25)
+                    canvas.itemconfig(background, state='hidden')
                     self.backgroundLoopIndices[i] = -1
                 else:
                     if self.backgroundLoopIndices[i] == -1:

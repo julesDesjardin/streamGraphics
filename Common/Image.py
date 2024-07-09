@@ -9,10 +9,10 @@ storedImages = dict([])
 def getLocalImage(width, height, path, keepImage):
     if keepImage:
         if path in storedImages:
-            imageFull = storedImages[path]
+            imageFull = storedImages[path].copy()
         else:
             imageFull = Image.open(path)
-            storedImages[path] = imageFull
+            storedImages[path] = imageFull.copy()
     else:
         imageFull = Image.open(path)
     imageFull.thumbnail((width, height))
@@ -22,10 +22,10 @@ def getLocalImage(width, height, path, keepImage):
 def getInternetImage(width, height, url, keepImage):
     if keepImage:
         if url in storedImages:
-            imageFull = storedImages[url]
+            imageFull = storedImages[url].copy()
         else:
             imageFull = Image.open(urlopen(url))
-            storedImages[url] = imageFull
+            storedImages[url] = imageFull.copy()
     else:
         imageFull = Image.open(urlopen(url))
     imageFull.thumbnail((width, height))

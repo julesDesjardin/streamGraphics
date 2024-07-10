@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.filedialog
 import cv2
+from enum import Enum
 
 CAMERAS_ROWS = 2
 CAMERAS_COLS = 2
@@ -19,6 +20,13 @@ DEFAULT_AVATAR_WIDTH = 100
 DEFAULT_AVATAR_HEIGHT = 100
 DEFAULT_AVATAR_X = 100
 DEFAULT_AVATAR_Y = 200
+
+
+class BackgroundState(Enum):
+    EMPTY = 1
+    INTRO = 2
+    LOOP = 3
+    OUTRO = 4
 
 
 def browse(entry):

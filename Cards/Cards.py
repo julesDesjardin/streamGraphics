@@ -41,7 +41,12 @@ class Cards:
         self.avatars = []
         self.avatarImages = []
         self.backgrounds = []
-        self.backgroundLoopIndices = []
+        self.backgroundStates = []
+        self.backgroundIndices = []
+        self.requestCountries = []
+        self.requestNames = []
+        self.requestAvatars = []
+        self.requestTexts = []
         self.loopFile = ''
         self.loopImages = []
         self.introFile = ''
@@ -86,15 +91,21 @@ class Cards:
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
-            self.backgroundLoopIndices.append(-1)
+            self.backgroundStates.append(cardsUtils.BackgroundState.EMPTY)
+            self.backgroundIndices.append(-1)
+            self.requestNames.append('')
+            self.requestCountries.append('')
+            self.requestAvatars.append('')
+            self.requestTexts.append('')
             self.names.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.nameFont, self.nameSize, self.nameModifiers), text=f'Camera {i+1} competitor', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
+                              font=(self.nameFont, self.nameSize, self.nameModifiers), anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
-                              font=(self.textFont, self.textSize, self.textModifiers), text=f'Camera {i+1} text', anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
+                              font=(self.textFont, self.textSize, self.textModifiers), anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
             self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
             self.avatarImages.append(self.canvases[i].create_image(self.avatarX, self.avatarY, image=self.avatars[i]))
+            self.hide(i)
         for cameraX in range(0, self.camerasX):
             self.mainFrame.columnconfigure(cameraX, pad=20)
         for cameraY in range(0, self.camerasY):
@@ -218,19 +229,12 @@ class Cards:
                     self.flags.append(Image.getFlag(self.flagHeight, 'local'))
                     self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
                     self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-                    if self.flagEnable:
-                        self.canvases[i].itemconfig(self.flagImages[i], state='normal')
-                    else:
-                        self.canvases[i].itemconfig(self.flagImages[i], state='hidden')
                     self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
                     self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
                     self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
-                    if self.avatarEnable:
-                        self.canvases[i].itemconfig(self.avatarImages[i], state='normal')
-                    else:
-                        self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
                     if not self.canvases[i].winfo_ismapped():
                         self.canvases[i].grid(row=cameraY, column=cameraX)
+                    self.hide(i)
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
@@ -844,57 +848,120 @@ class Cards:
                                         command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
         telegramCloseButton.pack(pady=20)
 
+    def prepareWithRequest(self, i):
+        canvas = self.canvases[i]
+        name = self.names[i]
+        text = self.texts[i]
+        flagImage = self.flagImages[i]
+        avatarImage = self.avatarImages[i]
+        if self.flagEnable:
+            self.flags[i] = Image.getFlag(self.flagHeight, self.requestCountries[i])
+            canvas.itemconfig(flagImage, image=self.flags[i])
+        if self.avatarEnable:
+            self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, self.requestAvatars[i])
+            canvas.itemconfig(avatarImage, image=self.avatars[i])
+        canvas.itemconfig(name, text=self.requestNames[i])
+        canvas.itemconfig(text, text=self.requestTexts[i])
+
+    def show(self, i):
+        canvas = self.canvases[i]
+        background = self.backgrounds[i]
+        name = self.names[i]
+        text = self.texts[i]
+        flagImage = self.flagImages[i]
+        avatarImage = self.avatarImages[i]
+        canvas.itemconfig(background, state='normal')
+        if self.flagEnable:
+            canvas.itemconfig(flagImage, state='normal')
+        if self.avatarEnable:
+            canvas.itemconfig(avatarImage, state='normal')
+        canvas.itemconfig(name, state='normal')
+        canvas.itemconfig(text, state='normal')
+        canvas.update()
+
+    def hide(self, i):
+        canvas = self.canvases[i]
+        name = self.names[i]
+        text = self.texts[i]
+        flagImage = self.flagImages[i]
+        avatarImage = self.avatarImages[i]
+        canvas.itemconfig(flagImage, state='hidden')
+        canvas.itemconfig(avatarImage, state='hidden')
+        canvas.itemconfig(name, state='hidden')
+        canvas.itemconfig(text, state='hidden')
+        canvas.update()
+
     def checkAllQueues(self):
         for i in range(0, self.camerasCount):
             dataQueue = self.queues[i]
             canvas = self.canvases[i]
-            name = self.names[i]
-            text = self.texts[i]
-            flagImage = self.flagImages[i]
-            avatarImage = self.avatarImages[i]
             background = self.backgrounds[i]
-            try:
-                (country, nameRead, avatarRead, textRead) = dataQueue.get(block=False)
-                if nameRead == '':
-                    canvas.itemconfig(background, state='hidden')
-                    canvas.itemconfig(flagImage, state='hidden')
-                    canvas.itemconfig(avatarImage, state='hidden')
-                    canvas.itemconfig(name, state='hidden')
-                    canvas.itemconfig(text, state='hidden')
-                    if self.outroFile != '':
-                        for image in self.outroImages:
-                                canvas.itemconfig(background, image=image, state='normal')
-                                canvas.update()
-                                time.sleep(1 / 25)
-                    canvas.itemconfig(background, state='hidden')
-                    self.backgroundLoopIndices[i] = -1
-                else:
-                    if self.backgroundLoopIndices[i] == -1:
-                        if self.introFile != '':
-                            for image in self.introImages:
-                                canvas.itemconfig(background, image=image, state='normal')
-                                canvas.update()
-                                time.sleep(1 / 25)
-                        self.backgroundLoopIndices[i] = 0
-                    if self.flagEnable:
-                        self.flags[i] = Image.getFlag(self.flagHeight, country)
-                        canvas.itemconfig(flagImage, image=self.flags[i], state='normal')
-                    if self.avatarEnable:
-                        self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, avatarRead)
-                        canvas.itemconfig(avatarImage, image=self.avatars[i], state='normal')
-                    canvas.itemconfig(name, text=nameRead, state='normal')
-                    canvas.itemconfig(text, text=textRead, state='normal')
-            except queue.Empty:
-                pass
-            if self.backgroundLoopIndices[i] != -1:
-                if self.loopFile != '':
-                    canvas.itemconfig(background, image=self.loopImages[self.backgroundLoopIndices[i]])
-                canvas.itemconfig(background, state='normal')
+            backgroundState = self.backgroundStates[i]
+            nextBackgroundState = backgroundState
+            index = self.backgroundIndices[i]
+            nextIndex = index
+
+            # Update background
+            if backgroundState == cardsUtils.BackgroundState.EMPTY:
+                canvas.itemconfig(background, state='hidden')
+            else:
+                match backgroundState:
+                    case cardsUtils.BackgroundState.INTRO:
+                        image = self.introImages[index]
+                    case cardsUtils.BackgroundState.LOOP:
+                        image = self.loopImages[index]
+                    case cardsUtils.BackgroundState.OUTRO:
+                        image = self.outroImages[index]
+                canvas.itemconfig(background, image=image, state='normal')
                 canvas.update()
-                if self.backgroundLoopIndices[i] >= len(self.loopImages) - 1:
-                    self.backgroundLoopIndices[i] = 0
-                else:
-                    self.backgroundLoopIndices[i] = self.backgroundLoopIndices[i] + 1
+
+            # Get new request from queue
+            try:
+                (self.requestCountries[i], self.requestNames[i], self.requestAvatars[i], self.requestTexts[i]) = dataQueue.get(block=False)
+                if self.requestNames[i] != '':
+                    self.prepareWithRequest(i)
+            except:
+                pass
+
+            # Update state if needed
+            match backgroundState:
+                case cardsUtils.BackgroundState.EMPTY:
+                    if self.requestNames[i] != '':
+                        if self.introFile != '':
+                            nextBackgroundState = cardsUtils.BackgroundState.INTRO
+                        else:
+                            nextBackgroundState = cardsUtils.BackgroundState.LOOP
+                            self.show(i)
+                        nextIndex = 0
+                case cardsUtils.BackgroundState.INTRO:
+                    if index == len(self.introImages) - 1:
+                        nextIndex = 0
+                        nextBackgroundState = cardsUtils.BackgroundState.LOOP
+                        self.show(i)
+                    else:
+                        nextIndex = index + 1
+                case cardsUtils.BackgroundState.LOOP:
+                    if self.requestNames[i] == '':
+                        if self.outroFile != '':
+                            nextBackgroundState = cardsUtils.BackgroundState.OUTRO
+                        else:
+                            nextBackgroundState = cardsUtils.BackgroundState.EMPTY
+                        self.hide(i)
+                        nextIndex = 0
+                    else:
+                        if index == len(self.loopImages) - 1:
+                            nextIndex = 0
+                        else:
+                            nextIndex = index + 1
+                case cardsUtils.BackgroundState.OUTRO:
+                    if index == len(self.outroImages) - 1:
+                        nextIndex = 0
+                        nextBackgroundState = cardsUtils.BackgroundState.EMPTY
+                    else:
+                        nextIndex = index + 1
+            self.backgroundStates[i] = nextBackgroundState
+            self.backgroundIndices[i] = nextIndex
+
         self.root.after(int(1000 / 25), self.checkAllQueues)
 
     def showSettingsFrame(self):

@@ -204,6 +204,7 @@ class Cards:
 
         try:
             self.flags.clear()
+            self.avatars.clear()
             for cameraY in range(0, self.camerasY):
                 for cameraX in range(0, self.camerasX):
                     i = self.camerasX * cameraY + cameraX

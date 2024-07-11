@@ -917,6 +917,7 @@ class Cards:
         canvas.update()
 
     def checkAllQueues(self):
+        start = time.time()
         for i in range(0, self.camerasCount):
             dataQueue = self.queues[i]
             canvas = self.canvases[i]
@@ -986,8 +987,8 @@ class Cards:
                         nextIndex = index + 1
             self.backgroundStates[i] = nextBackgroundState
             self.backgroundIndices[i] = nextIndex
-
-        self.root.after(int(1000 / self.FPS), self.checkAllQueues)
+        delay = max(0, int(1000 / self.FPS - 1000 * (time.time() - start)))
+        self.root.after(delay, self.checkAllQueues)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)

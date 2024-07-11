@@ -53,6 +53,7 @@ class Cards:
         self.introImages = []
         self.outroFile = ''
         self.outroImages = []
+        self.FPS = cardsUtils.DEFAULT_FPS
         self.width = cardsUtils.DEFAULT_WIDTH
         self.height = cardsUtils.DEFAULT_HEIGHT
         self.backgroundColor = '#FFFFFF'
@@ -137,6 +138,7 @@ class Cards:
             'introFile': self.introFile,
             'outroFile': self.outroFile,
             'loopFile': self.loopFile,
+            'FPS': self.FPS,
             'nameFont': self.nameFont,
             'nameSize': self.nameSize,
             'nameColor': self.nameColor,
@@ -183,6 +185,7 @@ class Cards:
             self.introFile = loadSettingsJson['introFile']
             self.outroFile = loadSettingsJson['outroFile']
             self.loopFile = loadSettingsJson['loopFile']
+            self.FPS = loadSettingsJson['FPS']
             self.nameFont = loadSettingsJson['nameFont']
             self.nameSize = loadSettingsJson['nameSize']
             self.nameColor = loadSettingsJson['nameColor']
@@ -811,6 +814,28 @@ class Cards:
                                   [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle])
         backgroundColorVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(background=backgroundColorVariable.get()))
 
+    def updateFPSCloseButton(self, FPS, window):
+        self.FPS = FPS
+        window.destroy()
+        self.settingsChanged.set(True)
+
+    def updateFPS(self):
+        FPSWindow = tk.Toplevel(self.root)
+        FPSWindow.grab_set()
+        FPSWindow.rowconfigure(0, pad=20)
+        FPSWindow.rowconfigure(1, pad=20)
+        FPSWindow.rowconfigure(2, pad=20)
+        FPSTitle = tk.Label(FPSWindow, text='FPS for intro/loop/outro videos.\nBe careful, setting FPS too high may make the app laggy.')
+        FPSTitle.grid(column=0, columnspan=2, row=0)
+        FPSLabel = tk.Label(FPSWindow, text='FPS:')
+        FPSLabel.grid(column=0, row=1, sticky='e')
+        FPSVariable = tk.StringVar()
+        FPSSpinbox = tk.Spinbox(FPSWindow, width=20, from_=0, to=50, textvariable=FPSVariable)
+        FPSSpinbox.grid(column=1, row=1, sticky='w')
+        FPSVariable.set(f'{self.FPS}')
+        OKButton = tk.Button(FPSWindow, text='OK', command=lambda: self.updateFPSCloseButton(cleverInt(FPSVariable.get()), FPSWindow))
+        OKButton.grid(column=0, columnspan=2, row=2)
+
     def updateTelegramSettingsCloseButton(self, token, id, window):
         self.botToken = token
         self.botChannelId = id
@@ -962,7 +987,7 @@ class Cards:
             self.backgroundStates[i] = nextBackgroundState
             self.backgroundIndices[i] = nextIndex
 
-        self.root.after(int(1000 / 25), self.checkAllQueues)
+        self.root.after(int(1000 / self.FPS), self.checkAllQueues)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
@@ -970,12 +995,14 @@ class Cards:
         settingsLabel.grid(column=0, row=0)
         layoutButton = tk.Button(frame, text='Update layout', command=self.updateLayout)
         layoutButton.grid(column=0, row=1)
+        FPSButton = tk.Button(frame, text='Change FPS for videos', command=self.updateFPS)
+        FPSButton.grid(column=0, row=2)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=2)
+        telegramButton.grid(column=0, row=3)
         saveButton = tk.Button(frame, text='Save Cards Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=3)
-        saveButton = tk.Button(frame, text='Load Cards Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=4)
+        saveButton = tk.Button(frame, text='Load Cards Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=5)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -983,3 +1010,4 @@ class Cards:
         frame.rowconfigure(2, pad=20)
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
+        frame.rowconfigure(5, pad=20)

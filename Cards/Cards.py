@@ -375,6 +375,7 @@ class Cards:
                     self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
                 if not self.canvases[i].winfo_ismapped():
                     self.canvases[i].grid(row=cameraY, column=cameraX)
+                self.hide(i)
 
         window.destroy()
         self.settingsChanged.set(True)

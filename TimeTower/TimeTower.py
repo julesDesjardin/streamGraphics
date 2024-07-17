@@ -1,3 +1,7 @@
+import TimeTowerLine
+import TimeTowerContent
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS
+from Common import TelegramBot, Image
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
@@ -12,10 +16,6 @@ import timeTowerUtils
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS
-import TimeTowerContent
-import TimeTowerLine
 
 
 class TimeTower:
@@ -66,8 +66,7 @@ class TimeTower:
         self.colorForeignerName = timeTowerUtils.DEFAULT_COLOR_FOREIGNER_NAME
         self.colorForeignerResult = timeTowerUtils.DEFAULT_COLOR_FOREIGNER_RESULT
         self.maxNumber = timeTowerUtils.DEFAULT_MAX_NUMBER
-        self.FPSX = timeTowerUtils.DEFAULT_FPS_X
-        self.FPSY = timeTowerUtils.DEFAULT_FPS_Y
+        self.FPS = timeTowerUtils.DEFAULT_FPS
         self.durationX = timeTowerUtils.DEFAULT_DURATION_X
         self.durationY = timeTowerUtils.DEFAULT_DURATION_Y
         self.settingsChanged = tk.BooleanVar()
@@ -133,10 +132,8 @@ class TimeTower:
                     line.reduceRequest = True
 
     def loadContent(self):
-        durationX = self.durationX / 1000
-        durationY = self.durationY / 1000
-        stepXmax = int(self.FPSX * self.durationX / 1000)
-        stepYmax = int(self.FPSY * self.durationY / 1000)
+        stepXmax = int(self.FPS * self.durationX / 1000)
+        stepYmax = int(self.FPS * self.durationY / 1000)
         if self.content is None:
             self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region,
                                                              self.backgroundColor,
@@ -149,7 +146,7 @@ class TimeTower:
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
                                                              (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
                                                              self.colorLocalName, self.colorLocalResult, self.colorForeignerName, self.colorForeignerResult,
-                                                             self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY)
+                                                             self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, self.FPS)
             self.content.showFrame()
             self.content.mainLoop()
         else:
@@ -167,7 +164,7 @@ class TimeTower:
                                   self.bgForeignerName, self.bgForeignerResult,
                                   self.colorLocalName, self.colorLocalResult,
                                   self.colorForeignerName, self.colorForeignerResult,
-                                  self.maxNumber, self.delay, stepXmax, stepYmax, durationX, durationY))
+                                  self.maxNumber, self.delay, stepXmax, stepYmax, self.FPS))
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -209,9 +206,8 @@ class TimeTower:
             'colorForeignerName': self.colorForeignerName,
             'colorForeignerResult': self.colorForeignerResult,
             'durationX': self.durationX,
-            'FPSX': self.FPSX,
             'durationY': self.durationY,
-            'FPSY': self.FPSY,
+            'FPS': self.FPS,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -264,9 +260,8 @@ class TimeTower:
             self.colorForeignerName = loadSettingsJson['colorForeignerName']
             self.colorForeignerResult = loadSettingsJson['colorForeignerResult']
             self.durationX = loadSettingsJson['durationX']
-            self.FPSX = loadSettingsJson['FPSX']
             self.durationY = loadSettingsJson['durationY']
-            self.FPSY = loadSettingsJson['FPSY']
+            self.FPS = loadSettingsJson['FPS']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -456,11 +451,11 @@ class TimeTower:
         for line in self.exampleLines:
             line.showLine(0, 0)
 
-    def testAnimation(self, durationX, FPSX, durationY, FPSY):
+    def testAnimation(self, durationX, durationY, FPS):
         trueDurationX = durationX / 1000
         trueDurationY = durationY / 1000
-        stepXmax = int(FPSX * durationX / 1000)
-        stepYmax = int(FPSY * durationY / 1000)
+        stepXmax = int(FPS * durationX / 1000)
+        stepYmax = int(FPS * durationY / 1000)
 
         for line in self.exampleLines:
             line.durationX = trueDurationX
@@ -527,7 +522,7 @@ class TimeTower:
             line.showLine(0, 0)
         self.exampleCanvas.update()
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, FPSX, durationY, FPSY, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, durationY, FPS, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
@@ -563,9 +558,8 @@ class TimeTower:
             self.colorForeignerResult = colorForeignerResult
             self.maxNumber = maxNumber
             self.durationX = durationX
-            self.FPSX = FPSX
             self.durationY = durationY
-            self.FPSY = FPSY
+            self.FPS = FPS
         except:
             tkinter.messagebox.showerror(title='Layout Settings Error !', message='Error in the settings! Please check all values.')
         else:
@@ -1121,18 +1115,6 @@ class TimeTower:
         durationXVariable.set(f'{self.durationX}')
         self.layoutEndRow(animationFrame, 10)
 
-        FPSXLabel = tk.Label(animationFrame, text='FPS for expansion/reduction of a focused line')
-        FPSXLabel.grid(column=0, row=self.currentRow, sticky='e')
-        FPSXVariable = tk.StringVar()
-        FPSXSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSXVariable)
-        FPSXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
-        FPSXVariable.set(f'{self.FPSX}')
-
-        self.layoutEndRow(animationFrame, 10)
-        emptyFrames.append(tk.Frame(animationFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(animationFrame, 30)
-
         durationYLabel = tk.Label(animationFrame, text='Duration of ranking update')
         durationYLabel.grid(column=0, row=self.currentRow, sticky='e')
         durationYVariable = tk.StringVar()
@@ -1141,12 +1123,12 @@ class TimeTower:
         durationYVariable.set(f'{self.durationY}')
         self.layoutEndRow(animationFrame, 10)
 
-        FPSYLabel = tk.Label(animationFrame, text='FPS for ranking update')
-        FPSYLabel.grid(column=0, row=self.currentRow, sticky='e')
-        FPSYVariable = tk.StringVar()
-        FPSYSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSYVariable)
-        FPSYSpinbox.grid(column=1, row=self.currentRow, sticky='w')
-        FPSYVariable.set(f'{self.FPSY}')
+        FPSLabel = tk.Label(animationFrame, text='FPS')
+        FPSLabel.grid(column=0, row=self.currentRow, sticky='e')
+        FPSVariable = tk.StringVar()
+        FPSSpinbox = tk.Spinbox(animationFrame, width=20, from_=0, to=100, textvariable=FPSVariable)
+        FPSSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        FPSVariable.set(f'{self.FPS}')
 
         self.layoutEndRow(animationFrame, 10)
         emptyFrames.append(tk.Frame(animationFrame))
@@ -1154,8 +1136,7 @@ class TimeTower:
         self.layoutEndRow(animationFrame, 30)
 
         testButton = tk.Button(animationFrame, text='Test animation', command=lambda: self.testAnimation(
-            cleverInt(durationXVariable.get()), cleverInt(FPSXVariable.get()),
-            cleverInt(durationYVariable.get()), cleverInt(FPSYVariable.get())))
+            cleverInt(durationXVariable.get()), cleverInt(durationYVariable.get()), cleverInt(FPSVariable.get())))
         testButton.grid(column=0, columnspan=2, row=self.currentRow)
 
         # End
@@ -1177,8 +1158,7 @@ class TimeTower:
             colorLocalNameVariable.get(), colorLocalResultVariable.get(),
             colorForeignerNameVariable.get(), colorForeignerResultVariable.get(),
             cleverInt(maxNumberVariable.get()),
-            cleverInt(durationXVariable.get()), cleverInt(FPSXVariable.get()),
-            cleverInt(durationYVariable.get()), cleverInt(FPSYVariable.get()),
+            cleverInt(durationXVariable.get()), cleverInt(durationYVariable.get()), cleverInt(FPSVariable.get()),
             layoutWindow))
         OKButton.pack(pady=30)
 

@@ -1,5 +1,6 @@
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
+from enum import Enum
 
 ##############################################################################
 # DEBUG
@@ -58,8 +59,7 @@ DEFAULT_COLOR_FOREIGNER_RESULT = '#FFFFFF'
 DEFAULT_MAX_NUMBER = 16
 DEFAULT_DURATION_X = 1000
 DEFAULT_DURATION_Y = 1000
-DEFAULT_FPS_X = 50
-DEFAULT_FPS_Y = 50
+DEFAULT_FPS = 50
 
 LAYOUT_MAX_WIDTH = 200
 LAYOUT_MAX_HEIGHT = 200
@@ -67,6 +67,12 @@ LAYOUT_MAX_EXTENDED_WIDTH = 500
 LAYOUT_MAX_FONT = 50
 LAYOUT_CANVAS_WIDTH = 1000
 LAYOUT_CANVAS_HEIGHT = 400
+
+
+class TimeTowerState(Enum):
+    IDLE = 1
+    STEP_X = 2
+    STEP_Y = 3
 
 
 def getQueryResult(query):

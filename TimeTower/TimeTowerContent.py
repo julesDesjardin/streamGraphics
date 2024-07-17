@@ -1,3 +1,5 @@
+from Common import Image
+from Common.commonUtils import COUNTRIES
 import tkinter as tk
 from tkinter import ttk
 import json
@@ -10,13 +12,11 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common.commonUtils import COUNTRIES
-from Common import Image
 
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, queueUpdate, region, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, durationX, durationY):
+    def __init__(self, root, queueRound, queueUpdate, region, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -60,8 +60,11 @@ class TimeTowerContent:
         self.threadResults.start()
         self.stepXmax = stepXmax
         self.stepYmax = stepYmax
-        self.durationX = durationX
-        self.durationY = durationY
+        self.FPS = FPS
+        self.state = timeTowerUtils.TimeTowerState.IDLE
+        self.stepXRequest = False
+        self.stepYRequest = False
+        self.step = 0
 
     def updateRound(self, roundId, criteria):
         self.roundId = roundId
@@ -124,106 +127,136 @@ class TimeTowerContent:
             time.sleep(self.reloadDelay / 1000)
 
     def mainLoop(self):
+        start = time.time()
+        nextState = self.state
+        nextStep = self.step
 
-        # Update layout
+        match self.state:
+            case timeTowerUtils.TimeTowerState.IDLE:
 
-        try:
-            (self.region,
-             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
-             self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
-             self.height, self.heightSeparator,
-             self.backgroundColor,
-             self.bgLocalName, self.bgLocalResult,
-             self.bgForeignerName, self.bgForeignerResult,
-             self.colorLocalName, self.colorLocalResult,
-             self.colorForeignerName, self.colorForeignerResult,
-             self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.durationX, self.durationY
-             ) = self.queueUpdate.get(block=False)
-            self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthFullName + self.widthCount + self.widthResult + self.widthFullResult,
-                                  height=self.maxNumber * (self.height + self.heightSeparator), bg=self.backgroundColor)
-            for line in self.lines:
-                line.widthRanking = self.widthRanking
-                line.widthFlagRectangle = self.widthFlagRectangle
-                line.heightFlag = self.heightFlag
-                line.flagImage = Image.getFlag(self.heightFlag, line.country)
-                line.widthName = self.widthName
-                line.widthFullName = self.widthFullName
-                line.widthCount = self.widthCount
-                line.widthResult = self.widthResult
-                line.widthFullResult = self.widthFullResult
-                line.height = self.height
-                line.heightSeparator = self.heightSeparator
-                line.fontRanking = self.fontRanking
-                line.fontName = self.fontName
-                line.fontCount = self.fontCount
-                line.fontIncompleteResult = self.fontIncompleteResult
-                line.fontResult = self.fontResult
-                line.fontFullResult = self.fontFullResult
-                line.stepXmax = self.stepXmax
-                line.stepYmax = self.stepYmax
-        except:
-            pass
+                # Update layout
+                try:
+                    (self.region,
+                     self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                     self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
+                     self.height, self.heightSeparator,
+                     self.backgroundColor,
+                     self.bgLocalName, self.bgLocalResult,
+                     self.bgForeignerName, self.bgForeignerResult,
+                     self.colorLocalName, self.colorLocalResult,
+                     self.colorForeignerName, self.colorForeignerResult,
+                     self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.FPS
+                     ) = self.queueUpdate.get(block=False)
+                    self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthFullName + self.widthCount + self.widthResult + self.widthFullResult,
+                                          height=self.maxNumber * (self.height + self.heightSeparator), bg=self.backgroundColor)
+                    for line in self.lines:
+                        line.widthRanking = self.widthRanking
+                        line.widthFlagRectangle = self.widthFlagRectangle
+                        line.heightFlag = self.heightFlag
+                        line.flagImage = Image.getFlag(
+                            self.heightFlag, line.country)
+                        line.widthName = self.widthName
+                        line.widthFullName = self.widthFullName
+                        line.widthCount = self.widthCount
+                        line.widthResult = self.widthResult
+                        line.widthFullResult = self.widthFullResult
+                        line.height = self.height
+                        line.heightSeparator = self.heightSeparator
+                        line.fontRanking = self.fontRanking
+                        line.fontName = self.fontName
+                        line.fontCount = self.fontCount
+                        line.fontIncompleteResult = self.fontIncompleteResult
+                        line.fontResult = self.fontResult
+                        line.fontFullResult = self.fontFullResult
+                        line.stepXmax = self.stepXmax
+                        line.stepYmax = self.stepYmax
+                except:
+                    pass
 
-        # Update round
-        try:
-            (roundId, criteria) = self.queueRound.get(block=False)
-            self.updateRound(roundId, criteria)
-        except:
-            pass
+                # Update round
+                try:
+                    (roundId, criteria) = self.queueRound.get(block=False)
+                    self.updateRound(roundId, criteria)
+                except:
+                    pass
 
-        # Update lines
+                # Update stepX
+                self.stepXRequest = False
+                for line in self.lines:
+                    if line.expandRequest or line.reduceRequest:
+                        self.stepXRequest = True
 
-        updateLines = False
-        for line in self.lines:
-            if line.expandRequest or line.reduceRequest:
-                updateLines = True
+                # Update stepY
+                self.stepYRequest = False
+                try:
+                    queryResult = self.queueRanking.get(block=False)
 
-        if updateLines:
-            for stepX in range(0, self.stepXmax + 1):
+                    if int(queryResult['round']['id']) == self.roundId:
+                        unorderedResults = []
+                        for line in self.lines:
+                            line.updateResults(queryResult)
+                            bestResult = timeTowerUtils.DNF_ATTEMPT
+                            if len(line.results) > 0:
+                                bestResult = min(line.results)
+                            unorderedResults.append((line.competitorId, line.currentResult, bestResult))
+
+                        orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
+                        for line in self.lines:
+                            line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1  # +1 because first index is 0
+                    self.stepYRequest = True
+                except:
+                    pass
+
+                if self.stepXRequest:
+                    self.stepXRequest = False
+                    nextState = timeTowerUtils.TimeTowerState.STEP_X
+                    nextStep = 0
+                elif self.stepYRequest:
+                    self.stepYRequest = False
+                    nextState = timeTowerUtils.TimeTowerState.STEP_Y
+                    nextStep = 0
+
+            case timeTowerUtils.TimeTowerState.STEP_X:
                 self.canvas.delete('all')
                 for line in self.lines:
-                    line.showLine(stepX, 0)
+                    line.showLine(self.step, 0)
                 self.canvas.update()
-                time.sleep(self.durationX / self.stepXmax)
-            for line in self.lines:
-                if line.expandRequest:
-                    line.expanded = True
-                    line.expandRequest = False
-                if line.reduceRequest:
-                    line.expanded = False
-                    line.reduceRequest = False
-
-        # Update results
-
-        try:
-            queryResult = self.queueRanking.get(block=False)
-
-            if int(queryResult['round']['id']) == self.roundId:
-                unorderedResults = []
-                for line in self.lines:
-                    line.updateResults(queryResult)
-                    bestResult = timeTowerUtils.DNF_ATTEMPT
-                    if len(line.results) > 0:
-                        bestResult = min(line.results)
-                    unorderedResults.append((line.competitorId, line.currentResult, bestResult))
-
-                orderedResults = sorted(unorderedResults, key=lambda result: (result[1], result[2]))
-                for line in self.lines:
-                    line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1  # +1 because first index is 0
-
-                for stepY in range(0, self.stepYmax + 1):
-                    self.canvas.delete('all')
+                if self.step == self.stepXmax:
+                    # Expand requests are over, expanded values must be changed
                     for line in self.lines:
-                        line.showLine(0, stepY)
-                    self.canvas.update()
-                    time.sleep(self.durationY / self.stepYmax)
-                for line in self.lines:
-                    line.ranking = line.nextRanking
-        except:
-            pass
+                        if line.expandRequest:
+                            line.expanded = True
+                            line.expandRequest = False
+                        if line.reduceRequest:
+                            line.expanded = False
+                            line.reduceRequest = False
 
-        # End of loop, loop again after 1 second
-        self.root.after(1000, lambda: self.mainLoop())
+                    if self.stepYRequest:
+                        self.stepYRequest = False
+                        nextState = timeTowerUtils.TimeTowerState.STEP_Y
+                    else:
+                        nextState = timeTowerUtils.TimeTowerState.IDLE
+                    nextStep = 0
+                else:
+                    nextStep = self.step + 1
+
+            case timeTowerUtils.TimeTowerState.STEP_Y:
+                self.canvas.delete('all')
+                for line in self.lines:
+                    line.showLine(0, self.step)
+                self.canvas.update()
+                if self.step == self.stepYmax:
+                    nextState = timeTowerUtils.TimeTowerState.IDLE
+                    nextStep = 0
+                    for line in self.lines:
+                        line.ranking = line.nextRanking
+                else:
+                    nextStep = self.step + 1
+
+        self.state = nextState
+        self.step = nextStep
+        delay = max(0, int(1000 / self.FPS - 1000 * (time.time() - start)))
+        self.root.after(delay, self.mainLoop)
 
     def showFrame(self):
         self.canvas.pack()

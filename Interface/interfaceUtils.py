@@ -68,7 +68,7 @@ def resultToString(result):
     return f"{((result % 6000) / 100):.2f}"
 
 
-def replaceText(text, wcif, id, seed, event, round):
+def replaceText(text, wcif, id, seed, event, round, customTexts):
     if int(round) > 1:
         previousRound = int(round) - 1
     else:
@@ -76,6 +76,8 @@ def replaceText(text, wcif, id, seed, event, round):
     previousRank = WCIFParse.getRoundRank(wcif, id, event, previousRound)
     prSingleInt = WCIFParse.getPb(wcif, id, event, 'single')
     prAverageInt = WCIFParse.getPb(wcif, id, event, 'average')
+    WCAID = WCIFParse.getWCAID(wcif, id)
+    text = text.replace('%WCAID', WCAID)
     text = text.replace('%prSingle', resultToString(prSingleInt))
     text = text.replace('%prAverage', resultToString(prAverageInt))
     text = text.replace('%nrSingle', f"{WCIFParse.getRanking(wcif,id,event,'single','national')}")
@@ -88,4 +90,8 @@ def replaceText(text, wcif, id, seed, event, round):
     text = text.replace('%previousRank', f"{previousRank}")
     text = text.replace('%previousSingle', resultToString(WCIFParse.getRoundResult(wcif, id, event, round, 'single')))
     text = text.replace('%previousAverage', resultToString(WCIFParse.getRoundResult(wcif, id, event, round, 'average')))
+    if WCAID in customTexts[EVENTS[event]]:
+        text = text.replace('%custom', customTexts[EVENTS[event]][WCAID])
+    else:
+        text = text.replace('%custom', '')
     return text

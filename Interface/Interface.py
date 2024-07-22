@@ -40,6 +40,9 @@ class Interface:
         self.region = 'World'
         self.cardText = ''
         self.presentationText = ''
+        self.customTexts = dict([])
+        for event in interfaceUtils.EVENTS.values():
+            self.customTexts[event] = dict([])
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -71,6 +74,7 @@ class Interface:
             'region': self.region,
             'cardText': self.cardText,
             'presentationText': self.presentationText,
+            'customTexts': self.customTexts,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -108,6 +112,7 @@ class Interface:
             self.region = loadSettingsJson['region']
             self.cardText = loadSettingsJson['cardText']
             self.presentationText = loadSettingsJson['presentationText']
+            self.customTexts = loadSettingsJson['customTexts']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -185,7 +190,7 @@ class Interface:
         for cameraY in range(0, interfaceUtils.CAMERAS_ROWS):
             for cameraX in range(0, interfaceUtils.CAMERAS_COLS):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardText, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
 
@@ -357,6 +362,7 @@ class Interface:
         cardTextDescription = f'''
 Please enter the text to show on the {cardOrPresentation}
 This supports the following characters to be replaced by the appropriate value:
+%WCAID: WCA ID
 %prSingle: PR single
 %prAverage: PR average/mean
 %nrSingle: National ranking single

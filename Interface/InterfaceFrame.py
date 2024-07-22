@@ -7,13 +7,14 @@ import WCIFParse
 
 class InterfaceFrame:
 
-    def __init__(self, root, wcif, cardText, bot, buttonRows, buttonCols, x, y, index):
+    def __init__(self, root, wcif, cardText, customTexts, bot, buttonRows, buttonCols, x, y, index):
 
         self.emptyPixel = tk.PhotoImage(width=1, height=1)
 
         self.root = root
         self.wcif = wcif
         self.cardText = cardText
+        self.customTexts = customTexts
         self.bot = bot
         self.buttonRows = buttonRows
         self.buttonCols = buttonCols
@@ -89,7 +90,7 @@ class InterfaceFrame:
             extraButtonText = f'Seed {seed}'
             if previousRank is not None:
                 extraButtonText = extraButtonText + f', Placed {previousRank}'
-            cardTextReplaced = interfaceUtils.replaceText(self.cardText, self.wcif, id, seed, event, round)
+            cardTextReplaced = interfaceUtils.replaceText(self.cardText, self.wcif, id, seed, event, round, self.customTexts)
             self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
                 buttonIndex, WCIFParse.getCountry(self.wcif, id), name, WCIFParse.getAvatar(self.wcif, id), cardTextReplaced, id))
             self.buttonFrames[buttonIndex].grid(row=row, column=column)

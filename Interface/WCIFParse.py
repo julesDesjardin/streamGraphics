@@ -144,7 +144,12 @@ def getCompetitors(wcif, activityId, event):
     for i in range(0, len(wcif['persons'])):
         for assignment in wcif['persons'][i]['assignments']:
             if assignment['assignmentCode'] == 'competitor' and assignment['activityId'] == activityId:
-                competitors.append((i, competitorsRanked.index(i) + 1))  # + 1 because first seed is 1 and first index is 0
+                try:
+                    competitors.append((i, competitorsRanked.index(i) + 1))  # + 1 because first seed is 1 and first index is 0
+                except:
+                    print(i)
+                    print(competitorsRanked)
+                    print(getCompetitorName(wcif, i))
     return competitors
 
 

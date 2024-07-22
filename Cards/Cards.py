@@ -932,15 +932,18 @@ class Cards:
             if backgroundState == cardsUtils.BackgroundState.EMPTY:
                 canvas.itemconfig(background, state='hidden')
             else:
+                image = None
                 match backgroundState:
                     case cardsUtils.BackgroundState.INTRO:
                         image = self.introImages[index]
                     case cardsUtils.BackgroundState.LOOP:
-                        image = self.loopImages[index]
+                        if self.loopFile != '':
+                            image = self.loopImages[index]
                     case cardsUtils.BackgroundState.OUTRO:
                         image = self.outroImages[index]
-                canvas.itemconfig(background, image=image, state='normal')
-                canvas.update()
+                if image is not None:
+                    canvas.itemconfig(background, image=image, state='normal')
+                    canvas.update()
 
             # Get new request from queue
             try:

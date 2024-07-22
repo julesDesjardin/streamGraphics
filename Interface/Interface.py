@@ -492,7 +492,7 @@ This supports the following characters to be replaced by the appropriate value:
         (venue, room, event, round, group) = self.getStageInfo()
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
-                self.root, self.wcif, self.presentationText, self.region, venue, room, event, int(round), group, self.bot)
+                self.root, self.wcif, self.presentationText, self.customTexts, self.region, venue, room, event, int(round), group, self.bot)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)

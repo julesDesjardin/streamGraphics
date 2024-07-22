@@ -13,11 +13,12 @@ from Common.commonUtils import COUNTRIES
 
 
 class PresentationInterface:
-    def __init__(self, root, wcif, text, region, venue, room, event, round, group, bot):
+    def __init__(self, root, wcif, text, customTexts, region, venue, room, event, round, group, bot):
 
         self.root = root
         self.wcif = wcif
         self.text = text
+        self.customTexts = customTexts
         self.region = region
         self.event = event
         self.round = round
@@ -88,7 +89,7 @@ class PresentationInterface:
             dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
         else:
             dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
-                self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round), True)
+                self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round, self.customTexts), True)
 
     def previousButtonCommand(self):
         self.id = self.id - 1

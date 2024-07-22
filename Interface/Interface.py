@@ -43,6 +43,8 @@ class Interface:
         self.customTexts = dict([])
         for event in interfaceUtils.EVENTS.values():
             self.customTexts[event] = dict([])
+        self.customTextCuber = None
+        self.textVars = None
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -55,8 +57,12 @@ class Interface:
         self.TimeTowerCheckbox.pack()
         self.OKButton = tk.Button(self.OKFrame, text="OK", command=self.OKButtonCommand)
         self.OKButton.pack()
+        emptyFrame = tk.Frame(self.OKFrame)
+        emptyFrame.pack(pady=15)
         self.presentationButton = tk.Button(self.OKFrame, text='Start presentation', command=self.presentationButtonCommand)
-        self.presentationButton.pack(pady=30)
+        self.presentationButton.pack()
+        self.customTextsButton = tk.Button(self.OKFrame, text='Change custom texts', command=self.updateCustomTexts)
+        self.customTextsButton.pack(pady=5)
 
         self.showSettingsFrame()
         self.mainFrame.pack(side=tk.TOP, padx=10)
@@ -496,6 +502,71 @@ This supports the following characters to be replaced by the appropriate value:
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
                 self.root, self.wcif, self.presentationText, self.customTexts, self.region, self.getStageInfo(), self.bot)
+
+    def updateSingleCustomText(self, textEntry, nextCuber):
+        if self.customTextCuber is not None:
+            self.textVars[self.customTextCuber].set(textEntry.get('1.0', tk.END + '-1c'))  # -1c to remove last pending newline
+        self.customTextCuber = nextCuber
+        textEntry.delete('1.0', 'end')
+        textEntry.insert(tk.END, self.textVars[nextCuber].get())
+
+    def updateCustomTextsCloseButton(self, event, textEntry, nextCuber, window):
+        self.updateSingleCustomText(textEntry, nextCuber)
+        for cuber in self.textVars:
+            if cuber in self.customTexts[interfaceUtils.EVENTS[event]] and self.textVars[cuber].get() == '':
+                del self.customTexts[interfaceUtils.EVENTS[event]][cuber]
+            elif self.textVars[cuber].get() != '':
+                self.customTexts[interfaceUtils.EVENTS[event]][cuber] = self.textVars[cuber].get()
+        window.destroy()
+
+    def updateCustomTexts(self):
+        (_, _, event, _, _) = self.getStageInfo()[0]
+        if event is not None:
+            self.settingsChanged.set(True)
+            self.customTextCuber = None
+            customTextsWindow = tk.Toplevel(self.root)
+            customTextsWindow.grab_set()
+            customTextsLabel = tk.Label(
+                customTextsWindow, text=f'Please edit custom texts here.\nOnly the cubers in selected groups can be edited here\nEach cuber can have a different text per event, so a text edited here will only affect {event}.')
+            customTextsLabel.pack(pady=20)
+
+            # Cuber choice
+
+            customCuberVar = tk.StringVar()
+            customTextsMenu = tk.OptionMenu(customTextsWindow, customCuberVar, '')
+            customTextsMenu['menu'].delete(0, 'end')
+            customTextsMenu.pack()
+
+            # Custom text
+
+            customTextEntry = tk.Text(customTextsWindow)
+            customTextEntry.pack(padx=20, pady=5)
+
+            competitors = []
+            self.textVars = dict([])
+            for (venue, room, event, round, group) in self.getStageInfo():
+                activityId = WCIFParse.getActivityId(self.wcif, venue, room, event, round, group)
+                competitors += WCIFParse.getCompetitors(self.wcif, activityId, event)
+            competitors.sort(key=lambda x: WCIFParse.getCompetitorName(self.wcif, x[0]))
+
+            for (competitor, _) in competitors:
+                WCAID = WCIFParse.getWCAID(self.wcif, competitor)
+                customTextsMenu['menu'].add_command(
+                    label=f'{WCIFParse.getCompetitorName(self.wcif, competitor)} ({WCAID})',
+                    command=lambda id=WCAID: customCuberVar.set(id))
+                self.textVars[WCAID] = tk.StringVar()
+                if WCAID in self.customTexts[interfaceUtils.EVENTS[event]]:
+                    self.textVars[WCAID].set(self.customTexts[interfaceUtils.EVENTS[event]][WCAID])
+                else:
+                    self.textVars[WCAID].set('')
+
+            customCuberVar.trace_add('write', lambda var, index, mode:
+                                     self.updateSingleCustomText(customTextEntry, customCuberVar.get()))
+            customCuberVar.set(WCIFParse.getWCAID(self.wcif, competitors[0][0]))
+
+            customTextsCloseButton = tk.Button(customTextsWindow, text='Save Custom Texts',
+                                               command=lambda: self.updateCustomTextsCloseButton(event, customTextEntry, customCuberVar.get(), customTextsWindow))
+            customTextsCloseButton.pack(pady=20)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)

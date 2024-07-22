@@ -13,33 +13,36 @@ from Common.commonUtils import COUNTRIES
 
 
 class PresentationInterface:
-    def __init__(self, root, wcif, text, customTexts, region, venue, room, event, round, group, bot):
+    def __init__(self, root, wcif, text, customTexts, region, stageInfo, bot):
 
         self.root = root
         self.wcif = wcif
         self.text = text
         self.customTexts = customTexts
         self.region = region
-        self.event = event
-        self.round = round
         self.bot = bot
         self.window = tk.Toplevel(self.root)
         self.window.geometry('500x500')
         self.window.grab_set()
 
-        self.id = -1
-        activityId = WCIFParse.getActivityId(wcif, venue, room, event, round, group)
+        foreignCompetitors = []
+        localCompetitors = []
+        for (venue, room, event, round, group) in stageInfo:
+            self.event = event
+            self.round = round
+            activityId = WCIFParse.getActivityId(wcif, venue, room, event, round, group)
 
-        foreignCompetitors = [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
-                              if self.region != 'World' and self.region not in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
-        localCompetitors = [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
-                            if self.region == 'World' or self.region in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+            foreignCompetitors += [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+                                   if self.region != 'World' and self.region not in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+            localCompetitors += [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
+                                 if self.region == 'World' or self.region in COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
         foreignCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
         localCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
 
         # This is an array of tuple: for each element, competitor[0] is the ID and competitor[1] is the seed
         self.competitors = foreignCompetitors + localCompetitors
 
+        self.id = -1
         self.avatars = []
         self.competitorsName = []
         self.seeds = []

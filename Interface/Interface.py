@@ -472,16 +472,19 @@ This supports the following characters to be replaced by the appropriate value:
                         frame.configureButton(buttonIndex, '', '', (0, 0, ''), False, i + 3, j, '#000000', '#000000')
 
     def getStageInfo(self):
+        ret = []
         for stage in self.stages:
             if stage.stageEnabled:
-                return (stage.venue, stage.room, stage.eventVar.get(), stage.roundVar.get(), stage.groupVar.get())
-        tkinter.messagebox.showerror(
-            title='Stages error !', message='All stages are disabled (or no stages exist), please enable a stage')
-        return (None, None, None, None, None)
+                ret.append(((stage.venue, stage.room, stage.eventVar.get(), int(stage.roundVar.get()), stage.groupVar.get())))
+        if ret == []:
+            tkinter.messagebox.showerror(
+                title='Stages error !', message='All stages are disabled (or no stages exist), please enable a stage')
+            ret.append((None, None, None, None, None))
+        return ret
 
     def OKButtonCommand(self):
         if self.timeTowerEventVariable.get():
-            (_, _, event, round, _) = self.getStageInfo()
+            (_, _, event, round, _) = self.getStageInfo()[0]
             if event is not None:
                 dataWrite.sendTimeTowerEvent(self.bot, interfaceUtils.EVENTS[event], round)
         self.updateCubers()
@@ -489,10 +492,10 @@ This supports the following characters to be replaced by the appropriate value:
             frame.buttonCommand(-1, '', '', '', '', -1)
 
     def presentationButtonCommand(self):
-        (venue, room, event, round, group) = self.getStageInfo()
+        (_, _, event, _, _) = self.getStageInfo()[0]
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
-                self.root, self.wcif, self.presentationText, self.customTexts, self.region, venue, room, event, int(round), group, self.bot)
+                self.root, self.wcif, self.presentationText, self.customTexts, self.region, self.getStageInfo(), self.bot)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)

@@ -13,12 +13,13 @@ from Common.commonUtils import COUNTRIES
 
 
 class PresentationInterface:
-    def __init__(self, root, wcif, text, customTexts, region, stageInfo, bot):
+    def __init__(self, root, wcif, text, customTexts, customImages, region, stageInfo, bot):
 
         self.root = root
         self.wcif = wcif
         self.text = text
         self.customTexts = customTexts
+        self.customImages = customImages
         self.region = region
         self.bot = bot
         self.window = tk.Toplevel(self.root)
@@ -47,7 +48,11 @@ class PresentationInterface:
         self.competitorsName = []
         self.seeds = []
         for competitor in self.competitors:
-            self.avatars.append(WCIFParse.getAvatar(wcif, competitor[0]))
+            WCAID = WCIFParse.getWCAID(wcif, competitor[0])
+            if WCAID in self.customImages:
+                self.avatars.append(self.customImages[WCAID])
+            else:
+                self.avatars.append(WCIFParse.getAvatar(wcif, competitor[0]))
             self.competitorsName.append(WCIFParse.getCompetitorName(wcif, competitor[0]))
 
         self.previousButton = tk.Button(self.window, command=self.previousButtonCommand)

@@ -43,8 +43,10 @@ class Interface:
         self.customTexts = dict([])
         for event in interfaceUtils.EVENTS.values():
             self.customTexts[event] = dict([])
+        self.customImages = dict([])
         self.customTextCuber = None
         self.textVars = None
+        self.imageVars = None
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -61,7 +63,7 @@ class Interface:
         emptyFrame.pack(pady=15)
         self.presentationButton = tk.Button(self.OKFrame, text='Start presentation', command=self.presentationButtonCommand)
         self.presentationButton.pack()
-        self.customTextsButton = tk.Button(self.OKFrame, text='Change custom texts', command=self.updateCustomTexts)
+        self.customTextsButton = tk.Button(self.OKFrame, text='Change custom texts and/or images', command=self.updateCustomTexts)
         self.customTextsButton.pack(pady=5)
 
         self.showSettingsFrame()
@@ -81,6 +83,7 @@ class Interface:
             'cardText': self.cardText,
             'presentationText': self.presentationText,
             'customTexts': self.customTexts,
+            'customImages': self.customImages,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
         }
@@ -119,6 +122,7 @@ class Interface:
             self.cardText = loadSettingsJson['cardText']
             self.presentationText = loadSettingsJson['presentationText']
             self.customTexts = loadSettingsJson['customTexts']
+            self.customImages = loadSettingsJson['customImages']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
         except:
@@ -196,7 +200,7 @@ class Interface:
         for cameraY in range(0, interfaceUtils.CAMERAS_ROWS):
             for cameraX in range(0, interfaceUtils.CAMERAS_COLS):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.customImages, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
 
@@ -501,22 +505,29 @@ This supports the following characters to be replaced by the appropriate value:
         (_, _, event, _, _) = self.getStageInfo()[0]
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
-                self.root, self.wcif, self.presentationText, self.customTexts, self.region, self.getStageInfo(), self.bot)
+                self.root, self.wcif, self.presentationText, self.customTexts, self.customImages, self.region, self.getStageInfo(), self.bot)
 
-    def updateSingleCustomText(self, textEntry, nextCuber):
+    def updateSingleCustomText(self, textEntry, imageEntry, nextCuber):
         if self.customTextCuber is not None:
             self.textVars[self.customTextCuber].set(textEntry.get('1.0', tk.END + '-1c'))  # -1c to remove last pending newline
+            self.imageVars[self.customTextCuber].set(imageEntry.get())
         self.customTextCuber = nextCuber
         textEntry.delete('1.0', 'end')
         textEntry.insert(tk.END, self.textVars[nextCuber].get())
+        imageEntry.delete(0, tk.END)
+        imageEntry.insert(tk.END, self.imageVars[nextCuber].get())
 
-    def updateCustomTextsCloseButton(self, event, textEntry, nextCuber, window):
-        self.updateSingleCustomText(textEntry, nextCuber)
+    def updateCustomTextsCloseButton(self, event, textEntry, imageEntry, nextCuber, window):
+        self.updateSingleCustomText(textEntry, imageEntry, nextCuber)
         for cuber in self.textVars:
             if cuber in self.customTexts[interfaceUtils.EVENTS[event]] and self.textVars[cuber].get() == '':
                 del self.customTexts[interfaceUtils.EVENTS[event]][cuber]
             elif self.textVars[cuber].get() != '':
                 self.customTexts[interfaceUtils.EVENTS[event]][cuber] = self.textVars[cuber].get()
+            if cuber in self.customImages and self.imageVars[cuber].get() == '':
+                del self.customImages[cuber]
+            elif self.imageVars[cuber].get() != '':
+                self.customImages[cuber] = self.imageVars[cuber].get()
         window.destroy()
 
     def updateCustomTexts(self):
@@ -542,8 +553,16 @@ This supports the following characters to be replaced by the appropriate value:
             customTextEntry = tk.Text(customTextsWindow)
             customTextEntry.pack(padx=20, pady=5)
 
+            # Custom image
+
+            customImageLabel = tk.Label(customTextsWindow, text='Custom image URL:')
+            customImageLabel.pack(pady=5)
+            customImageEntry = tk.Entry(customTextsWindow, width=80)
+            customImageEntry.pack()
+
             competitors = []
             self.textVars = dict([])
+            self.imageVars = dict([])
             for (venue, room, event, round, group) in self.getStageInfo():
                 activityId = WCIFParse.getActivityId(self.wcif, venue, room, event, round, group)
                 competitors += WCIFParse.getCompetitors(self.wcif, activityId, event)
@@ -555,17 +574,22 @@ This supports the following characters to be replaced by the appropriate value:
                     label=f'{WCIFParse.getCompetitorName(self.wcif, competitor)} ({WCAID})',
                     command=lambda id=WCAID: customCuberVar.set(id))
                 self.textVars[WCAID] = tk.StringVar()
+                self.imageVars[WCAID] = tk.StringVar()
                 if WCAID in self.customTexts[interfaceUtils.EVENTS[event]]:
                     self.textVars[WCAID].set(self.customTexts[interfaceUtils.EVENTS[event]][WCAID])
                 else:
                     self.textVars[WCAID].set('')
+                if WCAID in self.customImages:
+                    self.imageVars[WCAID].set(self.customImages[WCAID])
+                else:
+                    self.imageVars[WCAID].set('')
 
             customCuberVar.trace_add('write', lambda var, index, mode:
-                                     self.updateSingleCustomText(customTextEntry, customCuberVar.get()))
+                                     self.updateSingleCustomText(customTextEntry, customImageEntry, customCuberVar.get()))
             customCuberVar.set(WCIFParse.getWCAID(self.wcif, competitors[0][0]))
 
             customTextsCloseButton = tk.Button(customTextsWindow, text='Save Custom Texts',
-                                               command=lambda: self.updateCustomTextsCloseButton(event, customTextEntry, customCuberVar.get(), customTextsWindow))
+                                               command=lambda: self.updateCustomTextsCloseButton(event, customTextEntry, customImageEntry, customCuberVar.get(), customTextsWindow))
             customTextsCloseButton.pack(pady=20)
 
     def showSettingsFrame(self):

@@ -70,7 +70,7 @@ class InterfaceFrame:
             else:
                 self.buttonFrames[index].configure(highlightbackground='white')
                 self.buttons[index].configure(relief=tk.RAISED)
-        dataWrite.sendCardData(self.bot, self.index, country, name, avatar, cardText, False)
+        dataWrite.sendCardData(self.bot, self.index, country, name.split('(')[0].strip(), avatar, cardText, False)
         if self.timeTowerVariable.get() == 1:
             dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, self.activeCuber), 0)
             dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, competitorId), 1)

@@ -97,7 +97,7 @@ class Stage:
         if len(rounds) > 0:
             for round in sorted(rounds):
                 menu.add_command(label=f'{round}', command=lambda value=f'{round}': self.roundVar.set(value))
-            self.roundVar.set(sorted(rounds)[0])
+            self.roundVar.set(sorted(rounds)[-1])
         else:
             menu.add_command(label='No round', command=lambda value=0: self.roundVar.set(value))
             self.roundVar.set(0)

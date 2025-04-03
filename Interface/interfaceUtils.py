@@ -88,8 +88,8 @@ def replaceText(text, wcif, id, seed, event, round, customTexts):
     text = text.replace('%wrAverage', f"{WCIFParse.getRanking(wcif,id,event,'average','world')}")
     text = text.replace('%seed', f"{seed}")
     text = text.replace('%previousRank', f"{previousRank}")
-    text = text.replace('%previousSingle', resultToString(WCIFParse.getRoundResult(wcif, id, event, round, 'single')))
-    text = text.replace('%previousAverage', resultToString(WCIFParse.getRoundResult(wcif, id, event, round, 'average')))
+    text = text.replace('%previousSingle', resultToString(WCIFParse.getRoundResult(wcif, id, event, previousRound, 'single')))
+    text = text.replace('%previousAverage', resultToString(WCIFParse.getRoundResult(wcif, id, event, previousRound, 'average')))
     if WCAID in customTexts[EVENTS[event]]:
         text = text.replace('%custom', customTexts[EVENTS[event]][WCAID])
     else:

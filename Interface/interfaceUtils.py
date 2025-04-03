@@ -28,7 +28,7 @@ SEED_TYPE = dict([
     ('555', 'average'),
     ('666', 'average'),
     ('777', 'average'),
-    ('333bf', 'average'),
+    ('333bf', 'single'),
     ('333fm', 'average'),
     ('333oh', 'average'),
     ('clock', 'average'),

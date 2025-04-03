@@ -24,7 +24,7 @@ class InterfaceFrame:
         self.index = index
         self.activeCuber = -1
 
-        frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + self.buttonCols * \
+        frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + (self.buttonCols + 1) * \
             (interfaceUtils.BUTTON_WIDTH + 2 * interfaceUtils.BUTTON_PADX + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
         frameHeight = 2 * interfaceUtils.FRAME_THICKNESS + interfaceUtils.LABEL_HEIGHT + \
             (self.buttonRows + 2) * (interfaceUtils.BUTTON_HEIGHT + 2 * interfaceUtils.BUTTON_PADY + 2 * interfaceUtils.BUTTON_THICKNESS + 3)

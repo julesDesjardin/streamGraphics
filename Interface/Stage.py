@@ -19,7 +19,7 @@ class Stage:
         self.textColor = textColor
         self.venue = venue
         self.room = room
-        self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black', highlightthickness=1, padx=50, pady=20)
+        self.frame = tk.Frame(self.root, bg=self.backgroundColor, highlightbackground='black', highlightthickness=1, padx=50, pady=5)
         self.disableButton = tk.Button(self.frame, text='Disable stage', command=self.disableStageToggle)
         self.disableButton.grid(column=0, row=0)
         self.eventLabel = tk.Label(self.frame, text='Event:', bg=self.backgroundColor, fg=self.textColor,

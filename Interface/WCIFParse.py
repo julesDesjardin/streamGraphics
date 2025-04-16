@@ -167,7 +167,10 @@ def getCompetitorName(wcif, competitor):
 
 
 def getAvatar(wcif, competitor):
-    return wcif['persons'][competitor]['avatar']['url']
+    avatar = wcif['persons'][competitor]['avatar']
+    if avatar is not None:
+        return avatar['url']
+    return 'https://assets.worldcubeassociation.org/assets/f1c5695/assets/missing_avatar_thumb-d77f478a307a91a9d4a083ad197012a391d5410f6dd26cb0b0e3118a5de71438.png'
 
 
 def getColorFromSchedule(wcif, venue, room):

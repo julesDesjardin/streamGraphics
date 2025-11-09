@@ -174,6 +174,8 @@ class Interface:
     def reloadWCIF(self):
         jsonFile = urllib.request.urlopen(f'https://worldcubeassociation.org/api/v0/competitions/{self.compId}/wcif/public')
         self.wcif = json.loads(jsonFile.read())
+        with open('toto.json', 'w') as saveFile:
+            saveFile.write(json.dumps(self.wcif, indent=4))
 
     def updateMaxSeedCloseButton(self, maxSeed, window):
         try:

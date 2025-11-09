@@ -1,3 +1,5 @@
+from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS, SEPARATOR, CURRENT_VERSION
+from Common import TelegramBot
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
@@ -14,8 +16,6 @@ import dataWrite
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot
-from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS, SEPARATOR
 
 
 class Interface:
@@ -74,6 +74,7 @@ class Interface:
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
                                                     ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
+            'version': CURRENT_VERSION,
             'compId': self.compId,
             'maxSeed': self.maxSeed,
             'buttonRows': self.buttonRows,
@@ -101,6 +102,8 @@ class Interface:
             return
 
         try:
+            if 'version' not in loadSettingsJson:
+                loadSettingsJson['version'] = 10
             self.compId = loadSettingsJson['compId']
             try:
                 self.reloadWCIF()

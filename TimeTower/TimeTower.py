@@ -1,6 +1,6 @@
 import TimeTowerLine
 import TimeTowerContent
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS, CURRENT_VERSION
 from Common import TelegramBot, Image
 import tkinter as tk
 import tkinter.messagebox
@@ -170,6 +170,7 @@ class TimeTower:
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
                                                     ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
+            'version': CURRENT_VERSION,
             'compId': self.compId,
             'delay': self.delay,
             'region': self.region,
@@ -224,6 +225,8 @@ class TimeTower:
             return
 
         try:
+            if 'version' not in loadSettingsJson:
+                loadSettingsJson['version'] = 10
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']

@@ -1,3 +1,5 @@
+from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify, addCheckSettingsChanged, colorButtonCommand, CURRENT_VERSION
+from Common import TelegramBot, Image
 import tkinter as tk
 import tkinter.messagebox
 import tkinter.filedialog
@@ -15,8 +17,6 @@ import DragManager
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot, Image
-from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, setAnchorVariables, getAnchor, getJustify, addCheckSettingsChanged, colorButtonCommand
 
 
 class Cards:
@@ -132,6 +132,7 @@ class Cards:
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
                                                     ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
+            'version': CURRENT_VERSION,
             'width': self.width,
             'height': self.height,
             'backgroundColor': self.backgroundColor,
@@ -179,6 +180,8 @@ class Cards:
             return
 
         try:
+            if 'version' not in loadSettingsJson['version']:
+                loadSettingsJson['version'] = 10
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']

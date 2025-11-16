@@ -32,21 +32,6 @@ class Cards:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
-        self.queues = []
-        self.canvases = []
-        self.names = []
-        self.texts = []
-        self.flags = []
-        self.flagImages = []
-        self.avatars = []
-        self.avatarImages = []
-        self.backgrounds = []
-        self.backgroundStates = []
-        self.backgroundIndices = []
-        self.requestCountries = []
-        self.requestNames = []
-        self.requestAvatars = []
-        self.requestTexts = []
         self.loopFile = ''
         self.loopImages = []
         self.introFile = ''
@@ -88,6 +73,28 @@ class Cards:
         self.settingsChanged.set(False)
         addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Cards')
 
+        self.cardsInit()
+
+        self.showSettingsFrame()
+        self.mainFrame.pack(side=tk.RIGHT)
+        self.checkAllQueues()
+
+    def cardsInit(self):
+        self.queues = []
+        self.canvases = []
+        self.names = []
+        self.texts = []
+        self.flags = []
+        self.flagImages = []
+        self.avatars = []
+        self.avatarImages = []
+        self.backgrounds = []
+        self.backgroundStates = []
+        self.backgroundIndices = []
+        self.requestCountries = []
+        self.requestNames = []
+        self.requestAvatars = []
+        self.requestTexts = []
         for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
@@ -111,10 +118,6 @@ class Cards:
             self.mainFrame.columnconfigure(cameraX, pad=20)
         for cameraY in range(0, self.camerasY):
             self.mainFrame.rowconfigure(cameraY, pad=20)
-
-        self.showSettingsFrame()
-        self.mainFrame.pack(side=tk.RIGHT)
-        self.checkAllQueues()
 
     def botCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)

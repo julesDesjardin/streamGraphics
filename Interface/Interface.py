@@ -34,6 +34,9 @@ class Interface:
         self.buttonRows = interfaceUtils.BUTTONS_ROWS
         self.buttonCols = interfaceUtils.BUTTONS_COLS
         self.buttonCount = self.buttonRows * self.buttonCols
+        self.cameraRows = interfaceUtils.CAMERAS_ROWS
+        self.cameraCols = interfaceUtils.CAMERAS_COLS
+        self.cameraCount = self.cameraRows * self.cameraCols
         self.interfaceFrames = []
         self.stages = []
         self.exampleStages = []
@@ -77,6 +80,8 @@ class Interface:
             'version': CURRENT_VERSION,
             'compId': self.compId,
             'maxSeed': self.maxSeed,
+            'cameraRows': self.cameraRows,
+            'cameraCols': self.cameraCols,
             'buttonRows': self.buttonRows,
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
@@ -104,6 +109,11 @@ class Interface:
         try:
             if 'version' not in loadSettingsJson:
                 loadSettingsJson['version'] = 10
+            # Retrocompat
+            version = loadSettingsJson['version']
+            if version < 20:
+                loadSettingsJson['cameraCols'] = interfaceUtils.CAMERAS_COLS
+                loadSettingsJson['cameraRows'] = interfaceUtils.CAMERAS_ROWS
             self.compId = loadSettingsJson['compId']
             try:
                 self.reloadWCIF()
@@ -112,6 +122,9 @@ class Interface:
                     title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
                 return
             self.maxSeed = loadSettingsJson['maxSeed']
+            self.cameraRows = loadSettingsJson['cameraRows']
+            self.cameraCols = loadSettingsJson['cameraCols']
+            self.cameraCount = self.cameraRows * self.cameraCols
             self.buttonRows = loadSettingsJson['buttonRows']
             self.buttonCols = loadSettingsJson['buttonCols']
             self.buttonCount = self.buttonRows * self.buttonCols
@@ -200,12 +213,49 @@ class Interface:
         for frame in self.interfaceFrames:
             frame.hideFrame()
         self.interfaceFrames = []
-        for cameraY in range(0, interfaceUtils.CAMERAS_ROWS):
-            for cameraX in range(0, interfaceUtils.CAMERAS_COLS):
+        for cameraY in range(0, self.cameraRows):
+            for cameraX in range(0, self.cameraCols):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.customImages, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * interfaceUtils.CAMERAS_COLS + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.customImages, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * self.cameraCols + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
+
+    def updateCamerasCloseButton(self, cameraRows, cameraCols, window):
+        try:
+            self.cameraRows = int(cameraRows)
+            self.cameraCols = int(cameraCols)
+            self.cameraCount = self.cameraRows * self.cameraCols
+            self.reloadInterfaceFrames()
+        except:
+            tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
+        else:
+            window.destroy()
+            self.settingsChanged.set(True)
+
+    def updateCameras(self):
+        camerasWindow = tk.Toplevel(self.root)
+        camerasWindow.grab_set()
+        camerasWindow.rowconfigure(0, pad=20)
+        camerasWindow.rowconfigure(1, pad=20)
+        camerasWindow.rowconfigure(2, pad=20)
+        camerasWindow.rowconfigure(3, pad=20)
+        camerasLabel = tk.Label(camerasWindow, text='Please change the number of rows and columns of cameras')
+        camerasLabel.grid(column=0, row=0, columnspan=2)
+        cameraRowsLabel = tk.Label(camerasWindow, text='Rows:')
+        cameraRowsLabel.grid(column=0, row=1, sticky='e')
+        cameraRowsVariable = tk.StringVar()
+        cameraRowsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraRowsVariable)
+        cameraRowsVariable.set(self.cameraRows)
+        cameraRowsSpinbox.grid(column=1, row=1, sticky='w')
+        cameraColsLabel = tk.Label(camerasWindow, text='Columns:')
+        cameraColsLabel.grid(column=0, row=2, sticky='e')
+        cameraColsVariable = tk.StringVar()
+        cameraColsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraColsVariable)
+        cameraColsVariable.set(self.cameraCols)
+        cameraColsSpinbox.grid(column=1, row=2, sticky='w')
+        camerasCloseButton = tk.Button(camerasWindow, text='OK', command=lambda:
+                                       self.updateCamerasCloseButton(cameraRowsVariable.get(), cameraColsVariable.get(), camerasWindow))
+        camerasCloseButton.grid(column=0, row=3, columnspan=2)
 
     def updateButtonsCloseButton(self, buttonRows, buttonCols, window):
         try:
@@ -605,22 +655,24 @@ This supports the following characters to be replaced by the appropriate value:
         reloadButton.grid(column=0, row=2)
         maxSeedButton = tk.Button(frame, text='Change Max Seed', command=self.updateMaxSeed)
         maxSeedButton.grid(column=0, row=3)
+        maxSeedButton = tk.Button(frame, text='Change number of cameras', command=self.updateCameras)
+        maxSeedButton.grid(column=0, row=4)
         buttonsButton = tk.Button(frame, text='Change number of buttons', command=self.updateButtons)
-        buttonsButton.grid(column=0, row=4)
+        buttonsButton.grid(column=0, row=5)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
-        stagesButton.grid(column=0, row=5)
+        stagesButton.grid(column=0, row=6)
         regionButton = tk.Button(frame, text='Change championship region for presentation', command=self.updateRegion)
-        regionButton.grid(column=0, row=6)
+        regionButton.grid(column=0, row=7)
         cardTextButton = tk.Button(frame, text='Change text on card', command=lambda: self.updateCardText(True))
-        cardTextButton.grid(column=0, row=7)
-        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
         cardTextButton.grid(column=0, row=8)
+        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
+        cardTextButton.grid(column=0, row=9)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=9)
+        telegramButton.grid(column=0, row=10)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=10)
-        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=11)
+        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=12)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -635,3 +687,4 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(9, pad=20)
         frame.rowconfigure(10, pad=20)
         frame.rowconfigure(11, pad=20)
+        frame.rowconfigure(12, pad=20)

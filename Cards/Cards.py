@@ -32,21 +32,6 @@ class Cards:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
-        self.queues = []
-        self.canvases = []
-        self.names = []
-        self.texts = []
-        self.flags = []
-        self.flagImages = []
-        self.avatars = []
-        self.avatarImages = []
-        self.backgrounds = []
-        self.backgroundStates = []
-        self.backgroundIndices = []
-        self.requestCountries = []
-        self.requestNames = []
-        self.requestAvatars = []
-        self.requestTexts = []
         self.loopFile = ''
         self.loopImages = []
         self.introFile = ''
@@ -88,6 +73,29 @@ class Cards:
         self.settingsChanged.set(False)
         addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Cards')
 
+        self.cardsInit()
+
+        self.showSettingsFrame()
+        self.mainFrame.pack(side=tk.RIGHT)
+        self.currentlyChanging = False
+        self.checkAllQueues()
+
+    def cardsInit(self):
+        self.queues = []
+        self.canvases = []
+        self.names = []
+        self.texts = []
+        self.flags = []
+        self.flagImages = []
+        self.avatars = []
+        self.avatarImages = []
+        self.backgrounds = []
+        self.backgroundStates = []
+        self.backgroundIndices = []
+        self.requestCountries = []
+        self.requestNames = []
+        self.requestAvatars = []
+        self.requestTexts = []
         for i in range(0, self.camerasCount):
             self.queues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
@@ -112,10 +120,6 @@ class Cards:
         for cameraY in range(0, self.camerasY):
             self.mainFrame.rowconfigure(cameraY, pad=20)
 
-        self.showSettingsFrame()
-        self.mainFrame.pack(side=tk.RIGHT)
-        self.checkAllQueues()
-
     def botCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
         camera = int(messageArray[0])
@@ -133,6 +137,8 @@ class Cards:
                                                     ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
             'version': CURRENT_VERSION,
+            'cameraRows': self.cameraRows,
+            'cameraCols': self.cameraCols,
             'width': self.width,
             'height': self.height,
             'backgroundColor': self.backgroundColor,
@@ -179,9 +185,20 @@ class Cards:
                 tkinter.messagebox.showerror(title='File Error !', message='File is not a json file')
             return
 
+        self.currentlyChanging = True
+        while (not self.readyToChange):
+            print('Waiting for ready')
         try:
             if 'version' not in loadSettingsJson:
                 loadSettingsJson['version'] = 10
+            # Retrocompat
+            version = loadSettingsJson['version']
+            if version < 20:
+                loadSettingsJson['cameraCols'] = cardsUtils.CAMERAS_COLS
+                loadSettingsJson['cameraRows'] = cardsUtils.CAMERAS_ROWS
+            self.cameraRows = loadSettingsJson['cameraRows']
+            self.cameraCols = loadSettingsJson['cameraCols']
+            self.cameraCount = self.cameraRows * self.cameraCols
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']
@@ -220,27 +237,7 @@ class Cards:
             return
 
         try:
-            self.flags.clear()
-            self.avatars.clear()
-            for cameraY in range(0, self.camerasY):
-                for cameraX in range(0, self.camerasX):
-                    i = self.camerasX * cameraY + cameraX
-                    self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-                    self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
-                                                anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
-                    self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
-                    self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
-                                                anchor=self.textAnchor, justify=getJustify(self.textAnchor))
-                    self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                    self.flags.append(Image.getFlag(self.flagHeight, 'local'))
-                    self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
-                    self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-                    self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
-                    self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
-                    self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
-                    if not self.canvases[i].winfo_ismapped():
-                        self.canvases[i].grid(row=cameraY, column=cameraX)
-                    self.hide(i)
+            self.cardsInit()
         except:
             tkinter.messagebox.showerror(title='Cards Error !',
                                          message='Error in the Cards Settings, please make sure the Settings are correct')
@@ -268,7 +265,46 @@ class Cards:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct, and the application isn\'t already running')
             return
+        self.checkAllQueues()
+        self.currentlyChanging = False
         self.settingsChanged.set(False)
+
+    def updateCamerasCloseButton(self, cameraRows, cameraCols, window):
+        try:
+            self.cameraRows = int(cameraRows)
+            self.cameraCols = int(cameraCols)
+            self.cameraCount = self.cameraRows * self.cameraCols
+            self.reloadInterfaceFrames()
+        except:
+            tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
+        else:
+            window.destroy()
+            self.settingsChanged.set(True)
+
+    def updateCameras(self):
+        camerasWindow = tk.Toplevel(self.root)
+        camerasWindow.grab_set()
+        camerasWindow.rowconfigure(0, pad=20)
+        camerasWindow.rowconfigure(1, pad=20)
+        camerasWindow.rowconfigure(2, pad=20)
+        camerasWindow.rowconfigure(3, pad=20)
+        camerasLabel = tk.Label(camerasWindow, text='Please change the number of rows and columns of cameras')
+        camerasLabel.grid(column=0, row=0, columnspan=2)
+        cameraRowsLabel = tk.Label(camerasWindow, text='Rows:')
+        cameraRowsLabel.grid(column=0, row=1, sticky='e')
+        cameraRowsVariable = tk.StringVar()
+        cameraRowsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraRowsVariable)
+        cameraRowsVariable.set(self.cameraRows)
+        cameraRowsSpinbox.grid(column=1, row=1, sticky='w')
+        cameraColsLabel = tk.Label(camerasWindow, text='Columns:')
+        cameraColsLabel.grid(column=0, row=2, sticky='e')
+        cameraColsVariable = tk.StringVar()
+        cameraColsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraColsVariable)
+        cameraColsVariable.set(self.cameraCols)
+        cameraColsSpinbox.grid(column=1, row=2, sticky='w')
+        camerasCloseButton = tk.Button(camerasWindow, text='OK', command=lambda:
+                                       self.updateCamerasCloseButton(cameraRowsVariable.get(), cameraColsVariable.get(), camerasWindow))
+        camerasCloseButton.grid(column=0, row=3, columnspan=2)
 
     def updateBackgroundCloseButton(self, window, introFile, loopFile, outroFile, canvas, background, width, height, intro, loop, outro):
         intro.set(introFile)
@@ -995,22 +1031,28 @@ class Cards:
             self.backgroundStates[i] = nextBackgroundState
             self.backgroundIndices[i] = nextIndex
         delay = max(0, int(1000 / self.FPS - 1000 * (time.time() - start)))
+        while (self.currentlyChanging):
+            self.readyToChange = True
+        self.readyToChange = False
+        print('Check all queues')
         self.root.after(delay, self.checkAllQueues)
 
     def showSettingsFrame(self):
         frame = tk.Frame(self.root, bg=self.BG_COLOR, highlightbackground='black', highlightthickness=1)
         settingsLabel = tk.Label(frame, text='Cards Settings', bg=self.BG_COLOR)
         settingsLabel.grid(column=0, row=0)
+        cameraButton = tk.Button(frame, text='Update cameras', command=self.updateCameras)
+        cameraButton.grid(column=0, row=1)
         layoutButton = tk.Button(frame, text='Update layout', command=self.updateLayout)
-        layoutButton.grid(column=0, row=1)
+        layoutButton.grid(column=0, row=2)
         FPSButton = tk.Button(frame, text='Change FPS for videos', command=self.updateFPS)
-        FPSButton.grid(column=0, row=2)
+        FPSButton.grid(column=0, row=3)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=3)
+        telegramButton.grid(column=0, row=4)
         saveButton = tk.Button(frame, text='Save Cards Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=4)
-        saveButton = tk.Button(frame, text='Load Cards Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=5)
+        saveButton = tk.Button(frame, text='Load Cards Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=6)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -1019,3 +1061,4 @@ class Cards:
         frame.rowconfigure(3, pad=20)
         frame.rowconfigure(4, pad=20)
         frame.rowconfigure(5, pad=20)
+        frame.rowconfigure(6, pad=20)

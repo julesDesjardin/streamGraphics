@@ -323,4 +323,4 @@ def getTextColorFromBackground(bg):
         return '#ffffff'
 
 
-CURRENT_VERSION = 10
+CURRENT_VERSION = 20

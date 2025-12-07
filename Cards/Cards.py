@@ -180,7 +180,7 @@ class Cards:
             return
 
         try:
-            if 'version' not in loadSettingsJson['version']:
+            if 'version' not in loadSettingsJson:
                 loadSettingsJson['version'] = 10
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']

@@ -21,11 +21,16 @@ v1.0:
 
 ### Future versions
 
-Planned features for v2.0:
+v2.0: (In development)
 - Support retrocompatibility: when loading a JSON from an earlier version, fill it with default values for new features.
 - Support local communication instead of Telegram for 1-PC use, and easier development.
 - Support any number of Cards, to adapt to all screen sizes/Card sizes.
+
+Remaining features planned for v2.0:
 - Replace the Taiwan flag with the WCA "Chinese Taipei" flag.
 - Support both "A. BCD" and Full Name for the TimeTower.
-- Support adding BPA and WPA on the TimeTower when reaching solve 4.
+- Replace TimeTower line expansion with BPA and WPA when reaching solve 4.
 - Support new Blind Best Of 5 format.
+- Send results from TimeTower to Cards (or refacto) to show full results on Cards
+
+Please contact me if you have ideas for new features!

@@ -16,10 +16,11 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, queueUpdate, region, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
+    def __init__(self, root, queueRound, queueUpdate, region, nameIsFull, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
+        self.nameIsFull = nameIsFull
         self.backgroundColor = backgroundColor
         self.bgLocalName = bgLocalName
         self.bgLocalResult = bgLocalResult
@@ -100,7 +101,7 @@ class TimeTowerContent:
                 colorName = self.colorForeignerName
                 colorResult = self.colorForeignerResult
             self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount,
-                              self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], criteria, self.stepXmax, self.stepYmax))
+                              self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], self.nameIsFull, criteria, self.stepXmax, self.stepYmax))
 
     def resultsLoop(self):
 

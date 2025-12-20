@@ -33,6 +33,7 @@ class TimeTower:
         self.queueRound = queue.Queue()
         self.queueUpdate = queue.Queue()
         self.content = None
+        self.nameIsFull = False
         self.backgroundColor = timeTowerUtils.DEFAULT_BACKGROUND_COLOR
         self.bgLocalName = timeTowerUtils.DEFAULT_BG_LOCAL_NAME
         self.bgLocalResult = timeTowerUtils.DEFAULT_BG_LOCAL_RESULT
@@ -174,6 +175,7 @@ class TimeTower:
             'compId': self.compId,
             'delay': self.delay,
             'region': self.region,
+            'nameIsFull': self.nameIsFull,
             'backgroundColor': self.backgroundColor,
             'bgLocalName': self.bgLocalName,
             'bgLocalResult': self.bgLocalResult,
@@ -227,9 +229,12 @@ class TimeTower:
         try:
             if 'version' not in loadSettingsJson:
                 loadSettingsJson['version'] = 10
+            if loadSettingsJson['version'] < 20:
+                loadSettingsJson['nameIsFull'] = False
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
+            self.nameIsFull = loadSettingsJson['nameIsFull']
             self.backgroundColor = loadSettingsJson['backgroundColor']
             self.bgLocalName = loadSettingsJson['bgLocalName']
             self.bgLocalResult = loadSettingsJson['bgLocalResult']
@@ -376,7 +381,7 @@ class TimeTower:
                                                              (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
                                                              (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
-                                                             self.colorLocalName, self.colorLocalResult, self.height, self.heightSeparator, 0, 0, 0, 'PL', 'Tymon Kolasiński', 'average', 1, 1))
+                                                             self.colorLocalName, self.colorLocalResult, self.height, self.heightSeparator, 0, 0, 0, 'PL', 'Tymon Kolasiński', self.nameIsFull, 'average', 1, 1))
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgForeignerName, self.bgForeignerResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
@@ -385,7 +390,7 @@ class TimeTower:
                                                              (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
                                                              (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
-                                                             self.colorForeignerName, self.colorForeignerResult, self.height, self.heightSeparator, 0, 0, 0, 'US', 'Max Park', 'average', 1, 1))
+                                                             self.colorForeignerName, self.colorForeignerResult, self.height, self.heightSeparator, 0, 0, 0, 'US', 'Max Park', self.nameIsFull, 'average', 1, 1))
         self.exampleLines[0].ranking = 1
         self.exampleLines[0].nextRanking = 1
         self.exampleLines[0].results = [500, 600, 700, 800, timeTowerUtils.DNF_ATTEMPT]
@@ -398,7 +403,7 @@ class TimeTower:
         for line in self.exampleLines:
             line.showLine(0, 0)
 
-    def updateExampleLines(self, widthRanking=None, widthFlagRectangle=None, heightFlag=None, widthName=None, widthFullName=None, widthCount=None, widthResult=None, widthFullResult=None, height=None, heightSeparator=None, bgLocalName=None, bgLocalResult=None, bgForeignerName=None, bgForeignerResult=None, fontRanking=None, fontName=None, fontCount=None, fontIncompleteResult=None, fontResult=None, fontFullResult=None, colorLocalName=None, colorLocalResult=None, colorForeignerName=None, colorForeignerResult=None):
+    def updateExampleLines(self, widthRanking=None, widthFlagRectangle=None, heightFlag=None, nameIsFull=None, widthName=None, widthFullName=None, widthCount=None, widthResult=None, widthFullResult=None, height=None, heightSeparator=None, bgLocalName=None, bgLocalResult=None, bgForeignerName=None, bgForeignerResult=None, fontRanking=None, fontName=None, fontCount=None, fontIncompleteResult=None, fontResult=None, fontFullResult=None, colorLocalName=None, colorLocalResult=None, colorForeignerName=None, colorForeignerResult=None):
         for line in self.exampleLines:
             if widthRanking is not None:
                 line.widthRanking = widthRanking
@@ -407,6 +412,8 @@ class TimeTower:
             if heightFlag is not None:
                 line.heightFlag = heightFlag
                 line.flagImage = Image.getFlag(heightFlag, line.country)
+            if nameIsFull is not None:
+                line.nameIsFull = nameIsFull
             if widthName is not None:
                 line.widthName = widthName
             if widthFullName is not None:
@@ -634,6 +641,13 @@ class TimeTower:
         emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(sizeFrame, 30)
 
+        nameIsFullVariable = tk.BooleanVar()
+        nameIsFullLabel = tk.Label(sizeFrame, text='Use full name instead of abbreviated one')
+        nameIsFullLabel.grid(column=0, row=self.currentRow, sticky='e')
+        nameIsFullCheckbox = tk.Checkbutton(sizeFrame, text='', variable=nameIsFullVariable)
+        nameIsFullCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        self.layoutEndRow(sizeFrame, 10)
+
         widthNameLabel = tk.Label(sizeFrame, text='Abbreviated name width:')
         widthNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthNameVariable = tk.StringVar()
@@ -717,6 +731,8 @@ class TimeTower:
             widthFlagRectangle=cleverInt(widthFlagRectangleVariable.get())))
         heightFlagVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             heightFlag=cleverInt(heightFlagVariable.get())))
+        nameIsFullVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            nameIsFull=nameIsFullVariable.get()))
         widthNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthName=cleverInt(widthNameVariable.get())))
         widthFullNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(

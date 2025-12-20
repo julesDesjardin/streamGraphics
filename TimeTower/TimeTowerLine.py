@@ -1,3 +1,4 @@
+from Common import Image
 import tkinter as tk
 from tkinter import ttk
 import timeTowerUtils
@@ -7,12 +8,11 @@ from urllib.request import urlopen
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import Image
 
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, criteria, stepXmax, stepYmax):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, nameIsFull, criteria, stepXmax, stepYmax):
         self.canvas = canvas
         self.bgName = bgName
         self.bgResult = bgResult
@@ -39,9 +39,11 @@ class TimeTowerLine:
         self.competitorId = competitorId
         self.competitorRegistrantId = competitorRegistrantId
         self.country = country
+        self.nameIsFull = nameIsFull
         # Removes part in parentheses (could mess up the display, + messes up the 3 letter name) + trailing space in this case
-        self.fullName = name.split('(')[0].strip().upper()
-        fullNameSplit = self.fullName.split(' ')
+        fullName = name.split('(')[0].strip().upper()
+        fullNameSplit = fullName.split(' ')
+        self.longName = (fullNameSplit[0][0] + '. ' + ' '.join(fullNameSplit[1:]))
         self.smallName = (fullNameSplit[0][0] + '. ' + fullNameSplit[-1][0:3])
         self.criteria = criteria
         if criteria == 'average':
@@ -114,20 +116,21 @@ class TimeTowerLine:
         if self.expandRequest:
             currentWidthName = self.widthName + int((self.widthFullName - self.widthName) * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.fullName, fill=self.colorName, font=self.fontName, anchor='w')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
             currentX = currentX + currentWidthName
         elif self.reduceRequest:
             currentWidthName = self.widthFullName - int((self.widthFullName - self.widthName) * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.smallName, fill=self.colorName, font=self.fontName, anchor='w')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
             currentX = currentX + currentWidthName
         elif self.expanded:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.fullName, fill=self.colorName, font=self.fontName, anchor='w')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
             currentX = currentX + self.widthFullName
         else:
             self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=self.smallName, fill=self.colorName, font=self.fontName, anchor='w')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=(self.longName if self.nameIsFull else self.smallName),
+                                    fill=self.colorName, font=self.fontName, anchor='w')
             currentX = currentX + self.widthName
 
         # Count

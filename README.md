@@ -26,9 +26,9 @@ v2.0: (In development)
 - Support local communication instead of Telegram for 1-PC use, and easier development.
 - Support any number of Cards, to adapt to all screen sizes/Card sizes.
 - Replace the Taiwan flag with the WCA "Chinese Taipei" flag.
+- Support both "A. BCD" and Full Name for the TimeTower.
 
 Remaining features planned for v2.0:
-- Support both "A. BCD" and Full Name for the TimeTower.
 - Replace TimeTower line expansion with BPA and WPA when reaching solve 4.
 - Support new Blind Best Of 5 format.
 - Send results from TimeTower to Cards (or refacto) to show full results on Cards

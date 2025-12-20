@@ -26,9 +26,6 @@ class Cards:
     def __init__(self, root):
         self.root = root
         self.mainFrame = tk.Frame(self.root)
-        self.camerasX = cardsUtils.CAMERAS_COLS
-        self.camerasY = cardsUtils.CAMERAS_ROWS
-        self.camerasCount = self.camerasX * self.camerasY
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
@@ -73,14 +70,19 @@ class Cards:
         self.settingsChanged.set(False)
         addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Cards')
 
-        self.cardsInit()
-
         self.showSettingsFrame()
         self.mainFrame.pack(side=tk.RIGHT)
-        self.currentlyChanging = False
+        self.askForReload(cardsUtils.CAMERAS_COLS, cardsUtils.CAMERAS_ROWS)
         self.checkAllQueues()
 
-    def cardsInit(self):
+    def askForReload(self, cols, rows):
+        self.reloadCards = (True, cols, rows)
+
+    def cardsInit(self, cols, rows):
+
+        self.cameraCols = cols
+        self.cameraRows = rows
+        self.camerasCount = self.cameraCols * self.cameraRows
         self.queues = []
         self.canvases = []
         self.names = []
@@ -115,10 +117,40 @@ class Cards:
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
             self.avatarImages.append(self.canvases[i].create_image(self.avatarX, self.avatarY, image=self.avatars[i]))
             self.hide(i)
-        for cameraX in range(0, self.camerasX):
+        for cameraX in range(0, self.cameraCols):
             self.mainFrame.columnconfigure(cameraX, pad=20)
-        for cameraY in range(0, self.camerasY):
+        for cameraY in range(0, self.cameraRows):
             self.mainFrame.rowconfigure(cameraY, pad=20)
+
+        for cameraY in range(0, self.cameraRows):
+            for cameraX in range(0, self.cameraCols):
+                i = self.cameraCols * cameraY + cameraX
+                self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
+                if self.loopFile != '':
+                    self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
+                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
+                                            anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
+                self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
+                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
+                                            anchor=self.textAnchor, justify=getJustify(self.textAnchor))
+                self.canvases[i].coords(self.texts[i], self.textX, self.textY)
+                self.flags[i] = Image.getFlag(self.flagHeight, 'local')
+                self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
+                self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
+                if self.flagEnable:
+                    self.canvases[i].itemconfig(self.flagImages[i], state='normal')
+                else:
+                    self.canvases[i].itemconfig(self.flagImages[i], state='hidden')
+                self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
+                self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
+                self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
+                if self.avatarEnable:
+                    self.canvases[i].itemconfig(self.avatarImages[i], state='normal')
+                else:
+                    self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
+                if not self.canvases[i].winfo_ismapped():
+                    self.canvases[i].grid(row=cameraY, column=cameraX)
+                self.hide(i)
 
     def botCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
@@ -185,9 +217,6 @@ class Cards:
                 tkinter.messagebox.showerror(title='File Error !', message='File is not a json file')
             return
 
-        self.currentlyChanging = True
-        while (not self.readyToChange):
-            print('Waiting for ready')
         try:
             if 'version' not in loadSettingsJson:
                 loadSettingsJson['version'] = 10
@@ -196,9 +225,8 @@ class Cards:
             if version < 20:
                 loadSettingsJson['cameraCols'] = cardsUtils.CAMERAS_COLS
                 loadSettingsJson['cameraRows'] = cardsUtils.CAMERAS_ROWS
-            self.cameraRows = loadSettingsJson['cameraRows']
-            self.cameraCols = loadSettingsJson['cameraCols']
-            self.cameraCount = self.cameraRows * self.cameraCols
+            rows = loadSettingsJson['cameraRows']
+            cols = loadSettingsJson['cameraCols']
             self.width = loadSettingsJson['width']
             self.height = loadSettingsJson['height']
             self.backgroundColor = loadSettingsJson['backgroundColor']
@@ -236,16 +264,10 @@ class Cards:
                                          message='Error in the Settings file, please make sure you selected the correct file and try to load again')
             return
 
-        try:
-            self.cardsInit()
-        except:
-            tkinter.messagebox.showerror(title='Cards Error !',
-                                         message='Error in the Cards Settings, please make sure the Settings are correct')
+        self.askForReload(cols, rows)
 
         if self.loopFile != '':
             cardsUtils.loadVideo(self.loopFile, self.loopImages)
-            for i in range(0, self.camerasCount):
-                self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
 
         if self.introFile != '':
             cardsUtils.loadVideo(self.introFile, self.introImages)
@@ -270,16 +292,13 @@ class Cards:
         self.settingsChanged.set(False)
 
     def updateCamerasCloseButton(self, cameraRows, cameraCols, window):
-        try:
-            self.cameraRows = int(cameraRows)
-            self.cameraCols = int(cameraCols)
-            self.cameraCount = self.cameraRows * self.cameraCols
-            self.reloadInterfaceFrames()
-        except:
-            tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
-        else:
-            window.destroy()
-            self.settingsChanged.set(True)
+        # try:
+        self.askForReload(int(cameraCols), int(cameraRows))
+        # except:
+        #     tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
+        # else:
+        window.destroy()
+        self.settingsChanged.set(True)
 
     def updateCameras(self):
         camerasWindow = tk.Toplevel(self.root)
@@ -386,36 +405,8 @@ class Cards:
         self.avatarHeight = avatarHeight
         self.avatarX = avatarX
         self.avatarY = avatarY
-        for cameraY in range(0, self.camerasY):
-            for cameraX in range(0, self.camerasX):
-                i = self.camerasX * cameraY + cameraX
-                self.canvases[i].configure(width=self.width, height=self.height, background=self.backgroundColor)
-                if self.loopFile != '':
-                    self.canvases[i].itemconfig(self.backgrounds[i], image=self.loopImages[0])
-                self.canvases[i].itemconfig(self.names[i], font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
-                                            anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
-                self.canvases[i].coords(self.names[i], self.nameX, self.nameY)
-                self.canvases[i].itemconfig(self.texts[i], font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
-                                            anchor=self.textAnchor, justify=getJustify(self.textAnchor))
-                self.canvases[i].coords(self.texts[i], self.textX, self.textY)
-                self.flags[i] = Image.getFlag(self.flagHeight, 'local')
-                self.canvases[i].itemconfig(self.flagImages[i], image=self.flags[i])
-                self.canvases[i].coords(self.flagImages[i], self.flagX, self.flagY)
-                if self.flagEnable:
-                    self.canvases[i].itemconfig(self.flagImages[i], state='normal')
-                else:
-                    self.canvases[i].itemconfig(self.flagImages[i], state='hidden')
-                self.avatars[i] = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
-                self.canvases[i].itemconfig(self.avatarImages[i], image=self.avatars[i])
-                self.canvases[i].coords(self.avatarImages[i], self.avatarX, self.avatarY)
-                if self.avatarEnable:
-                    self.canvases[i].itemconfig(self.avatarImages[i], state='normal')
-                else:
-                    self.canvases[i].itemconfig(self.avatarImages[i], state='hidden')
-                if not self.canvases[i].winfo_ismapped():
-                    self.canvases[i].grid(row=cameraY, column=cameraX)
-                self.hide(i)
 
+        self.askForReload(self.cameraCols, self.cameraRows)
         window.destroy()
         self.settingsChanged.set(True)
 
@@ -957,6 +948,9 @@ class Cards:
         canvas.update()
 
     def checkAllQueues(self):
+        if self.reloadCards[0]:
+            self.cardsInit(self.reloadCards[1], self.reloadCards[2])
+            self.reloadCards = (False, 1, 1)
         start = time.time()
         for i in range(0, self.camerasCount):
             dataQueue = self.queues[i]
@@ -1031,10 +1025,6 @@ class Cards:
             self.backgroundStates[i] = nextBackgroundState
             self.backgroundIndices[i] = nextIndex
         delay = max(0, int(1000 / self.FPS - 1000 * (time.time() - start)))
-        while (self.currentlyChanging):
-            self.readyToChange = True
-        self.readyToChange = False
-        print('Check all queues')
         self.root.after(delay, self.checkAllQueues)
 
     def showSettingsFrame(self):

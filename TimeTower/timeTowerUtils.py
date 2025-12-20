@@ -43,10 +43,10 @@ DEFAULT_WIDTH_RANKING = 50
 DEFAULT_WIDTH_FLAG_RECTANGLE = 60
 DEFAULT_HEIGHT_FLAG = 30
 DEFAULT_WIDTH_NAME = 100
-DEFAULT_WIDTH_FULL_NAME = 300
 DEFAULT_WIDTH_COUNT = 50
 DEFAULT_WIDTH_RESULT = 100
-DEFAULT_WIDTH_FULL_RESULT = 300
+DEFAULT_WIDTH_BPAWPA = 50
+DEFAULT_WIDTH_BPAWPA_SEPARATOR = 20
 DEFAULT_FONT_FAMILY = 'Arial'
 DEFAULT_FONT_SIZE_BIG = 15
 DEFAULT_FONT_SIZE_SMALL = 12
@@ -113,3 +113,19 @@ def getAllResults(results, criteria):
         else:
             outputArray.append(f'{getReadableResult(result)}')
     return ' '.join(outputArray)
+
+
+def getBPA(results):
+    if len(results) != 4:
+        return ''
+    sortedResults = sorted(results)
+    BPA = round(sum(sortedResults[0:3]) / 3)
+    return f'{getReadableResult(BPA)}'
+
+
+def getWPA(results):
+    if len(results) != 4:
+        return ''
+    sortedResults = sorted(results)
+    WPA = round(sum(sortedResults[1:4]) / 3)
+    return f'{getReadableResult(WPA)}'

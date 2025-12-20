@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 
 class TimeTowerLine:
 
-    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, nameIsFull, criteria, stepXmax, stepYmax):
+    def __init__(self, canvas, bgName, bgResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontBPAWPA, colorName, colorResult, height, heightSeparator, roundId, competitorId, competitorRegistrantId, country, name, nameIsFull, criteria, stepXmax, stepYmax):
         self.canvas = canvas
         self.bgName = bgName
         self.bgResult = bgResult
@@ -21,16 +21,16 @@ class TimeTowerLine:
         self.widthFlagRectangle = widthFlagRectangle
         self.heightFlag = heightFlag
         self.widthName = widthName
-        self.widthFullName = widthFullName
         self.widthCount = widthCount
         self.widthResult = widthResult
-        self.widthFullResult = widthFullResult
+        self.widthBPAWPA = widthBPAWPA
+        self.widthBPAWPASeparator = widthBPAWPASeparator
         self.fontRanking = fontRanking
         self.fontName = fontName
         self.fontCount = fontCount
         self.fontIncompleteResult = fontIncompleteResult
         self.fontResult = fontResult
-        self.fontFullResult = fontFullResult
+        self.fontBPAWPA = fontBPAWPA
         self.colorName = colorName
         self.colorResult = colorResult
         self.height = height
@@ -113,25 +113,10 @@ class TimeTowerLine:
         currentX = currentX + self.widthFlagRectangle
 
         # Name
-        if self.expandRequest:
-            currentWidthName = self.widthName + int((self.widthFullName - self.widthName) * (stepX / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
-            currentX = currentX + currentWidthName
-        elif self.reduceRequest:
-            currentWidthName = self.widthFullName - int((self.widthFullName - self.widthName) * (stepX / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
-            currentX = currentX + currentWidthName
-        elif self.expanded:
-            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text='', fill=self.colorName, font=self.fontName, anchor='w')
-            currentX = currentX + self.widthFullName
-        else:
-            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill=self.bgName, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=(self.longName if self.nameIsFull else self.smallName),
-                                    fill=self.colorName, font=self.fontName, anchor='w')
-            currentX = currentX + self.widthName
+        self.canvas.create_rectangle(currentX, currentY, currentX + self.widthName, currentY + self.height, fill=self.bgName, outline='')
+        self.canvas.create_text(currentX, currentY + self.height / 2, text=(self.longName if self.nameIsFull else self.smallName),
+                                fill=self.colorName, font=self.fontName, anchor='w')
+        currentX = currentX + self.widthName
 
         # Count
         self.canvas.create_rectangle(currentX, currentY, currentX + self.widthCount, currentY + self.height, fill=self.bgResult, outline='')
@@ -149,21 +134,59 @@ class TimeTowerLine:
                                 text=timeTowerUtils.getReadableResult(self.currentResult), fill=self.colorResult, font=fontResult)
         currentX = currentX + self.widthResult
 
-        # Full result
+        # BPA
         if self.expandRequest:
-            currentWidthFullResult = int(self.widthFullResult * (stepX / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult,
+            currentWidthBPA = int(self.widthBPAWPA * (stepX / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthBPA,
                                          currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getAllResults(self.results,
-                                    self.criteria), fill=self.colorResult, font=self.fontFullResult, anchor='w')
-            currentX = currentX + currentWidthFullResult
+            self.canvas.create_text(currentX + currentWidthBPA, currentY + self.height / 2, text=timeTowerUtils.getBPA(self.results),
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='e')
+            currentX = currentX + currentWidthBPA
         elif self.reduceRequest:
-            currentWidthFullResult = int(self.widthFullResult * ((self.stepXmax - stepX) / self.stepXmax))
-            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthFullResult,
+            currentWidthBPA = int(self.widthBPAWPA * ((self.stepXmax - stepX) / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthBPA,
                                          currentY + self.height, fill=self.bgResult, outline='')
-            currentX = currentX + currentWidthFullResult
+            currentX = currentX + currentWidthBPA
         elif self.expanded:
-            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthFullResult, currentY + self.height, fill=self.bgResult, outline='')
-            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getAllResults(self.results,
-                                    self.criteria), fill=self.colorResult, font=self.fontFullResult, anchor='w')
-            currentX = currentX + self.widthFullResult
+            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthBPAWPA, currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX + self.widthBPAWPA, currentY + self.height / 2, text=timeTowerUtils.getBPA(self.results),
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='e')
+            currentX = currentX + self.widthBPAWPA
+
+        # Separator
+        if self.expandRequest:
+            currentWidthSeparator = int(self.widthBPAWPASeparator * (stepX / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthSeparator,
+                                         currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX + currentWidthSeparator/2, currentY + self.height / 2, text='-',
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='c')
+            currentX = currentX + currentWidthSeparator
+        elif self.reduceRequest:
+            currentWidthSeparator = int(self.widthBPAWPASeparator * ((self.stepXmax - stepX) / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthSeparator,
+                                         currentY + self.height, fill=self.bgResult, outline='')
+            currentX = currentX + currentWidthSeparator
+        elif self.expanded:
+            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthBPAWPASeparator, currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX + self.widthBPAWPASeparator/2, currentY + self.height / 2, text='-',
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='c')
+            currentX = currentX + self.widthBPAWPASeparator
+
+        # WPA
+        if self.expandRequest:
+            currentWidthWPA = int(self.widthBPAWPA * (stepX / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthWPA,
+                                         currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getWPA(self.results),
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='w')
+            currentX = currentX + currentWidthWPA
+        elif self.reduceRequest:
+            currentWidthWPA = int(self.widthBPAWPA * ((self.stepXmax - stepX) / self.stepXmax))
+            self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthWPA,
+                                         currentY + self.height, fill=self.bgResult, outline='')
+            currentX = currentX + currentWidthWPA
+        elif self.expanded:
+            self.canvas.create_rectangle(currentX, currentY, currentX + self.widthBPAWPA, currentY + self.height, fill=self.bgResult, outline='')
+            self.canvas.create_text(currentX, currentY + self.height / 2, text=timeTowerUtils.getWPA(self.results),
+                                    fill=self.colorResult, font=self.fontBPAWPA, anchor='w')
+            currentX = currentX + self.widthBPAWPA

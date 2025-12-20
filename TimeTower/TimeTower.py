@@ -43,10 +43,10 @@ class TimeTower:
         self.widthFlagRectangle = timeTowerUtils.DEFAULT_WIDTH_FLAG_RECTANGLE
         self.heightFlag = timeTowerUtils.DEFAULT_HEIGHT_FLAG
         self.widthName = timeTowerUtils.DEFAULT_WIDTH_NAME
-        self.widthFullName = timeTowerUtils.DEFAULT_WIDTH_FULL_NAME
         self.widthCount = timeTowerUtils.DEFAULT_WIDTH_COUNT
         self.widthResult = timeTowerUtils.DEFAULT_WIDTH_RESULT
-        self.widthFullResult = timeTowerUtils.DEFAULT_WIDTH_FULL_RESULT
+        self.widthBPAWPA = timeTowerUtils.DEFAULT_WIDTH_BPAWPA
+        self.widthBPAWPASeparator = timeTowerUtils.DEFAULT_WIDTH_BPAWPA_SEPARATOR
         self.fontFamily = timeTowerUtils.DEFAULT_FONT_FAMILY
         self.rankingSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
         self.rankingModifiers = 'bold'
@@ -58,8 +58,8 @@ class TimeTower:
         self.incompleteResultModifiers = 'italic'
         self.resultSize = timeTowerUtils.DEFAULT_FONT_SIZE_BIG
         self.resultModifiers = 'bold'
-        self.fullResultSize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
-        self.fullResultModifiers = ''
+        self.BPAWPASize = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+        self.BPAWPAModifiers = 'italic'
         self.height = timeTowerUtils.DEFAULT_HEIGHT
         self.heightSeparator = timeTowerUtils.DEFAULT_HEIGHT_SEPARATOR
         self.colorLocalName = timeTowerUtils.DEFAULT_COLOR_LOCAL_NAME
@@ -85,8 +85,8 @@ class TimeTower:
         self.incompleteResultItalicVariable = None
         self.resultBoldVariable = None
         self.resultItalicVariable = None
-        self.fullResultBoldVariable = None
-        self.fullResultItalicVariable = None
+        self.BPAWPABoldVariable = None
+        self.BPAWPAItalicVariable = None
         self.exampleLines = []
 
         self.showSettingsFrame()
@@ -139,26 +139,26 @@ class TimeTower:
             self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region,
                                                              self.backgroundColor,
                                                              self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
-                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
                                                              (self.fontFamily, self.nameSize, self.nameModifiers),
                                                              (self.fontFamily, self.countSize, self.countModifiers),
                                                              (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
-                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                                             (self.fontFamily, self.BPAWPASize, self.BPAWPAModifiers),
                                                              self.colorLocalName, self.colorLocalResult, self.colorForeignerName, self.colorForeignerResult,
                                                              self.height, self.heightSeparator, self.maxNumber, self.delay, stepXmax, stepYmax, self.FPS)
             self.content.showFrame()
             self.content.mainLoop()
         else:
             self.queueUpdate.put((self.region,
-                                  self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                  self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
                                   (self.fontFamily, self.rankingSize, self.rankingModifiers),
                                   (self.fontFamily, self.nameSize, self.nameModifiers),
                                   (self.fontFamily, self.countSize, self.countModifiers),
                                   (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                   (self.fontFamily, self.resultSize, self.resultModifiers),
-                                  (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                  (self.fontFamily, self.BPAWPASize, self.BPAWPAModifiers),
                                   self.height, self.heightSeparator,
                                   self.backgroundColor,
                                   self.bgLocalName, self.bgLocalResult,
@@ -185,10 +185,10 @@ class TimeTower:
             'widthFlagRectangle': self.widthFlagRectangle,
             'heightFlag': self.heightFlag,
             'widthName': self.widthName,
-            'widthFullName': self.widthFullName,
             'widthCount': self.widthCount,
             'widthResult': self.widthResult,
-            'widthFullResult': self.widthFullResult,
+            'widthBPAWPA': self.widthBPAWPA,
+            'widthBPAWPASeparator': self.widthBPAWPASeparator,
             'fontFamily': self.fontFamily,
             'rankingSize': self.rankingSize,
             'rankingModifiers': self.rankingModifiers,
@@ -200,8 +200,8 @@ class TimeTower:
             'incompleteResultModifiers': self.incompleteResultModifiers,
             'resultSize': self.resultSize,
             'resultModifiers': self.resultModifiers,
-            'fullResultSize': self.fullResultSize,
-            'fullResultModifiers': self.fullResultModifiers,
+            'BPAWPASize': self.BPAWPASize,
+            'BPAWPAModifiers': self.BPAWPAModifiers,
             'height': self.height,
             'heightSeparator': self.heightSeparator,
             'colorLocalName': self.colorLocalName,
@@ -231,6 +231,10 @@ class TimeTower:
                 loadSettingsJson['version'] = 10
             if loadSettingsJson['version'] < 20:
                 loadSettingsJson['nameIsFull'] = False
+                loadSettingsJson['widthBPAWPA'] = timeTowerUtils.DEFAULT_WIDTH_BPAWPA
+                loadSettingsJson['widthBPAWPASeparator'] = timeTowerUtils.DEFAULT_WIDTH_BPAWPA_SEPARATOR
+                loadSettingsJson['BPAWPASize'] = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
+                loadSettingsJson['BPAWPAModifiers'] = 'italic'
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
@@ -244,10 +248,10 @@ class TimeTower:
             self.widthFlagRectangle = loadSettingsJson['widthFlagRectangle']
             self.heightFlag = loadSettingsJson['heightFlag']
             self.widthName = loadSettingsJson['widthName']
-            self.widthFullName = loadSettingsJson['widthFullName']
             self.widthCount = loadSettingsJson['widthCount']
             self.widthResult = loadSettingsJson['widthResult']
-            self.widthFullResult = loadSettingsJson['widthFullResult']
+            self.widthBPAWPA = loadSettingsJson['widthBPAWPA']
+            self.widthBPAWPASeparator = loadSettingsJson['widthBPAWPASeparator']
             self.fontFamily = loadSettingsJson['fontFamily']
             self.rankingSize = loadSettingsJson['rankingSize']
             self.rankingModifiers = loadSettingsJson['rankingModifiers']
@@ -259,8 +263,8 @@ class TimeTower:
             self.incompleteResultModifiers = loadSettingsJson['incompleteResultModifiers']
             self.resultSize = loadSettingsJson['resultSize']
             self.resultModifiers = loadSettingsJson['resultModifiers']
-            self.fullResultSize = loadSettingsJson['fullResultSize']
-            self.fullResultModifiers = loadSettingsJson['fullResultModifiers']
+            self.BPAWPASize = loadSettingsJson['BPAWPASize']
+            self.BPAWPAModifiers = loadSettingsJson['BPAWPAModifiers']
             self.height = loadSettingsJson['height']
             self.heightSeparator = loadSettingsJson['heightSeparator']
             self.colorLocalName = loadSettingsJson['colorLocalName']
@@ -374,36 +378,36 @@ class TimeTower:
         self.exampleCanvas.pack(pady=5)
         self.exampleLines = []
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgLocalName, self.bgLocalResult,
-                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
                                                              (self.fontFamily, self.nameSize, self.nameModifiers),
                                                              (self.fontFamily, self.countSize, self.countModifiers),
                                                              (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
-                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                                             (self.fontFamily, self.BPAWPASize, self.BPAWPAModifiers),
                                                              self.colorLocalName, self.colorLocalResult, self.height, self.heightSeparator, 0, 0, 0, 'PL', 'Tymon Kolasiński', self.nameIsFull, 'average', 1, 1))
         self.exampleLines.append(TimeTowerLine.TimeTowerLine(self.exampleCanvas, self.bgForeignerName, self.bgForeignerResult,
-                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
+                                                             self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
                                                              (self.fontFamily, self.rankingSize, self.rankingModifiers),
                                                              (self.fontFamily, self.nameSize, self.nameModifiers),
                                                              (self.fontFamily, self.countSize, self.countModifiers),
                                                              (self.fontFamily, self.incompleteResultSize, self.incompleteResultModifiers),
                                                              (self.fontFamily, self.resultSize, self.resultModifiers),
-                                                             (self.fontFamily, self.fullResultSize, self.fullResultModifiers),
+                                                             (self.fontFamily, self.BPAWPASize, self.BPAWPAModifiers),
                                                              self.colorForeignerName, self.colorForeignerResult, self.height, self.heightSeparator, 0, 0, 0, 'US', 'Max Park', self.nameIsFull, 'average', 1, 1))
         self.exampleLines[0].ranking = 1
         self.exampleLines[0].nextRanking = 1
-        self.exampleLines[0].results = [500, 600, 700, 800, timeTowerUtils.DNF_ATTEMPT]
-        self.exampleLines[0].currentResult = 700
+        self.exampleLines[0].results = [500, 600, 700, timeTowerUtils.DNF_ATTEMPT]
+        self.exampleLines[0].currentResult = 650
         self.exampleLines[0].expanded = True
         self.exampleLines[1].ranking = 2
         self.exampleLines[1].nextRanking = 2
         self.exampleLines[1].results = [0, 0, 0, 0]
-        self.exampleLines[1].currentResult = 500
+        self.exampleLines[1].currentResult = 700
         for line in self.exampleLines:
             line.showLine(0, 0)
 
-    def updateExampleLines(self, widthRanking=None, widthFlagRectangle=None, heightFlag=None, nameIsFull=None, widthName=None, widthFullName=None, widthCount=None, widthResult=None, widthFullResult=None, height=None, heightSeparator=None, bgLocalName=None, bgLocalResult=None, bgForeignerName=None, bgForeignerResult=None, fontRanking=None, fontName=None, fontCount=None, fontIncompleteResult=None, fontResult=None, fontFullResult=None, colorLocalName=None, colorLocalResult=None, colorForeignerName=None, colorForeignerResult=None):
+    def updateExampleLines(self, widthRanking=None, widthFlagRectangle=None, heightFlag=None, nameIsFull=None, widthName=None, widthCount=None, widthResult=None, widthBPAWPA=None, widthBPAWPASeparator=None, height=None, heightSeparator=None, bgLocalName=None, bgLocalResult=None, bgForeignerName=None, bgForeignerResult=None, fontRanking=None, fontName=None, fontCount=None, fontIncompleteResult=None, fontResult=None, fontBPAWPA=None, colorLocalName=None, colorLocalResult=None, colorForeignerName=None, colorForeignerResult=None):
         for line in self.exampleLines:
             if widthRanking is not None:
                 line.widthRanking = widthRanking
@@ -416,14 +420,14 @@ class TimeTower:
                 line.nameIsFull = nameIsFull
             if widthName is not None:
                 line.widthName = widthName
-            if widthFullName is not None:
-                line.widthFullName = widthFullName
             if widthCount is not None:
                 line.widthCount = widthCount
             if widthResult is not None:
                 line.widthResult = widthResult
-            if widthFullResult is not None:
-                line.widthFullResult = widthFullResult
+            if widthBPAWPA is not None:
+                line.widthBPAWPA = widthBPAWPA
+            if widthBPAWPASeparator is not None:
+                line.widthBPAWPASeparator = widthBPAWPASeparator
             if height is not None:
                 line.height = height
             if heightSeparator is not None:
@@ -438,8 +442,8 @@ class TimeTower:
                 line.fontIncompleteResult = fontIncompleteResult
             if fontResult is not None:
                 line.fontResult = fontResult
-            if fontFullResult is not None:
-                line.fontFullResult = fontFullResult
+            if fontBPAWPA is not None:
+                line.fontBPAWPA = fontBPAWPA
         if bgLocalName is not None:
             self.exampleLines[0].bgName = bgLocalName
         if bgLocalResult is not None:
@@ -532,16 +536,16 @@ class TimeTower:
             line.showLine(0, 0)
         self.exampleCanvas.update()
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, fullResultSize, fullResultModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, durationY, FPS, window):
+    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, BPAWPASize, BPAWPAModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, durationY, FPS, window):
         try:
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
             self.heightFlag = heightFlag
             self.widthName = widthName
-            self.widthFullName = widthFullName
             self.widthCount = widthCount
             self.widthResult = widthResult
-            self.widthFullResult = widthFullResult
+            self.widthBPAWPA = widthBPAWPA
+            self.widthBPAWPASeparator = widthBPAWPASeparator
             self.height = height
             self.heightSeparator = heightSeparator
             self.fontFamily = fontFamily
@@ -555,8 +559,8 @@ class TimeTower:
             self.incompleteResultModifiers = incompleteResultModifiers
             self.resultSize = resultSize
             self.resultModifiers = resultModifiers
-            self.fullResultSize = fullResultSize
-            self.fullResultModifiers = fullResultModifiers
+            self.BPAWPASize = BPAWPASize
+            self.BPAWPAModifiers = BPAWPAModifiers
             self.backgroundColor = backgroundColor
             self.bgLocalName = bgLocalName
             self.bgLocalResult = bgLocalResult
@@ -648,26 +652,13 @@ class TimeTower:
         nameIsFullCheckbox.grid(column=1, row=self.currentRow, sticky='w')
         self.layoutEndRow(sizeFrame, 10)
 
-        widthNameLabel = tk.Label(sizeFrame, text='Abbreviated name width:')
+        widthNameLabel = tk.Label(sizeFrame, text='Name width:')
         widthNameLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthNameVariable = tk.StringVar()
         widthNameSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_WIDTH, textvariable=widthNameVariable)
         widthNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthNameVariable.set(f'{self.widthName}')
         self.layoutEndRow(sizeFrame, 10)
-
-        widthFullNameLabel = tk.Label(sizeFrame, text='Full name width:')
-        widthFullNameLabel.grid(column=0, row=self.currentRow, sticky='e')
-        widthFullNameVariable = tk.StringVar()
-        widthFullNameSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
-                                          textvariable=widthFullNameVariable)
-        widthFullNameSpinbox.grid(column=1, row=self.currentRow, sticky='w')
-        widthFullNameVariable.set(f'{self.widthFullName}')
-
-        self.layoutEndRow(sizeFrame, 10)
-        emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(sizeFrame, 30)
 
         widthCountLabel = tk.Label(sizeFrame, text='Solve count width:')
         widthCountLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -685,13 +676,22 @@ class TimeTower:
         widthResultVariable.set(f'{self.widthResult}')
         self.layoutEndRow(sizeFrame, 10)
 
-        widthFullResultLabel = tk.Label(sizeFrame, text='Full results width:')
-        widthFullResultLabel.grid(column=0, row=self.currentRow, sticky='e')
-        widthFullResultVariable = tk.StringVar()
-        widthFullResultSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
-                                            textvariable=widthFullResultVariable)
-        widthFullResultSpinbox.grid(column=1, row=self.currentRow, sticky='w')
-        widthFullResultVariable.set(f'{self.widthFullResult}')
+        widthBPAWPALabel = tk.Label(sizeFrame, text='BPA/WPA width:')
+        widthBPAWPALabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthBPAWPAVariable = tk.StringVar()
+        widthBPAWPASpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+                                        textvariable=widthBPAWPAVariable)
+        widthBPAWPASpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthBPAWPAVariable.set(f'{self.widthBPAWPA}')
+        self.layoutEndRow(sizeFrame, 10)
+
+        widthBPAWPASeparatorLabel = tk.Label(sizeFrame, text='BPA/WPA separator:')
+        widthBPAWPASeparatorLabel.grid(column=0, row=self.currentRow, sticky='e')
+        widthBPAWPASeparatorVariable = tk.StringVar()
+        widthBPAWPASeparatorSpinbox = tk.Spinbox(sizeFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_EXTENDED_WIDTH,
+                                                 textvariable=widthBPAWPASeparatorVariable)
+        widthBPAWPASeparatorSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        widthBPAWPASeparatorVariable.set(f'{self.widthBPAWPASeparator}')
 
         self.layoutEndRow(sizeFrame, 10)
         emptyFrames.append(tk.Frame(sizeFrame))
@@ -735,14 +735,14 @@ class TimeTower:
             nameIsFull=nameIsFullVariable.get()))
         widthNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthName=cleverInt(widthNameVariable.get())))
-        widthFullNameVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            widthFullName=cleverInt(widthFullNameVariable.get())))
         widthCountVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthCount=cleverInt(widthCountVariable.get())))
         widthResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             widthResult=cleverInt(widthResultVariable.get())))
-        widthFullResultVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            widthFullResult=cleverInt(widthFullResultVariable.get())))
+        widthBPAWPAVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthBPAWPA=cleverInt(widthBPAWPAVariable.get())))
+        widthBPAWPASeparatorVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            widthBPAWPASeparator=cleverInt(widthBPAWPASeparatorVariable.get())))
         heightVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             height=cleverInt(heightVariable.get())))
         heightSeparatorVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
@@ -889,21 +889,21 @@ class TimeTower:
         emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
         self.layoutEndRow(fontFrame, 10)
 
-        fullResultSizeLabel = tk.Label(fontFrame, text='Full result text size:')
-        fullResultSizeLabel.grid(column=0, row=self.currentRow, sticky='e')
-        fullResultSizeVariable = tk.StringVar()
-        fullResultSizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=fullResultSizeVariable)
-        fullResultSizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
-        fullResultSizeVariable.set(f'{self.fullResultSize}')
+        BPAWPASizeLabel = tk.Label(fontFrame, text='BPA/WPA text size:')
+        BPAWPASizeLabel.grid(column=0, row=self.currentRow, sticky='e')
+        BPAWPASizeVariable = tk.StringVar()
+        BPAWPASizeSpinbox = tk.Spinbox(fontFrame, from_=0, to=timeTowerUtils.LAYOUT_MAX_FONT, textvariable=BPAWPASizeVariable)
+        BPAWPASizeSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        BPAWPASizeVariable.set(f'{self.BPAWPASize}')
         self.layoutEndRow(fontFrame, 10)
 
-        self.fullResultBoldVariable = tk.BooleanVar()
-        fullResultBoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.fullResultBoldVariable)
-        fullResultBoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
-        self.fullResultItalicVariable = tk.BooleanVar()
-        fullResultItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.fullResultItalicVariable)
-        fullResultItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
-        setModifiersVariables(self.fullResultModifiers, self.fullResultBoldVariable, self.fullResultItalicVariable)
+        self.BPAWPABoldVariable = tk.BooleanVar()
+        BPAWPABoldCheckbox = tk.Checkbutton(fontFrame, text='Bold', variable=self.BPAWPABoldVariable)
+        BPAWPABoldCheckbox.grid(column=0, row=self.currentRow, sticky='e')
+        self.BPAWPAItalicVariable = tk.BooleanVar()
+        BPAWPAItalicCheckbox = tk.Checkbutton(fontFrame, text='Italic', variable=self.BPAWPAItalicVariable)
+        BPAWPAItalicCheckbox.grid(column=1, row=self.currentRow, sticky='w')
+        setModifiersVariables(self.BPAWPAModifiers, self.BPAWPABoldVariable, self.BPAWPAItalicVariable)
 
         fontFamilyVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()),
@@ -916,8 +916,8 @@ class TimeTower:
                                   getModifiers(self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get())),
             fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()),
                         getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get())),
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()),
-                            getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+            fontBPAWPA=(fontFamilyVariable.get(), cleverInt(BPAWPASizeVariable.get()),
+                        getModifiers(self.BPAWPABoldVariable.get(), self.BPAWPAItalicVariable.get()))))
         rankingSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             fontRanking=(fontFamilyVariable.get(), cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()))))
         self.rankingBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
@@ -948,12 +948,12 @@ class TimeTower:
             fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
         self.resultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
             fontResult=(fontFamilyVariable.get(), cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
-        fullResultSizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
-        self.fullResultBoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
-        self.fullResultItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
-            fontFullResult=(fontFamilyVariable.get(), cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()))))
+        BPAWPASizeVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontBPAWPA=(fontFamilyVariable.get(), cleverInt(BPAWPASizeVariable.get()), getModifiers(self.BPAWPABoldVariable.get(), self.BPAWPAItalicVariable.get()))))
+        self.BPAWPABoldVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontBPAWPA=(fontFamilyVariable.get(), cleverInt(BPAWPASizeVariable.get()), getModifiers(self.BPAWPABoldVariable.get(), self.BPAWPAItalicVariable.get()))))
+        self.BPAWPAItalicVariable.trace_add('write', lambda var, index, mode: self.updateExampleLines(
+            fontBPAWPA=(fontFamilyVariable.get(), cleverInt(BPAWPASizeVariable.get()), getModifiers(self.BPAWPABoldVariable.get(), self.BPAWPAItalicVariable.get()))))
 
         # Colors
 
@@ -1161,8 +1161,11 @@ class TimeTower:
         # End
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()), cleverInt(widthFullNameVariable.get(
-            )), cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(widthFullResultVariable.get()), cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()),
+            cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()
+                                                             ), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()),
+            cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(
+                widthBPAWPAVariable.get()), cleverInt(widthBPAWPASeparatorVariable.get()),
+            cleverInt(heightVariable.get()), cleverInt(heightSeparatorVariable.get()),
             fontFamilyVariable.get(),
             cleverInt(rankingSizeVariable.get()), getModifiers(self.rankingBoldVariable.get(), self.rankingItalicVariable.get()),
             cleverInt(nameSizeVariable.get()), getModifiers(self.nameBoldVariable.get(), self.nameItalicVariable.get()),
@@ -1170,7 +1173,7 @@ class TimeTower:
             cleverInt(incompleteResultSizeVariable.get()), getModifiers(
                 self.incompleteResultBoldVariable.get(), self.incompleteResultItalicVariable.get()),
             cleverInt(resultSizeVariable.get()), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()),
-            cleverInt(fullResultSizeVariable.get()), getModifiers(self.fullResultBoldVariable.get(), self.fullResultItalicVariable.get()),
+            cleverInt(BPAWPASizeVariable.get()), getModifiers(self.BPAWPABoldVariable.get(), self.BPAWPAItalicVariable.get()),
             backgroundVariable.get(),
             bgLocalNameVariable.get(), bgLocalResultVariable.get(),
             bgForeignerNameVariable.get(), bgForeignerResultVariable.get(),

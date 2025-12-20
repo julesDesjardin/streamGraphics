@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, queueUpdate, region, nameIsFull, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthFullName, widthCount, widthResult, widthFullResult, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontFullResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
+    def __init__(self, root, queueRound, queueUpdate, region, nameIsFull, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontBPAWPA, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
         self.root = root
         self.frame = tk.Frame(root)
         self.region = region
@@ -30,24 +30,24 @@ class TimeTowerContent:
         self.widthFlagRectangle = widthFlagRectangle
         self.heightFlag = heightFlag
         self.widthName = widthName
-        self.widthFullName = widthFullName
         self.widthCount = widthCount
         self.widthResult = widthResult
-        self.widthFullResult = widthFullResult
+        self.widthBPAWPA = widthBPAWPA
+        self.widthBPAWPASeparator = widthBPAWPASeparator
         self.fontRanking = fontRanking
         self.fontName = fontName
         self.fontCount = fontCount
         self.fontIncompleteResult = fontIncompleteResult
         self.fontResult = fontResult
-        self.fontFullResult = fontFullResult
+        self.fontBPAWPA = fontBPAWPA
         self.colorLocalName = colorLocalName
         self.colorLocalResult = colorLocalResult
         self.colorForeignerName = colorForeignerName
         self.colorForeignerResult = colorForeignerResult
         self.height = height
         self.heightSeparator = heightSeparator
-        self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthFullName + widthCount +
-                                widthResult + widthFullResult, height=maxNumber * (height + heightSeparator), bg=self.backgroundColor)
+        self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthCount +
+                                widthResult + 2*widthBPAWPA + widthBPAWPASeparator, height=maxNumber * (height + heightSeparator), bg=self.backgroundColor)
         self.queueRound = queueRound
         self.queueUpdate = queueUpdate
         self.queueRanking = queue.Queue()
@@ -100,8 +100,8 @@ class TimeTowerContent:
                 bgResult = self.bgForeignerResult
                 colorName = self.colorForeignerName
                 colorResult = self.colorForeignerResult
-            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult, self.fontRanking, self.fontName, self.fontCount,
-                              self.fontIncompleteResult, self.fontResult, self.fontFullResult, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], self.nameIsFull, criteria, self.stepXmax, self.stepYmax))
+            self.lines.append(TimeTowerLine.TimeTowerLine(self.canvas, bgName, bgResult, self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator, self.fontRanking, self.fontName, self.fontCount,
+                              self.fontIncompleteResult, self.fontResult, self.fontBPAWPA, colorName, colorResult, self.height, self.heightSeparator, roundId, person['person']['id'], person['person']['registrantId'], person['person']['country']['iso2'], person['person']['name'], self.nameIsFull, criteria, self.stepXmax, self.stepYmax))
 
     def resultsLoop(self):
 
@@ -138,8 +138,8 @@ class TimeTowerContent:
                 # Update layout
                 try:
                     (self.region,
-                     self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthFullName, self.widthCount, self.widthResult, self.widthFullResult,
-                     self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontFullResult,
+                     self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
+                     self.fontRanking, self.fontName, self.fontCount, self.fontIncompleteResult, self.fontResult, self.fontBPAWPA,
                      self.height, self.heightSeparator,
                      self.backgroundColor,
                      self.bgLocalName, self.bgLocalResult,
@@ -148,7 +148,7 @@ class TimeTowerContent:
                      self.colorForeignerName, self.colorForeignerResult,
                      self.maxNumber, self.reloadDelay, self.stepXmax, self.stepYmax, self.FPS
                      ) = self.queueUpdate.get(block=False)
-                    self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthFullName + self.widthCount + self.widthResult + self.widthFullResult,
+                    self.canvas.configure(width=self.widthRanking + self.widthFlagRectangle + self.widthCount + self.widthResult + 2*self.widthBPAWPA + self.widthBPAWPASeparator,
                                           height=self.maxNumber * (self.height + self.heightSeparator), bg=self.backgroundColor)
                     for line in self.lines:
                         line.widthRanking = self.widthRanking
@@ -157,10 +157,10 @@ class TimeTowerContent:
                         line.flagImage = Image.getFlag(
                             self.heightFlag, line.country)
                         line.widthName = self.widthName
-                        line.widthFullName = self.widthFullName
                         line.widthCount = self.widthCount
                         line.widthResult = self.widthResult
-                        line.widthFullResult = self.widthFullResult
+                        line.widthBPAWPA = self.widthBPAWPA
+                        line.widthBPAWPASeparator = self.widthBPAWPASeparator
                         line.height = self.height
                         line.heightSeparator = self.heightSeparator
                         line.fontRanking = self.fontRanking
@@ -168,7 +168,7 @@ class TimeTowerContent:
                         line.fontCount = self.fontCount
                         line.fontIncompleteResult = self.fontIncompleteResult
                         line.fontResult = self.fontResult
-                        line.fontFullResult = self.fontFullResult
+                        line.fontBPAWPA = self.fontBPAWPA
                         line.stepXmax = self.stepXmax
                         line.stepYmax = self.stepYmax
                 except:

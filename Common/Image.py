@@ -46,6 +46,9 @@ def getFlag(height, country):
         # For debug/example purpose : use a local US flag to avoid losing time getting an actual flag from the internet
         image_path = f'{os.path.dirname(__file__)}/us.png'
         return getLocalImage(width, height, image_path, True)
+    elif country == 'TW':
+        image_path = f'{os.path.dirname(__file__)}/ChineseTaipei.png'
+        return getLocalImage(width, height, image_path, True)
     else:
         image_url = f'https://flagcdn.com/w320/{country.lower()}.png'
         return getInternetImage(width, height, image_url, True)

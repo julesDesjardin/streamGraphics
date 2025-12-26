@@ -36,15 +36,10 @@ class InterfaceFrame:
         self.label = tk.Label(self.frame, text=f'Cuber on camera {index+1}')
         self.label.grid(column=0, row=0, columnspan=self.buttonCols)
 
-        self.timeTowerVariable = tk.IntVar()
-        self.timeTowerButton = tk.Checkbutton(self.frame, text='Expand TimeTower line',
-                                              variable=self.timeTowerVariable, command=self.timeTowerCommand)
-        self.timeTowerButton.grid(column=0, row=1, columnspan=self.buttonCols)
-
         self.cleanButton = tk.Button(self.frame)
         self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT,
                                    command=lambda: self.buttonCommand(-1, '', '', '', '', -1))
-        self.cleanButton.grid(column=0, row=2, columnspan=self.buttonCols)
+        self.cleanButton.grid(column=0, row=1, columnspan=self.buttonCols)
 
         self.buttonFrames = []
         self.buttons = []
@@ -59,9 +54,6 @@ class InterfaceFrame:
                                 compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
             self.buttons[-1].pack()
 
-    def timeTowerCommand(self):
-        dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, self.activeCuber), self.timeTowerVariable.get())
-
     def buttonCommand(self, buttonIndex, country, name, avatar, cardText, competitorId):
         for index in range(len(self.buttons)):
             if index == buttonIndex:
@@ -71,9 +63,6 @@ class InterfaceFrame:
                 self.buttonFrames[index].configure(highlightbackground='white')
                 self.buttons[index].configure(relief=tk.RAISED)
         dataWrite.sendCardData(self.bot, self.index, country, name.split('(')[0].strip(), avatar, cardText, False)
-        if self.timeTowerVariable.get() == 1:
-            dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, self.activeCuber), 0)
-            dataWrite.sendTimeTowerExpand(self.bot, WCIFParse.getRegistrantId(self.wcif, competitorId), 1)
         self.activeCuber = competitorId
 
     def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):

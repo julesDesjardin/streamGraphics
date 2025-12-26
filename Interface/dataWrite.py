@@ -1,7 +1,7 @@
+from Common import TelegramBot
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common import TelegramBot
 
 
 def sendCardData(bot, camera, country, name, avatar, text, immediate):
@@ -15,7 +15,3 @@ def sendCardData(bot, camera, country, name, avatar, text, immediate):
 
 def sendTimeTowerEvent(bot, event, round):
     bot.sendMessage('timeTowerEvent', f'{event} {round}')
-
-
-def sendTimeTowerExpand(bot, id, enable):
-    bot.sendMessage('timeTowerExpand', f'{id} {enable}')

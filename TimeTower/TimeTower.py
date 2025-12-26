@@ -122,17 +122,6 @@ class TimeTower:
                         self.queueRound.put((int(round['id']), timeTowerUtils.CRITERIA[event]))
                         return
 
-    def timeTowerExpandCallback(self, message):
-        messageSplit = message.split()
-        competitor = int(messageSplit[0])
-        enable = messageSplit[1]
-        for line in self.content.lines:
-            if competitor == line.competitorRegistrantId:
-                if enable == '1':
-                    line.expandRequest = True
-                else:
-                    line.reduceRequest = True
-
     def loadContent(self):
         stepXmax = int(self.FPS * self.durationX / 1000)
         stepYmax = int(self.FPS * self.durationY / 1000)
@@ -286,7 +275,6 @@ class TimeTower:
                 self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
                 self.bot.sendSimpleMessage('Bot TimeTower ready')
                 self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
-                self.bot.setMessageHandler(['timeTowerExpand'], self.timeTowerExpandCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
                 self.threadBot.daemon = True
                 self.threadBot.start()
@@ -1197,7 +1185,6 @@ class TimeTower:
                 self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
                 self.bot.sendSimpleMessage('Bot TimeTower ready')
                 self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
-                self.bot.setMessageHandler(['timeTowerExpand'], self.timeTowerExpandCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
                 self.threadBot.daemon = True
                 self.threadBot.start()

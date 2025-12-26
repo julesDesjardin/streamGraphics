@@ -70,11 +70,17 @@ class TimeTowerLine:
             if result['person']['id'] == self.competitorId:
                 self.results = []
                 for attempt in result['attempts']:
+                    if attempt['result'] == 0:
+                        continue
                     if attempt['result'] < 0:
                         nonDNFResult = timeTowerUtils.DNF_ATTEMPT
                     else:
                         nonDNFResult = attempt['result']
                     self.results.append(nonDNFResult)
+        if not self.expanded and not self.expandRequest and len(self.results) == 4:
+            self.expandRequest = True
+        if self.expanded and not self.reduceRequest and len(self.results) != 4:
+            self.reduceRequest = True
 
         # Update currentResult
         if len(self.results) == 0:
@@ -135,7 +141,7 @@ class TimeTowerLine:
         currentX = currentX + self.widthResult
 
         # BPA
-        if self.expandRequest:
+        if self.expandRequest and stepX > 0:
             currentWidthBPA = int(self.widthBPAWPA * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthBPA,
                                          currentY + self.height, fill=self.bgResult, outline='')
@@ -154,7 +160,7 @@ class TimeTowerLine:
             currentX = currentX + self.widthBPAWPA
 
         # Separator
-        if self.expandRequest:
+        if self.expandRequest and stepX > 0:
             currentWidthSeparator = int(self.widthBPAWPASeparator * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthSeparator,
                                          currentY + self.height, fill=self.bgResult, outline='')
@@ -173,7 +179,7 @@ class TimeTowerLine:
             currentX = currentX + self.widthBPAWPASeparator
 
         # WPA
-        if self.expandRequest:
+        if self.expandRequest and stepX > 0:
             currentWidthWPA = int(self.widthBPAWPA * (stepX / self.stepXmax))
             self.canvas.create_rectangle(currentX, currentY, currentX + currentWidthWPA,
                                          currentY + self.height, fill=self.bgResult, outline='')

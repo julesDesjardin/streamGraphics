@@ -7,7 +7,7 @@ from enum import Enum
 ##############################################################################
 
 DEBUG_MODE_LOCAL_FLAG = False  # Default : False, put to True to use local USA flag as placeholder to reduce data usage
-DEBUG_MODE_LOCALHOST_LIVE = False  # Default : False, put to True to use a local WCA Live for testing/developing
+DEBUG_MODE_LOCALHOST_LIVE = True  # Default : False, put to True to use a local WCA Live for testing/developing
 
 ##############################################################################
 

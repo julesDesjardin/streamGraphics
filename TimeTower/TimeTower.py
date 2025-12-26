@@ -114,6 +114,7 @@ class TimeTower:
         '''
 
         result = timeTowerUtils.getQueryResult(query)
+        print(result)
         for competitionEvent in result['competition']['competitionEvents']:
             if (competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:
@@ -136,7 +137,7 @@ class TimeTower:
         stepXmax = int(self.FPS * self.durationX / 1000)
         stepYmax = int(self.FPS * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region,
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, self.nameIsFull,
                                                              self.backgroundColor,
                                                              self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
@@ -536,8 +537,9 @@ class TimeTower:
             line.showLine(0, 0)
         self.exampleCanvas.update()
 
-    def updateLayoutCloseButton(self, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, BPAWPASize, BPAWPAModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, durationY, FPS, window):
+    def updateLayoutCloseButton(self, nameIsFull, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, height, heightSeparator, fontFamily, rankingSize, rankingModifiers, nameSize, nameModifiers, countSize, countModifiers, incompleteResultSize, incompleteResultModifiers, resultSize, resultModifiers, BPAWPASize, BPAWPAModifiers, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, maxNumber, durationX, durationY, FPS, window):
         try:
+            self.nameIsFull = nameIsFull
             self.widthRanking = widthRanking
             self.widthFlagRectangle = widthFlagRectangle
             self.heightFlag = heightFlag
@@ -1161,6 +1163,7 @@ class TimeTower:
         # End
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
+            nameIsFullVariable.get(),
             cleverInt(widthRankingVariable.get()), cleverInt(widthFlagRectangleVariable.get()
                                                              ), cleverInt(heightFlagVariable.get()), cleverInt(widthNameVariable.get()),
             cleverInt(widthCountVariable.get()), cleverInt(widthResultVariable.get()), cleverInt(

@@ -46,7 +46,7 @@ class TimeTowerContent:
         self.colorForeignerResult = colorForeignerResult
         self.height = height
         self.heightSeparator = heightSeparator
-        self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthCount +
+        self.canvas = tk.Canvas(self.frame, width=widthRanking + widthFlagRectangle + widthName + widthCount +
                                 widthResult + 2*widthBPAWPA + widthBPAWPASeparator, height=maxNumber * (height + heightSeparator), bg=self.backgroundColor)
         self.queueRound = queueRound
         self.queueUpdate = queueUpdate

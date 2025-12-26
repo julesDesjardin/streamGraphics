@@ -292,13 +292,13 @@ class Cards:
         self.settingsChanged.set(False)
 
     def updateCamerasCloseButton(self, cameraRows, cameraCols, window):
-        # try:
-        self.askForReload(int(cameraCols), int(cameraRows))
-        # except:
-        #     tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
-        # else:
-        window.destroy()
-        self.settingsChanged.set(True)
+        try:
+            self.askForReload(int(cameraCols), int(cameraRows))
+        except:
+            tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
+        else:
+            window.destroy()
+            self.settingsChanged.set(True)
 
     def updateCameras(self):
         camerasWindow = tk.Toplevel(self.root)

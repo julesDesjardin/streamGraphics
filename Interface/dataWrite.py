@@ -15,3 +15,7 @@ def sendCardData(bot, camera, country, name, avatar, text, immediate):
 
 def sendTimeTowerEvent(bot, event, round):
     bot.sendMessage('timeTowerEvent', f'{event} {round}')
+
+
+def sendCardResults(bot, i, results):
+    bot.sendMessage('cardResult', TelegramBot.DATA_SPLIT_SYMBOL.join([f'{i}', results]))

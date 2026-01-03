@@ -1,13 +1,14 @@
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from enum import Enum
+from Common import TelegramBot
 
 ##############################################################################
 # DEBUG
 ##############################################################################
 
 DEBUG_MODE_LOCAL_FLAG = False  # Default : False, put to True to use local USA flag as placeholder to reduce data usage
-DEBUG_MODE_LOCALHOST_LIVE = True  # Default : False, put to True to use a local WCA Live for testing/developing
+DEBUG_MODE_LOCALHOST_LIVE = False  # Default : False, put to True to use a local WCA Live for testing/developing
 
 ##############################################################################
 
@@ -129,3 +130,8 @@ def getWPA(results):
     sortedResults = sorted(results)
     WPA = round(sum(sortedResults[1:4]) / 3)
     return f'{getReadableResult(WPA)}'
+
+
+def sendResults(bot, id, results, criteria):
+    fullData = [f'{id}', getAllResults(results, criteria)]
+    bot.sendMessage('liveResults', TelegramBot.DATA_SPLIT_SYMBOL.join(fullData))

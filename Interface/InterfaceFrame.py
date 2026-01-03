@@ -3,6 +3,7 @@ import tkinter.messagebox
 import interfaceUtils
 import dataWrite
 import WCIFParse
+from Common import TelegramBot
 
 
 class InterfaceFrame:
@@ -22,7 +23,8 @@ class InterfaceFrame:
         self.x = x
         self.y = y
         self.index = index
-        self.activeCuber = -1
+        self.activeCuber = ''
+        self.fullResults = dict([])
 
         frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + (self.buttonCols + 1) * \
             (interfaceUtils.BUTTON_WIDTH + 2 * interfaceUtils.BUTTON_PADX + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
@@ -63,7 +65,12 @@ class InterfaceFrame:
                 self.buttonFrames[index].configure(highlightbackground='white')
                 self.buttons[index].configure(relief=tk.RAISED)
         dataWrite.sendCardData(self.bot, self.index, country, name.split('(')[0].strip(), avatar, cardText, False)
-        self.activeCuber = competitorId
+        print(f'Competitor ID : {competitorId}')
+        print(self.fullResults)
+        idString = f'{WCIFParse.getRegistrantId(self.wcif, competitorId)}'
+        if idString in self.fullResults:
+            dataWrite.sendCardResults(self.bot, self.index, self.fullResults[idString])
+        self.activeCuber = idString
 
     def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
         if not visible:

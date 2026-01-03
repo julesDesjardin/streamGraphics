@@ -54,6 +54,13 @@ class Cards:
         self.textAnchor = 'nw'
         self.textX = 0
         self.textY = 0
+        self.resultFont = cardsUtils.DEFAULT_FONT_FAMILY
+        self.resultSize = cardsUtils.DEFAULT_FONT_SIZE
+        self.resultColor = cardsUtils.DEFAULT_FONT_COLOR
+        self.resultModifiers = ''
+        self.resultAnchor = 'nw'
+        self.resultX = 0
+        self.resultY = 0
         self.flagEnable = True
         self.flagX = cardsUtils.DEFAULT_FLAG_X
         self.flagY = cardsUtils.DEFAULT_FLAG_Y
@@ -83,10 +90,12 @@ class Cards:
         self.cameraCols = cols
         self.cameraRows = rows
         self.camerasCount = self.cameraCols * self.cameraRows
-        self.queues = []
+        self.dataQueues = []
+        self.resultQueues = []
         self.canvases = []
         self.names = []
         self.texts = []
+        self.results = []
         self.flags = []
         self.flagImages = []
         self.avatars = []
@@ -98,8 +107,10 @@ class Cards:
         self.requestNames = []
         self.requestAvatars = []
         self.requestTexts = []
+        self.requestResults = []
         for i in range(0, self.camerasCount):
-            self.queues.append(queue.Queue())
+            self.dataQueues.append(queue.Queue())
+            self.resultQueues.append(queue.Queue())
             self.canvases.append(tkinter.Canvas(self.mainFrame, width=self.width, height=self.height, background=self.backgroundColor))
             self.backgrounds.append(self.canvases[i].create_image(0, 0, anchor='nw'))
             self.backgroundStates.append(cardsUtils.BackgroundState.EMPTY)
@@ -108,10 +119,13 @@ class Cards:
             self.requestCountries.append('')
             self.requestAvatars.append('')
             self.requestTexts.append('')
-            self.names.append(self.canvases[i].create_text(self.textX, self.textY,
+            self.requestResults.append('')
+            self.names.append(self.canvases[i].create_text(self.nameX, self.nameY,
                               font=(self.nameFont, self.nameSize, self.nameModifiers), anchor=self.nameAnchor, justify=getJustify(self.nameAnchor)))
             self.texts.append(self.canvases[i].create_text(self.textX, self.textY,
                               font=(self.textFont, self.textSize, self.textModifiers), anchor=self.textAnchor, justify=getJustify(self.textAnchor)))
+            self.results.append(self.canvases[i].create_text(self.resultX, self.resultY,
+                                font=(self.resultFont, self.resultSize, self.resultModifiers), anchor=self.resultAnchor, justify=getJustify(self.resultAnchor)))
             self.flags.append(Image.getFlag(self.flagHeight, 'local'))
             self.flagImages.append(self.canvases[i].create_image(self.flagX, self.flagY, image=self.flags[i]))
             self.avatars.append(Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local'))
@@ -152,7 +166,7 @@ class Cards:
                     self.canvases[i].grid(row=cameraY, column=cameraX)
                 self.hide(i)
 
-    def botCallback(self, message):
+    def dataCallback(self, message):
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
         camera = int(messageArray[0])
         country = messageArray[1]
@@ -162,7 +176,13 @@ class Cards:
             data = messageArray[4]
         else:
             data = ''
-        self.queues[camera].put((country, name, avatar, data))
+        self.dataQueues[camera].put((country, name, avatar, data))
+
+    def resultCallback(self, message):
+        messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
+        camera = int(messageArray[0])
+        result = messageArray[1]
+        self.resultQueues[camera].put(result)
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -192,6 +212,13 @@ class Cards:
             'textAnchor': self.textAnchor,
             'textX': self.textX,
             'textY': self.textY,
+            'resultFont': self.resultFont,
+            'resultSize': self.resultSize,
+            'resultColor': self.resultColor,
+            'resultModifiers': self.resultModifiers,
+            'resultAnchor': self.resultAnchor,
+            'resultX': self.resultX,
+            'resultY': self.resultY,
             'flagEnable': self.flagEnable,
             'flagX': self.flagX,
             'flagY': self.flagY,
@@ -225,6 +252,13 @@ class Cards:
             if version < 20:
                 loadSettingsJson['cameraCols'] = cardsUtils.CAMERAS_COLS
                 loadSettingsJson['cameraRows'] = cardsUtils.CAMERAS_ROWS
+                loadSettingsJson['resultFont'] = cardsUtils.DEFAULT_FONT_FAMILY
+                loadSettingsJson['resultSize'] = cardsUtils.DEFAULT_FONT_SIZE
+                loadSettingsJson['resultColor'] = cardsUtils.DEFAULT_FONT_COLOR
+                loadSettingsJson['resultModifiers'] = ''
+                loadSettingsJson['resultAnchor'] = 'nw'
+                loadSettingsJson['resultX'] = 0
+                loadSettingsJson['resultY'] = 0
             rows = loadSettingsJson['cameraRows']
             cols = loadSettingsJson['cameraCols']
             self.width = loadSettingsJson['width']
@@ -248,6 +282,13 @@ class Cards:
             self.textAnchor = loadSettingsJson['textAnchor']
             self.textX = loadSettingsJson['textX']
             self.textY = loadSettingsJson['textY']
+            self.resultFont = loadSettingsJson['resultFont']
+            self.resultSize = loadSettingsJson['resultSize']
+            self.resultColor = loadSettingsJson['resultColor']
+            self.resultModifiers = loadSettingsJson['resultModifiers']
+            self.resultAnchor = loadSettingsJson['resultAnchor']
+            self.resultX = loadSettingsJson['resultX']
+            self.resultY = loadSettingsJson['resultY']
             self.flagEnable = loadSettingsJson['flagEnable']
             self.flagX = loadSettingsJson['flagX']
             self.flagY = loadSettingsJson['flagY']
@@ -279,7 +320,8 @@ class Cards:
             if self.bot is None:
                 self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
                 self.bot.sendSimpleMessage('Bot Cards ready')
-                self.bot.setMessageHandler(['cardData'], self.botCallback)
+                self.bot.setMessageHandler(['cardData'], self.dataCallback)
+                self.bot.setMessageHandler(['cardResult'], self.resultCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
                 self.threadBot.daemon = True
                 self.threadBot.start()
@@ -371,7 +413,7 @@ class Cards:
             backgroundWindow, introEntry.get(), loopEntry.get(), outroEntry.get(), canvas, background, width, height, intro, loop, outro))
         OKButton.grid(row=3, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, outroFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, outroFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, resultFont, resultSize, resultColor, resultAnchor, resultX, resultY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
@@ -396,6 +438,12 @@ class Cards:
         self.textAnchor = textAnchor
         self.textX = textX
         self.textY = textY
+        self.resultFont = resultFont
+        self.resultSize = resultSize
+        self.resultColor = resultColor
+        self.resultAnchor = resultAnchor
+        self.resultX = resultX
+        self.resultY = resultY
         self.flagEnable = flagEnable
         self.flagHeight = flagHeight
         self.flagX = flagX
@@ -433,290 +481,398 @@ class Cards:
                       avatarX - int(avatarWidth / 2), avatarY - int(avatarHeight / 2), avatarX + int(avatarWidth / 2), avatarY + int(avatarHeight / 2))
         canvas.coords(avatar, avatarX, avatarY)
 
-    def layoutEndRow(self, pad):
-        self.layoutWindow.rowconfigure(self.currentRow, pad=pad)
+    def layoutEndRow(self, frame, pad):
+        frame.rowconfigure(self.currentRow, pad=pad)
         self.currentRow = self.currentRow + 1
 
     def updateLayout(self):
-        self.layoutWindow = tk.Toplevel(self.root)
-        self.layoutWindow.grab_set()
+        layoutWindow = tk.Toplevel(self.root)
+        layoutWindow.grab_set()
 
+        layoutLabel = tk.Label(layoutWindow, text='Customize the Cards:')
+        layoutLabel.pack(pady=5)
+
+        layoutNotebook = ttk.Notebook(layoutWindow)
+        layoutNotebook.pack(pady=5)
+
+        # Name, text, results
+
+        textFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(textFrame, text='Texts')
+        textFrame.columnconfigure(0, weight=1)
+        textFrame.columnconfigure(1, weight=1)
+        textFrame.columnconfigure(2, weight=1)
+        textFrame.columnconfigure(3, weight=1)
         self.currentRow = 0
-
         emptyFrames = []
 
         fonts = list(font.families())
         fonts.sort()
 
-        layoutLabel = tk.Label(self.layoutWindow, text='Customize the cards layout')
+        layoutLabel = tk.Label(textFrame, text='Customize the cards layout')
         layoutLabel.grid(column=0, columnspan=4, row=self.currentRow)
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(textFrame, 10)
+        emptyFrames.append(tk.Frame(textFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(textFrame, 30)
 
-        widthLabel = tk.Label(self.layoutWindow, text='Card width')
+        widthLabel = tk.Label(textFrame, text='Card width')
         widthLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthVariable = tk.StringVar()
-        widthSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=widthVariable)
+        widthSpinbox = tk.Spinbox(textFrame, width=20, from_=0, to=2000, textvariable=widthVariable)
         widthSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthVariable.set(f'{self.width}')
 
-        heightLabel = tk.Label(self.layoutWindow, text='Card height')
+        heightLabel = tk.Label(textFrame, text='Card height')
         heightLabel.grid(column=2, row=self.currentRow, sticky='e')
         heightVariable = tk.StringVar()
-        heightSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=heightVariable)
+        heightSpinbox = tk.Spinbox(textFrame, width=20, from_=0, to=2000, textvariable=heightVariable)
         heightSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         heightVariable.set(f'{self.height}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(textFrame, 10)
+        emptyFrames.append(tk.Frame(textFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(textFrame, 30)
 
-        nameLabel = tk.Label(self.layoutWindow, text='Name:')
+        nameLabel = tk.Label(textFrame, text='Name:')
         nameLabel.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        nameFontLabel = tk.Label(self.layoutWindow, text='Name Font')
+        nameFontLabel = tk.Label(textFrame, text='Name Font')
         nameFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameFontVariable = tk.StringVar()
-        nameFontMenu = ttk.Combobox(self.layoutWindow, textvariable=nameFontVariable)
+        nameFontMenu = ttk.Combobox(textFrame, textvariable=nameFontVariable)
         nameFontMenu['values'] = fonts
         nameFontVariable.set(self.nameFont)
         nameFontMenu.set(self.nameFont)
         nameFontMenu['state'] = 'readonly'
         nameFontMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        nameSizeLabel = tk.Label(self.layoutWindow, text='Name font size')
+        nameSizeLabel = tk.Label(textFrame, text='Name font size')
         nameSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
         nameSizeVariable = tk.StringVar()
-        nameSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=nameSizeVariable)
+        nameSizeSpinbox = tk.Spinbox(textFrame, from_=0, to=500, textvariable=nameSizeVariable)
         nameSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         nameSizeVariable.set(f'{self.nameSize}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
         self.nameBoldVariable = tk.BooleanVar()
-        nameBoldCheckbox = tk.Checkbutton(self.layoutWindow, text='Bold', variable=self.nameBoldVariable)
+        nameBoldCheckbox = tk.Checkbutton(textFrame, text='Bold', variable=self.nameBoldVariable)
         nameBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         self.nameItalicVariable = tk.BooleanVar()
-        nameItalicCheckbox = tk.Checkbutton(self.layoutWindow, text='Italic', variable=self.nameItalicVariable)
+        nameItalicCheckbox = tk.Checkbutton(textFrame, text='Italic', variable=self.nameItalicVariable)
         nameItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        nameColorLabel = tk.Label(self.layoutWindow, text='Name color:')
+        nameColorLabel = tk.Label(textFrame, text='Name color:')
         nameColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         nameColorVariable = tk.StringVar()
         nameColorVariable.set(self.nameColor)
-        nameColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        nameColorButtonFrame = tk.Frame(textFrame, highlightbackground='black', highlightthickness=1)
         nameColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         nameColorButton = tk.Button(nameColorButtonFrame, text='', background=self.nameColor, relief=tk.FLAT, width=10)
         nameColorButton.configure(command=lambda: colorButtonCommand(nameColorButton, nameColorVariable, 'Name color'))
         nameColorButton.pack()
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        nameXLabel = tk.Label(self.layoutWindow, text='Name position X')
+        nameXLabel = tk.Label(textFrame, text='Name position X')
         nameXLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameXVariable = tk.StringVar()
-        nameXSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.width, textvariable=nameXVariable)
+        nameXSpinbox = tk.Spinbox(textFrame, from_=0, to=self.width, textvariable=nameXVariable)
         nameXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         nameXVariable.set(f'{self.nameX}')
 
-        nameYLabel = tk.Label(self.layoutWindow, text='Name position Y')
+        nameYLabel = tk.Label(textFrame, text='Name position Y')
         nameYLabel.grid(column=2, row=self.currentRow, sticky='e')
         nameYVariable = tk.StringVar()
-        nameYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=nameYVariable)
+        nameYSpinbox = tk.Spinbox(textFrame, from_=0, to=self.height, textvariable=nameYVariable)
         nameYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         nameYVariable.set(f'{self.nameY}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
         nameAnchorXVariable = tk.StringVar()
         nameAnchorYVariable = tk.StringVar()
         setAnchorVariables(self.nameAnchor, nameAnchorXVariable, nameAnchorYVariable)
-        nameAnchorXLabel = tk.Label(self.layoutWindow, text='Horizontal alignment')
+        nameAnchorXLabel = tk.Label(textFrame, text='Horizontal alignment')
         nameAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
-        nameAnchorXMenu = ttk.Combobox(self.layoutWindow, textvariable=nameAnchorXVariable, values=['Left', 'Center', 'Right'])
+        nameAnchorXMenu = ttk.Combobox(textFrame, textvariable=nameAnchorXVariable, values=['Left', 'Center', 'Right'])
         nameAnchorXMenu.set(nameAnchorXVariable.get())
         nameAnchorXMenu['state'] = 'readonly'
         nameAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        nameAnchorYLabel = tk.Label(self.layoutWindow, text='Vertical alignment')
+        nameAnchorYLabel = tk.Label(textFrame, text='Vertical alignment')
         nameAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
-        nameAnchorYMenu = ttk.Combobox(self.layoutWindow, textvariable=nameAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        nameAnchorYMenu = ttk.Combobox(textFrame, textvariable=nameAnchorYVariable, values=['Top', 'Center', 'Bottom'])
         nameAnchorYMenu.set(nameAnchorYVariable.get())
         nameAnchorYMenu['state'] = 'readonly'
         nameAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(textFrame, 10)
+        emptyFrames.append(tk.Frame(textFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(textFrame, 30)
 
-        textLabel = tk.Label(self.layoutWindow, text='Text:')
+        textLabel = tk.Label(textFrame, text='Text:')
         textLabel.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        textFontLabel = tk.Label(self.layoutWindow, text='Text Font')
+        textFontLabel = tk.Label(textFrame, text='Text Font')
         textFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         textFontVariable = tk.StringVar()
-        textFontMenu = ttk.Combobox(self.layoutWindow, textvariable=textFontVariable)
+        textFontMenu = ttk.Combobox(textFrame, textvariable=textFontVariable)
         textFontMenu['values'] = fonts
         textFontVariable.set(self.textFont)
         textFontMenu.set(self.textFont)
         textFontMenu['state'] = 'readonly'
         textFontMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        textSizeLabel = tk.Label(self.layoutWindow, text='Text font size')
+        textSizeLabel = tk.Label(textFrame, text='Text font size')
         textSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
         textSizeVariable = tk.StringVar()
-        textSizeSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=500, textvariable=textSizeVariable)
+        textSizeSpinbox = tk.Spinbox(textFrame, from_=0, to=500, textvariable=textSizeVariable)
         textSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         textSizeVariable.set(f'{self.textSize}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
         self.textBoldVariable = tk.BooleanVar()
-        textBoldCheckbox = tk.Checkbutton(self.layoutWindow, text='Bold', variable=self.textBoldVariable)
+        textBoldCheckbox = tk.Checkbutton(textFrame, text='Bold', variable=self.textBoldVariable)
         textBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         self.textItalicVariable = tk.BooleanVar()
-        textItalicCheckbox = tk.Checkbutton(self.layoutWindow, text='Italic', variable=self.textItalicVariable)
+        textItalicCheckbox = tk.Checkbutton(textFrame, text='Italic', variable=self.textItalicVariable)
         textItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         setModifiersVariables(self.textModifiers, self.textBoldVariable, self.textItalicVariable)
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        textColorLabel = tk.Label(self.layoutWindow, text='Text color:')
+        textColorLabel = tk.Label(textFrame, text='Text color:')
         textColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         textColorVariable = tk.StringVar()
         textColorVariable.set(self.textColor)
-        textColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        textColorButtonFrame = tk.Frame(textFrame, highlightbackground='black', highlightthickness=1)
         textColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         textColorButton = tk.Button(textColorButtonFrame, text='', background=self.textColor, relief=tk.FLAT, width=10)
         textColorButton.configure(command=lambda: colorButtonCommand(textColorButton, textColorVariable, 'Text color'))
         textColorButton.pack()
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
-        textXLabel = tk.Label(self.layoutWindow, text='Text position X')
+        textXLabel = tk.Label(textFrame, text='Text position X')
         textXLabel.grid(column=0, row=self.currentRow, sticky='e')
         textXVariable = tk.StringVar()
-        textXSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.width, textvariable=textXVariable)
+        textXSpinbox = tk.Spinbox(textFrame, from_=0, to=self.width, textvariable=textXVariable)
         textXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         textXVariable.set(f'{self.textX}')
 
-        textYLabel = tk.Label(self.layoutWindow, text='Text position Y')
+        textYLabel = tk.Label(textFrame, text='Text position Y')
         textYLabel.grid(column=2, row=self.currentRow, sticky='e')
         textYVariable = tk.StringVar()
-        textYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=textYVariable)
+        textYSpinbox = tk.Spinbox(textFrame, from_=0, to=self.height, textvariable=textYVariable)
         textYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         textYVariable.set(f'{self.textY}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(textFrame, 10)
 
         textAnchorXVariable = tk.StringVar()
         textAnchorYVariable = tk.StringVar()
         setAnchorVariables(self.textAnchor, textAnchorXVariable, textAnchorYVariable)
-        textAnchorXLabel = tk.Label(self.layoutWindow, text='Horizontal alignment')
+        textAnchorXLabel = tk.Label(textFrame, text='Horizontal alignment')
         textAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
-        textAnchorXMenu = ttk.Combobox(self.layoutWindow, textvariable=textAnchorXVariable, values=['Left', 'Center', 'Right'])
+        textAnchorXMenu = ttk.Combobox(textFrame, textvariable=textAnchorXVariable, values=['Left', 'Center', 'Right'])
         textAnchorXMenu.set(textAnchorXVariable.get())
         textAnchorXMenu['state'] = 'readonly'
         textAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        textAnchorYLabel = tk.Label(self.layoutWindow, text='Vertical alignment')
+        textAnchorYLabel = tk.Label(textFrame, text='Vertical alignment')
         textAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
-        textAnchorYMenu = ttk.Combobox(self.layoutWindow, textvariable=textAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        textAnchorYMenu = ttk.Combobox(textFrame, textvariable=textAnchorYVariable, values=['Top', 'Center', 'Bottom'])
         textAnchorYMenu.set(textAnchorYVariable.get())
         textAnchorYMenu['state'] = 'readonly'
         textAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(textFrame, 10)
+        emptyFrames.append(tk.Frame(textFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(textFrame, 30)
+
+        resultLabel = tk.Label(textFrame, text='Results:')
+        resultLabel.grid(column=0, columnspan=4, row=self.currentRow)
+        self.layoutEndRow(textFrame, 10)
+
+        resultFontLabel = tk.Label(textFrame, text='Results Font')
+        resultFontLabel.grid(column=0, row=self.currentRow, sticky='e')
+        resultFontVariable = tk.StringVar()
+        resultFontMenu = ttk.Combobox(textFrame, textvariable=resultFontVariable)
+        resultFontMenu['values'] = fonts
+        resultFontVariable.set(self.resultFont)
+        resultFontMenu.set(self.resultFont)
+        resultFontMenu['state'] = 'readonly'
+        resultFontMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        resultSizeLabel = tk.Label(textFrame, text='Results font size')
+        resultSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
+        resultSizeVariable = tk.StringVar()
+        resultSizeSpinbox = tk.Spinbox(textFrame, from_=0, to=500, textvariable=resultSizeVariable)
+        resultSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        resultSizeVariable.set(f'{self.resultSize}')
+
+        self.layoutEndRow(textFrame, 10)
+
+        self.resultBoldVariable = tk.BooleanVar()
+        resultBoldCheckbox = tk.Checkbutton(textFrame, text='Bold', variable=self.resultBoldVariable)
+        resultBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        self.resultItalicVariable = tk.BooleanVar()
+        resultItalicCheckbox = tk.Checkbutton(textFrame, text='Italic', variable=self.resultItalicVariable)
+        resultItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        setModifiersVariables(self.resultModifiers, self.resultBoldVariable, self.resultItalicVariable)
+
+        self.layoutEndRow(textFrame, 10)
+
+        resultColorLabel = tk.Label(textFrame, text='Results color:')
+        resultColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        resultColorVariable = tk.StringVar()
+        resultColorVariable.set(self.resultColor)
+        resultColorButtonFrame = tk.Frame(textFrame, highlightbackground='black', highlightthickness=1)
+        resultColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        resultColorButton = tk.Button(resultColorButtonFrame, text='', background=self.resultColor, relief=tk.FLAT, width=10)
+        resultColorButton.configure(command=lambda: colorButtonCommand(resultColorButton, resultColorVariable, 'Results color'))
+        resultColorButton.pack()
+
+        self.layoutEndRow(textFrame, 10)
+
+        resultXLabel = tk.Label(textFrame, text='Results position X')
+        resultXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        resultXVariable = tk.StringVar()
+        resultXSpinbox = tk.Spinbox(textFrame, from_=0, to=self.width, textvariable=resultXVariable)
+        resultXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
+        resultXVariable.set(f'{self.resultX}')
+
+        resultYLabel = tk.Label(textFrame, text='Results position Y')
+        resultYLabel.grid(column=2, row=self.currentRow, sticky='e')
+        resultYVariable = tk.StringVar()
+        resultYSpinbox = tk.Spinbox(textFrame, from_=0, to=self.height, textvariable=resultYVariable)
+        resultYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
+        resultYVariable.set(f'{self.resultY}')
+
+        self.layoutEndRow(textFrame, 10)
+
+        resultAnchorXVariable = tk.StringVar()
+        resultAnchorYVariable = tk.StringVar()
+        setAnchorVariables(self.resultAnchor, resultAnchorXVariable, resultAnchorYVariable)
+        resultAnchorXLabel = tk.Label(textFrame, text='Horizontal alignment')
+        resultAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
+        resultAnchorXMenu = ttk.Combobox(textFrame, textvariable=resultAnchorXVariable, values=['Left', 'Center', 'Right'])
+        resultAnchorXMenu.set(resultAnchorXVariable.get())
+        resultAnchorXMenu['state'] = 'readonly'
+        resultAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
+
+        resultAnchorYLabel = tk.Label(textFrame, text='Vertical alignment')
+        resultAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
+        resultAnchorYMenu = ttk.Combobox(textFrame, textvariable=resultAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        resultAnchorYMenu.set(resultAnchorYVariable.get())
+        resultAnchorYMenu['state'] = 'readonly'
+        resultAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
+
+        # Images
+
+        imageFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(imageFrame, text='Images')
+        imageFrame.columnconfigure(0, weight=1)
+        imageFrame.columnconfigure(1, weight=1)
+        imageFrame.columnconfigure(2, weight=1)
+        imageFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
 
         flagEnableVariable = tk.BooleanVar()
         flagEnableVariable.set(self.flagEnable)
-        flagEnableButton = tk.Checkbutton(self.layoutWindow, text='Show flag', variable=flagEnableVariable,
+        flagEnableButton = tk.Checkbutton(imageFrame, text='Show flag', variable=flagEnableVariable,
                                           command=lambda: self.enableButtonCallback(flagEnableVariable.get(), [flagHeightSpinbox, flagXSpinbox, flagYSpinbox], exampleCanvas, [exampleFlagImage]))
         flagEnableButton.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(10)
+        self.layoutEndRow(imageFrame, 10)
 
-        flagHeightLabel = tk.Label(self.layoutWindow, text='Flag height')
+        flagHeightLabel = tk.Label(imageFrame, text='Flag height')
         flagHeightLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         flagHeightVariable = tk.StringVar()
-        flagHeightSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=flagHeightVariable)
+        flagHeightSpinbox = tk.Spinbox(imageFrame, width=20, from_=0, to=2000, textvariable=flagHeightVariable)
         flagHeightSpinbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         flagHeightVariable.set(f'{self.flagHeight}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(imageFrame, 10)
 
-        flagXLabel = tk.Label(self.layoutWindow, text='Flag position X')
+        flagXLabel = tk.Label(imageFrame, text='Flag position X')
         flagXLabel.grid(column=0, row=self.currentRow, sticky='e')
         flagXVariable = tk.StringVar()
-        flagXSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.width, textvariable=flagXVariable)
+        flagXSpinbox = tk.Spinbox(imageFrame, from_=0, to=self.width, textvariable=flagXVariable)
         flagXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         flagXVariable.set(f'{self.flagX}')
 
-        flagYLabel = tk.Label(self.layoutWindow, text='Flag position Y')
+        flagYLabel = tk.Label(imageFrame, text='Flag position Y')
         flagYLabel.grid(column=2, row=self.currentRow, sticky='e')
         flagYVariable = tk.StringVar()
-        flagYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=flagYVariable)
+        flagYSpinbox = tk.Spinbox(imageFrame, from_=0, to=self.height, textvariable=flagYVariable)
         flagYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         flagYVariable.set(f'{self.flagY}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
+        self.layoutEndRow(imageFrame, 10)
+        emptyFrames.append(tk.Frame(imageFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        self.layoutEndRow(imageFrame, 30)
 
         avatarEnableVariable = tk.BooleanVar()
         avatarEnableVariable.set(self.avatarEnable)
-        avatarEnableButton = tk.Checkbutton(self.layoutWindow, text='Show avatar', variable=avatarEnableVariable,
+        avatarEnableButton = tk.Checkbutton(imageFrame, text='Show avatar', variable=avatarEnableVariable,
                                             command=lambda: self.enableButtonCallback(avatarEnableVariable.get(), [avatarWidthSpinbox, avatarHeightSpinbox, avatarXSpinbox, avatarYSpinbox], exampleCanvas, [exampleAvatarImage, exampleAvatarRectangle]))
         avatarEnableButton.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(10)
+        self.layoutEndRow(imageFrame, 10)
 
-        avatarWidthLabel = tk.Label(self.layoutWindow, text='Avatar Width')
+        avatarWidthLabel = tk.Label(imageFrame, text='Avatar Width')
         avatarWidthLabel.grid(column=0, row=self.currentRow, sticky='e')
         avatarWidthVariable = tk.StringVar()
-        avatarWidthSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=avatarWidthVariable)
+        avatarWidthSpinbox = tk.Spinbox(imageFrame, width=20, from_=0, to=2000, textvariable=avatarWidthVariable)
         avatarWidthSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         avatarWidthVariable.set(f'{self.avatarWidth}')
 
-        avatarHeightLabel = tk.Label(self.layoutWindow, text='Avatar height')
+        avatarHeightLabel = tk.Label(imageFrame, text='Avatar height')
         avatarHeightLabel.grid(column=2, row=self.currentRow, sticky='e')
         avatarHeightVariable = tk.StringVar()
-        avatarHeightSpinbox = tk.Spinbox(self.layoutWindow, width=20, from_=0, to=2000, textvariable=avatarHeightVariable)
+        avatarHeightSpinbox = tk.Spinbox(imageFrame, width=20, from_=0, to=2000, textvariable=avatarHeightVariable)
         avatarHeightSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         avatarHeightVariable.set(f'{self.avatarHeight}')
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(imageFrame, 10)
 
-        avatarXLabel = tk.Label(self.layoutWindow, text='Avatar position X')
+        avatarXLabel = tk.Label(imageFrame, text='Avatar position X')
         avatarXLabel.grid(column=0, row=self.currentRow, sticky='e')
         avatarXVariable = tk.StringVar()
-        avatarXSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.width, textvariable=avatarXVariable)
+        avatarXSpinbox = tk.Spinbox(imageFrame, from_=0, to=self.width, textvariable=avatarXVariable)
         avatarXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         avatarXVariable.set(f'{self.avatarX}')
 
-        avatarYLabel = tk.Label(self.layoutWindow, text='Avatar position Y')
+        avatarYLabel = tk.Label(imageFrame, text='Avatar position Y')
         avatarYLabel.grid(column=2, row=self.currentRow, sticky='e')
         avatarYVariable = tk.StringVar()
-        avatarYSpinbox = tk.Spinbox(self.layoutWindow, from_=0, to=self.height, textvariable=avatarYVariable)
+        avatarYSpinbox = tk.Spinbox(imageFrame, from_=0, to=self.height, textvariable=avatarYVariable)
         avatarYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         avatarYVariable.set(f'{self.avatarY}')
 
-        self.layoutEndRow(10)
-        emptyFrames.append(tk.Frame(self.layoutWindow))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(30)
+        # Background
+
+        backgroundFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(backgroundFrame, text='Background')
+        backgroundFrame.columnconfigure(0, weight=1)
+        backgroundFrame.columnconfigure(1, weight=1)
+        backgroundFrame.columnconfigure(2, weight=1)
+        backgroundFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
 
         introFileVariable = tk.StringVar()
         loopFileVariable = tk.StringVar()
@@ -724,26 +880,26 @@ class Cards:
         introFileVariable.set(self.introFile)
         loopFileVariable.set(self.loopFile)
         outroFileVariable.set(self.outroFile)
-        backgroundButton = tk.Button(self.layoutWindow, text='Update background image/video',
-                                     command=lambda: self.updateBackground(self.layoutWindow, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable, outroFileVariable))
+        backgroundButton = tk.Button(backgroundFrame, text='Update background image/video',
+                                     command=lambda: self.updateBackground(backgroundFrame, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable, outroFileVariable))
         backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(backgroundFrame, 10)
 
-        backgroundColorLabel = tk.Label(self.layoutWindow, text='Background color:')
+        backgroundColorLabel = tk.Label(backgroundFrame, text='Background color:')
         backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         backgroundColorVariable = tk.StringVar()
         backgroundColorVariable.set(self.backgroundColor)
-        backgroundColorButtonFrame = tk.Frame(self.layoutWindow, highlightbackground='black', highlightthickness=1)
+        backgroundColorButtonFrame = tk.Frame(backgroundFrame, highlightbackground='black', highlightthickness=1)
         backgroundColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         backgroundColorButton = tk.Button(backgroundColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
         backgroundColorButton.configure(command=lambda: colorButtonCommand(backgroundColorButton, backgroundColorVariable, 'Background color'))
         backgroundColorButton.pack()
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(backgroundFrame, 10)
 
-        OKButton = tk.Button(self.layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
-            self.layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), outroFileVariable.get(),
+        OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
+            layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), outroFileVariable.get(),
             int(widthVariable.get()), int(heightVariable.get()),
             nameFontVariable.get(), int(nameSizeVariable.get()), nameColorVariable.get(),
             getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
@@ -751,13 +907,16 @@ class Cards:
             textFontVariable.get(), int(textSizeVariable.get()), textColorVariable.get(),
             getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
             int(textXVariable.get()), int(textYVariable.get()),
+            resultFontVariable.get(), int(resultSizeVariable.get()), resultColorVariable.get(),
+            getAnchor(resultAnchorXVariable.get(), resultAnchorYVariable.get()),
+            int(resultXVariable.get()), int(resultYVariable.get()),
             flagEnableVariable.get(), int(flagHeightVariable.get()), int(flagXVariable.get()), int(flagYVariable.get()),
             avatarEnableVariable.get(), int(avatarWidthVariable.get()), int(avatarHeightVariable.get()), int(avatarXVariable.get()), int(avatarYVariable.get())))
-        OKButton.grid(column=0, row=self.currentRow, columnspan=4)
+        OKButton.pack(pady=5)
 
-        self.layoutEndRow(10)
+        self.layoutEndRow(backgroundFrame, 10)
 
-        exampleWindow = tk.Toplevel(self.layoutWindow)
+        exampleWindow = tk.Toplevel(layoutWindow)
         exampleLabel = tk.Label(
             exampleWindow, text='Example Card. See main window to change sizes, fonts, backgrounds, etc, and confirm changes.\nYou can drag and drop elements (Flag, Avatar, name, extra text) in this window.')
         exampleLabel.pack(pady=20)
@@ -774,6 +933,8 @@ class Cards:
                                                 text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor=self.textAnchor, justify=getJustify(self.textAnchor))
+        exampleResult = exampleCanvas.create_text(self.resultX, self.resultY, font=(self.resultFont, self.resultSize, self.resultModifiers), fill=self.resultColor,
+                                                  text='1:23.45 (DNF) (1:10.21) 1.51.09', anchor=self.resultAnchor, justify=getJustify(self.resultAnchor))
         exampleAvatarRectangle = exampleCanvas.create_rectangle(
             self.avatarX - int(self.avatarWidth / 2), self.avatarY - int(self.avatarHeight / 2), self.avatarX + int(self.avatarWidth / 2), self.avatarY + int(self.avatarHeight / 2))
 
@@ -781,6 +942,7 @@ class Cards:
         managerAvatar = DragManager.DragManager(exampleCanvas, exampleAvatarImage, avatarXVariable, avatarYVariable)
         managerName = DragManager.DragManager(exampleCanvas, exampleName, nameXVariable, nameYVariable)
         managerText = DragManager.DragManager(exampleCanvas, exampleText, textXVariable, textYVariable)
+        managerResult = DragManager.DragManager(exampleCanvas, exampleResult, resultXVariable, resultYVariable)
         widthVariable.trace_add('write', lambda var, index, mode: exampleCanvas.configure(width=cleverInt(widthVariable.get())))
         widthVariable.trace_add('write', lambda var, index, mode: flagXSpinbox.configure(to=cleverInt(widthVariable.get())))
         widthVariable.trace_add('write', lambda var, index, mode: textXSpinbox.configure(to=cleverInt(widthVariable.get())))
@@ -825,6 +987,25 @@ class Cards:
             exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
         textYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleText, cleverInt(textXVariable.get()), cleverInt(textYVariable.get())))
+        resultFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, font=(resultFontVariable.get(), resultSizeVariable.get(), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        resultSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, font=(resultFontVariable.get(), resultSizeVariable.get(), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        self.resultBoldVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, font=(resultFontVariable.get(), resultSizeVariable.get(), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        self.resultItalicVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, font=(resultFontVariable.get(), resultSizeVariable.get(), getModifiers(self.resultBoldVariable.get(), self.resultItalicVariable.get()))))
+        resultColorVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(exampleResult, fill=resultColorVariable.get()))
+        resultAnchorXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, anchor=getAnchor(resultAnchorXVariable.get(), resultAnchorYVariable.get()),
+            justify=getJustify(getAnchor(resultAnchorXVariable.get(), resultAnchorYVariable.get()))))
+        resultAnchorYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
+            exampleResult, anchor=getAnchor(resultAnchorXVariable.get(), resultAnchorYVariable.get()),
+            justify=getJustify(getAnchor(resultAnchorXVariable.get(), resultAnchorYVariable.get()))))
+        resultXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleResult, cleverInt(resultXVariable.get()), cleverInt(resultYVariable.get())))
+        resultYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
+            exampleResult, cleverInt(resultXVariable.get()), cleverInt(resultYVariable.get())))
         flagHeightVariable.trace_add('write', lambda var, index, mode: self.updateFlag(
             exampleCanvas, exampleFlagImage, cleverInt(flagHeightVariable.get())))
         flagXVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
@@ -874,7 +1055,8 @@ class Cards:
             if self.bot is None:
                 self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
                 self.bot.sendSimpleMessage('Bot Cards ready')
-                self.bot.setMessageHandler(['cardData'], self.botCallback)
+                self.bot.setMessageHandler(['cardData'], self.dataCallback)
+                self.bot.setMessageHandler(['cardResult'], self.resultCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
                 self.threadBot.daemon = True
                 self.threadBot.start()
@@ -908,6 +1090,7 @@ class Cards:
         canvas = self.canvases[i]
         name = self.names[i]
         text = self.texts[i]
+        result = self.results[i]
         flagImage = self.flagImages[i]
         avatarImage = self.avatarImages[i]
         if self.flagEnable:
@@ -918,12 +1101,14 @@ class Cards:
             canvas.itemconfig(avatarImage, image=self.avatars[i])
         canvas.itemconfig(name, text=self.requestNames[i])
         canvas.itemconfig(text, text=self.requestTexts[i])
+        canvas.itemconfig(result, text=self.requestResults[i])
 
     def show(self, i):
         canvas = self.canvases[i]
         background = self.backgrounds[i]
         name = self.names[i]
         text = self.texts[i]
+        result = self.results[i]
         flagImage = self.flagImages[i]
         avatarImage = self.avatarImages[i]
         canvas.itemconfig(background, state='normal')
@@ -933,18 +1118,21 @@ class Cards:
             canvas.itemconfig(avatarImage, state='normal')
         canvas.itemconfig(name, state='normal')
         canvas.itemconfig(text, state='normal')
+        canvas.itemconfig(result, state='normal')
         canvas.update()
 
     def hide(self, i):
         canvas = self.canvases[i]
         name = self.names[i]
         text = self.texts[i]
+        result = self.results[i]
         flagImage = self.flagImages[i]
         avatarImage = self.avatarImages[i]
         canvas.itemconfig(flagImage, state='hidden')
         canvas.itemconfig(avatarImage, state='hidden')
         canvas.itemconfig(name, state='hidden')
         canvas.itemconfig(text, state='hidden')
+        canvas.itemconfig(result, state='hidden')
         canvas.update()
 
     def checkAllQueues(self):
@@ -953,7 +1141,8 @@ class Cards:
             self.reloadCards = (False, 1, 1)
         start = time.time()
         for i in range(0, self.camerasCount):
-            dataQueue = self.queues[i]
+            dataQueue = self.dataQueues[i]
+            resultQueue = self.resultQueues[i]
             canvas = self.canvases[i]
             background = self.backgrounds[i]
             backgroundState = self.backgroundStates[i]
@@ -978,12 +1167,19 @@ class Cards:
                     canvas.itemconfig(background, image=image, state='normal')
                     canvas.update()
 
-            # Get new request from queue
+            # Get new requests from queues
             try:
                 (self.requestCountries[i], self.requestNames[i], self.requestAvatars[i], self.requestTexts[i]) = dataQueue.get(block=False)
                 if self.requestNames[i] != '':
                     self.prepareWithRequest(i)
-            except:
+            except queue.Empty:
+                pass
+
+            try:
+                self.requestResults[i] = resultQueue.get(block=False)
+                if self.requestResults[i] != '':
+                    self.prepareWithRequest(i)
+            except queue.Empty:
                 pass
 
             # Update state if needed

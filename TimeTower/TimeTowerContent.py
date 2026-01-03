@@ -16,8 +16,9 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 
 class TimeTowerContent:
 
-    def __init__(self, root, queueRound, queueUpdate, region, nameIsFull, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontBPAWPA, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
+    def __init__(self, root, bot, queueRound, queueUpdate, region, nameIsFull, backgroundColor, bgLocalName, bgLocalResult, bgForeignerName, bgForeignerResult, widthRanking, widthFlagRectangle, heightFlag, widthName, widthCount, widthResult, widthBPAWPA, widthBPAWPASeparator, fontRanking, fontName, fontCount, fontIncompleteResult, fontResult, fontBPAWPA, colorLocalName, colorLocalResult, colorForeignerName, colorForeignerResult, height, heightSeparator, maxNumber, reloadDelay, stepXmax, stepYmax, FPS):
         self.root = root
+        self.bot = bot
         self.frame = tk.Frame(root)
         self.region = region
         self.nameIsFull = nameIsFull
@@ -171,14 +172,14 @@ class TimeTowerContent:
                         line.fontBPAWPA = self.fontBPAWPA
                         line.stepXmax = self.stepXmax
                         line.stepYmax = self.stepYmax
-                except:
+                except queue.Empty:
                     pass
 
                 # Update round
                 try:
                     (roundId, criteria) = self.queueRound.get(block=False)
                     self.updateRound(roundId, criteria)
-                except:
+                except queue.Empty:
                     pass
 
                 # Update stepX
@@ -196,6 +197,7 @@ class TimeTowerContent:
                         unorderedResults = []
                         for line in self.lines:
                             line.updateResults(queryResult)
+                            timeTowerUtils.sendResults(self.bot, line.competitorRegistrantId, line.results, self.criteria)
                             bestResult = timeTowerUtils.DNF_ATTEMPT
                             if len(line.results) > 0:
                                 bestResult = min(line.results)
@@ -205,7 +207,7 @@ class TimeTowerContent:
                         for line in self.lines:
                             line.nextRanking = [result[0] for result in orderedResults].index(line.competitorId) + 1  # +1 because first index is 0
                     self.stepYRequest = True
-                except:
+                except queue.Empty:
                     pass
 
                 if self.stepXRequest:

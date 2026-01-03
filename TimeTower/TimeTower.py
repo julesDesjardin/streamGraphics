@@ -114,7 +114,6 @@ class TimeTower:
         '''
 
         result = timeTowerUtils.getQueryResult(query)
-        print(result)
         for competitionEvent in result['competition']['competitionEvents']:
             if (competitionEvent['event']['id'] == event):
                 for round in competitionEvent['rounds']:
@@ -126,7 +125,7 @@ class TimeTower:
         stepXmax = int(self.FPS * self.durationX / 1000)
         stepYmax = int(self.FPS * self.durationY / 1000)
         if self.content is None:
-            self.content = TimeTowerContent.TimeTowerContent(self.root, self.queueRound, self.queueUpdate, self.region, self.nameIsFull,
+            self.content = TimeTowerContent.TimeTowerContent(self.root, self.bot, self.queueRound, self.queueUpdate, self.region, self.nameIsFull,
                                                              self.backgroundColor,
                                                              self.bgLocalName, self.bgLocalResult, self.bgForeignerName, self.bgForeignerResult,
                                                              self.widthRanking, self.widthFlagRectangle, self.heightFlag, self.widthName, self.widthCount, self.widthResult, self.widthBPAWPA, self.widthBPAWPASeparator,
@@ -272,8 +271,8 @@ class TimeTower:
             return
         try:
             if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
-                self.bot.sendSimpleMessage('Bot TimeTower ready')
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, True)
+                self.bot.sendSimpleMessage('Bot TimeTower toto ready')
                 self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
                 self.threadBot.daemon = True
@@ -1182,7 +1181,7 @@ class TimeTower:
         self.botChannelId = id
         try:
             if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, False, True)
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, True)
                 self.bot.sendSimpleMessage('Bot TimeTower ready')
                 self.bot.setMessageHandler(['timeTowerEvent'], self.timeTowerEventCallback)
                 self.threadBot = threading.Thread(target=self.bot.startPolling)
@@ -1192,6 +1191,8 @@ class TimeTower:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
         else:
+            if self.content is not None:
+                self.content.bot = self.bot
             window.destroy()
             self.settingsChanged.set(True)
 

@@ -57,7 +57,7 @@ class TelegramBot:
             while True:
                 try:
                     messages.append(self.sendQueue.get(block=False))
-                except:
+                except queue.Empty:
                     break
             if len(messages) != 0:
                 fullMessage = '/streamCommand \n' + SPLIT_SYMBOL.join([COMMAND_SYMBOL.join(message) for message in messages])

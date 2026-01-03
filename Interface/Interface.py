@@ -12,6 +12,7 @@ import interfaceUtils
 import InterfaceFrame
 import PresentationInterface
 import dataWrite
+import threading
 
 import sys
 import os
@@ -72,6 +73,20 @@ class Interface:
         self.showSettingsFrame()
         self.mainFrame.pack(side=tk.TOP, padx=10)
         self.OKFrame.pack(side=tk.BOTTOM, pady=20)
+
+    def botCallback(self, message):
+        [id, results] = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
+        print(f'{id}, {results}')
+        for i in range(self.cameraCount):
+            camera = self.interfaceFrames[i]
+            if id in camera.fullResults:
+                oldResult = camera.fullResults[id]
+            else:
+                oldResult = None
+            camera.fullResults[id] = results
+            if oldResult is None or results != oldResult:
+                if id == camera.activeCuber:
+                    dataWrite.sendCardResults(self.bot, i, results)
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -151,8 +166,12 @@ class Interface:
 
         try:
             if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, False)
+                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, True)
                 self.bot.sendSimpleMessage('Bot interface ready')
+                self.bot.setMessageHandler(['liveResults'], self.botCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
         except:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
@@ -458,8 +477,12 @@ This supports the following characters to be replaced by the appropriate value:
         self.botChannelId = id
         try:
             if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(token, id, True, False)
+                self.bot = TelegramBot.TelegramBot(token, id, True, True)
                 self.bot.sendSimpleMessage('Bot Interface ready')
+                self.bot.setMessageHandler(['liveResults'], self.botCallback)
+                self.threadBot = threading.Thread(target=self.bot.startPolling)
+                self.threadBot.daemon = True
+                self.threadBot.start()
         except:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
@@ -555,6 +578,7 @@ This supports the following characters to be replaced by the appropriate value:
         self.updateCubers()
         for frame in self.interfaceFrames:
             frame.buttonCommand(-1, '', '', '', '', -1)
+            frame.fullResults = dict([])
 
     def presentationButtonCommand(self):
         (_, _, event, _, _) = self.getStageInfo()[0]

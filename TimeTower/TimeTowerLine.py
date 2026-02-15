@@ -46,7 +46,7 @@ class TimeTowerLine:
         self.longName = (fullNameSplit[0][0] + '. ' + ' '.join(fullNameSplit[1:]))
         self.smallName = (fullNameSplit[0][0] + '. ' + fullNameSplit[-1][0:3])
         self.criteria = criteria
-        if criteria == 'average':
+        if criteria == 'average' or criteria == 'bo5':
             self.maxResults = 5
         else:
             self.maxResults = 3
@@ -77,7 +77,7 @@ class TimeTowerLine:
                     else:
                         nonDNFResult = attempt['result']
                     self.results.append(nonDNFResult)
-        if not self.expanded and not self.expandRequest and len(self.results) == 4:
+        if not self.expanded and not self.expandRequest and len(self.results) == 4 and self.criteria == 'average':
             self.expandRequest = True
         if self.expanded and not self.reduceRequest and len(self.results) != 4:
             self.reduceRequest = True
@@ -99,7 +99,7 @@ class TimeTowerLine:
                             self.currentResult = round((sum(self.results) - max(self.results) - min(self.results)) / (len(self.results) - 2))
                 case 'mean':
                     self.currentResult = round(sum(self.results) / (len(self.results)))
-                case 'single':
+                case default:
                     self.currentResult = min(self.results)
 
     def showLine(self, stepX, stepY):

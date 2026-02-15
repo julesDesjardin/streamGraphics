@@ -22,7 +22,7 @@ CRITERIA = dict([
     ('555', 'average'),
     ('666', 'mean'),
     ('777', 'mean'),
-    ('333bf', 'single'),
+    ('333bf', 'bo5'),
     ('333fm', 'mean'),
     ('333oh', 'average'),
     ('clock', 'average'),
@@ -30,9 +30,9 @@ CRITERIA = dict([
     ('pyram', 'average'),
     ('skewb', 'average'),
     ('sq1', 'average'),
-    ('444bf', 'single'),
-    ('555bf', 'single'),
-    ('333mbf', 'single'),
+    ('444bf', 'bo3'),
+    ('555bf', 'bo3'),
+    ('333mbf', 'bo3'),
 ])
 
 DEFAULT_BACKGROUND_COLOR = '#FFFFFF'

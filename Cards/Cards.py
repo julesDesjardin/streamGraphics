@@ -47,6 +47,7 @@ class Cards:
         self.nameAnchor = 'nw'
         self.nameX = 0
         self.nameY = 0
+        self.nameIsFull = True
         self.textFont = cardsUtils.DEFAULT_FONT_FAMILY
         self.textSize = cardsUtils.DEFAULT_FONT_SIZE
         self.textColor = cardsUtils.DEFAULT_FONT_COLOR
@@ -170,7 +171,12 @@ class Cards:
         messageArray = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
         camera = int(messageArray[0])
         country = messageArray[1]
-        name = messageArray[2]
+        fullName = messageArray[2].split('(')[0].strip()
+        fullNameSplit = fullName.split(' ')
+        if self.nameIsFull:
+            name = fullName
+        else:
+            name = (fullNameSplit[0][0] + '. ' + ' '.join(fullNameSplit[1:]))
         avatar = messageArray[3]
         if len(messageArray) > 4:
             data = messageArray[4]
@@ -205,6 +211,7 @@ class Cards:
             'nameAnchor': self.nameAnchor,
             'nameX': self.nameX,
             'nameY': self.nameY,
+            'nameIsFull': self.nameIsFull,
             'textFont': self.textFont,
             'textSize': self.textSize,
             'textColor': self.textColor,
@@ -259,6 +266,7 @@ class Cards:
                 loadSettingsJson['resultAnchor'] = 'nw'
                 loadSettingsJson['resultX'] = 0
                 loadSettingsJson['resultY'] = 0
+                loadSettingsJson['nameIsFull'] = True
             rows = loadSettingsJson['cameraRows']
             cols = loadSettingsJson['cameraCols']
             self.width = loadSettingsJson['width']
@@ -275,6 +283,7 @@ class Cards:
             self.nameAnchor = loadSettingsJson['nameAnchor']
             self.nameX = loadSettingsJson['nameX']
             self.nameY = loadSettingsJson['nameY']
+            self.nameIsFull = loadSettingsJson['nameIsFull']
             self.textFont = loadSettingsJson['textFont']
             self.textSize = loadSettingsJson['textSize']
             self.textColor = loadSettingsJson['textColor']
@@ -413,7 +422,7 @@ class Cards:
             backgroundWindow, introEntry.get(), loopEntry.get(), outroEntry.get(), canvas, background, width, height, intro, loop, outro))
         OKButton.grid(row=3, column=0, columnspan=3)
 
-    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, outroFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, textFont, textSize, textColor, textAnchor, textX, textY, resultFont, resultSize, resultColor, resultAnchor, resultX, resultY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
+    def updateLayoutCloseButton(self, window, backgroundColor, introFile, loopFile, outroFile, width, height, nameFont, nameSize, nameColor, nameAnchor, nameX, nameY, nameIsFull, textFont, textSize, textColor, textAnchor, textX, textY, resultFont, resultSize, resultColor, resultAnchor, resultX, resultY, flagEnable, flagHeight, flagX, flagY, avatarEnable, avatarWidth, avatarHeight, avatarX, avatarY):
         self.backgroundColor = backgroundColor
         self.introFile = introFile
         self.loopFile = loopFile
@@ -432,6 +441,7 @@ class Cards:
         self.nameAnchor = nameAnchor
         self.nameX = nameX
         self.nameY = nameY
+        self.nameIsFull = nameIsFull
         self.textFont = textFont
         self.textSize = textSize
         self.textColor = textColor
@@ -613,6 +623,15 @@ class Cards:
         nameAnchorYMenu.set(nameAnchorYVariable.get())
         nameAnchorYMenu['state'] = 'readonly'
         nameAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
+
+        self.layoutEndRow(textFrame, 10)
+
+        nameIsFullVariable = tk.BooleanVar()
+        nameIsFullLabel = tk.Label(textFrame, text='Use full name instead of abbreviated one')
+        nameIsFullLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        nameIsFullCheckbox = tk.Checkbutton(textFrame, text='', variable=nameIsFullVariable)
+        nameIsFullCheckbox.grid(column=2, row=self.currentRow, sticky='w')
+        nameIsFullVariable.set(self.nameIsFull)
 
         self.layoutEndRow(textFrame, 10)
         emptyFrames.append(tk.Frame(textFrame))
@@ -904,6 +923,7 @@ class Cards:
             nameFontVariable.get(), int(nameSizeVariable.get()), nameColorVariable.get(),
             getAnchor(nameAnchorXVariable.get(), nameAnchorYVariable.get()),
             int(nameXVariable.get()), int(nameYVariable.get()),
+            nameIsFullVariable.get(),
             textFontVariable.get(), int(textSizeVariable.get()), textColorVariable.get(),
             getAnchor(textAnchorXVariable.get(), textAnchorYVariable.get()),
             int(textXVariable.get()), int(textYVariable.get()),
@@ -930,7 +950,7 @@ class Cards:
         self.exampleAvatar = Image.getAvatar(self.avatarWidth, self.avatarHeight, 'local')
         exampleAvatarImage = exampleCanvas.create_image(self.avatarX, self.avatarY, image=self.exampleAvatar)
         exampleName = exampleCanvas.create_text(self.nameX, self.nameY, font=(self.nameFont, self.nameSize, self.nameModifiers), fill=self.nameColor,
-                                                text=f'Competitor name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
+                                                text=f'Competitor Name', anchor=self.nameAnchor, justify=getJustify(self.nameAnchor))
         exampleText = exampleCanvas.create_text(self.textX, self.textY, font=(self.textFont, self.textSize, self.textModifiers), fill=self.textColor,
                                                 text=f'Lorem ipsum\nDolor sit amet\nConsectetur adipiscing elit', anchor=self.textAnchor, justify=getJustify(self.textAnchor))
         exampleResult = exampleCanvas.create_text(self.resultX, self.resultY, font=(self.resultFont, self.resultSize, self.resultModifiers), fill=self.resultColor,
@@ -968,6 +988,7 @@ class Cards:
             exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
         nameYVariable.trace_add('write', lambda var, index, mode: exampleCanvas.coords(
             exampleName, cleverInt(nameXVariable.get()), cleverInt(nameYVariable.get())))
+        nameIsFullVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(exampleName, text='Competitor Name' if nameIsFullVariable.get() else 'C. Name'  ))
         textFontVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(
             exampleText, font=(textFontVariable.get(), textSizeVariable.get(), getModifiers(self.textBoldVariable.get(), self.textItalicVariable.get()))))
         textSizeVariable.trace_add('write', lambda var, index, mode: exampleCanvas.itemconfig(

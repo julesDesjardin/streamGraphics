@@ -1,4 +1,4 @@
-import interfaceUtils
+from . import interfaceUtils
 
 
 def getVenueName(wcif, venueId):

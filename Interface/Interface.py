@@ -6,12 +6,12 @@ import tkinter.filedialog
 from tkinter import ttk
 import json
 import urllib.request
-import Stage
-import WCIFParse
-import interfaceUtils
-import InterfaceFrame
-import PresentationInterface
-import dataWrite
+from . import Stage
+from . import WCIFParse
+from . import interfaceUtils
+from . import InterfaceFrame
+from . import PresentationInterface
+from . import dataWrite
 import threading
 
 import sys

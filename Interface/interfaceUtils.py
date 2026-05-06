@@ -1,5 +1,5 @@
 import tkinter as tk
-import WCIFParse
+from . import WCIFParse
 
 EVENTS = dict([
     ('3x3x3', '333'),

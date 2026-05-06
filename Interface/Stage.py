@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
-import WCIFParse
-import interfaceUtils
+from . import WCIFParse
+from . import interfaceUtils
 
 import sys
 import os

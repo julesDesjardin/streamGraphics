@@ -1,5 +1,5 @@
-import TimeTowerLine
-import TimeTowerContent
+from . import TimeTowerLine
+from . import TimeTowerContent
 from Common.commonUtils import cleverInt, setModifiersVariables, getModifiers, addCheckSettingsChanged, colorButtonCommand, SEPARATOR, REGION_OPTIONS, CURRENT_VERSION
 from Common import TelegramBot, Image
 import tkinter as tk
@@ -11,7 +11,7 @@ import json
 import queue
 import threading
 import time
-import timeTowerUtils
+from . import timeTowerUtils
 
 import sys
 import os

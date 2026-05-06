@@ -3,8 +3,8 @@ from Common.commonUtils import COUNTRIES
 import tkinter as tk
 from tkinter import ttk
 import json
-import timeTowerUtils
-import TimeTowerLine
+from . import timeTowerUtils
+from . import TimeTowerLine
 import threading
 import queue
 import time

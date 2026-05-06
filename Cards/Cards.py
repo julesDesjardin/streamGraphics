@@ -12,8 +12,8 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import cv2
 
-import cardsUtils
-import DragManager
+from . import cardsUtils
+from . import DragManager
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')

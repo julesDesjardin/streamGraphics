@@ -1,7 +1,7 @@
 from Common import Image
 import tkinter as tk
 from tkinter import ttk
-import timeTowerUtils
+from . import timeTowerUtils
 from urllib.request import urlopen
 
 

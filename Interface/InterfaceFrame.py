@@ -1,8 +1,8 @@
 import tkinter as tk
 import tkinter.messagebox
-import interfaceUtils
-import dataWrite
-import WCIFParse
+from . import interfaceUtils
+from . import dataWrite
+from . import WCIFParse
 from Common import TelegramBot
 
 

@@ -20,7 +20,7 @@ v1.0: (Used in 2024, no release)
 - Support a custom image instead of the WCA Avatar.
 
 
-v2.0: (to be released in May 2026)
+v2.0: (released in May 2026)
 - Support retrocompatibility: when loading a JSON from an earlier version, fill it with default values for new features.
 - Support local communication instead of Telegram for 1-PC use, and easier development.
 - Support any number of Cards, to adapt to all screen sizes/Card sizes.

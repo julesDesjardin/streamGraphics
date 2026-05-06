@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-import dataWrite
-import WCIFParse
-import interfaceUtils
+from . import dataWrite
+from . import WCIFParse
+from . import interfaceUtils
 
 import sys
 import os

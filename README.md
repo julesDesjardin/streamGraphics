@@ -11,7 +11,7 @@ This project has been successfully used in many WCA competitions. For more infor
 
 ### Previous versions/Release note
 
-v1.0:
+v1.0: (Used in 2024, no release)
 - Support 4 Cards in parallel.
 - Support animated background for opening a Card, loop it as background, and closing it.
 - Support time tower showing names with A. BCD, flag of the competitor and current average/best time.
@@ -19,18 +19,25 @@ v1.0:
 - Support a custom text to be used in presentation mode of Cards.
 - Support a custom image instead of the WCA Avatar.
 
-### Future versions
 
-v2.0: (In development)
+v2.0: (to be released in May 2026)
 - Support retrocompatibility: when loading a JSON from an earlier version, fill it with default values for new features.
 - Support local communication instead of Telegram for 1-PC use, and easier development.
 - Support any number of Cards, to adapt to all screen sizes/Card sizes.
 - Replace the Taiwan flag with the WCA "Chinese Taipei" flag.
 - Support both "A. BCD" and Full Name for the TimeTower.
 - Replace TimeTower line expansion with BPA and WPA when reaching solve 4.
-- Send results from TimeTower to Interface to show full results on Cards
-
-Remaining features planned for v2.0:
+- Send results from TimeTower to Interface to show full results on Cards.
 - Support new Blind Best Of 5 format.
+- Support both "Firstname Surname" and "F. Surname" name for Cards.
+
+### Future versions
+Ideas for v3.0 (planned for early 2027):
+- Remove unused buttons in the interface (especially "Update TimeTower", by detecting if it's a final round)
+- Add custom titles to "cameras" in the interface, to make it easier to use
+- Add the option to automatically click some people based on their seeding, useful for overheads in fixed Finals
+- Add the option to filter TimeTower expansion (only local competitors? Only topX? Only people who can podium?)
+- Support new WCA Live API
+- Support the successor of WCA Live
 
 Please contact me if you have ideas for new features!

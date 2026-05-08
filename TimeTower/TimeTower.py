@@ -589,14 +589,6 @@ class TimeTower:
         self.currentRow = 0
         emptyFrames = []
 
-        sizeLabel = tk.Label(sizeFrame, text='Customize the tower size')
-        sizeLabel.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(sizeFrame, 10)
-        emptyFrames.append(tk.Frame(sizeFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(sizeFrame, 30)
-
         widthRankingLabel = tk.Label(sizeFrame, text='Ranking width:')
         widthRankingLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthRankingVariable = tk.StringVar()
@@ -748,14 +740,6 @@ class TimeTower:
 
         fonts = list(font.families())
         fonts.sort()
-
-        fontLabel = tk.Label(fontFrame, text='Customize the tower fonts')
-        fontLabel.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(fontFrame, 10)
-        emptyFrames.append(tk.Frame(fontFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(fontFrame, 30)
 
         fontFamilyLabel = tk.Label(fontFrame, text='Font:')
         fontFamilyLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -953,14 +937,6 @@ class TimeTower:
         self.currentRow = 0
         emptyFrames = []
 
-        colorLabel = tk.Label(colorFrame, text='Customize the colors')
-        colorLabel.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(colorFrame, 10)
-        emptyFrames.append(tk.Frame(colorFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(colorFrame, 30)
-
         backgroundColorLabel = tk.Label(
             colorFrame, text='TimeTower background:\n(You can use a color like blue, green or magenta to remove it in your final layout)')
         backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow)
@@ -1107,14 +1083,6 @@ class TimeTower:
         self.currentRow = 0
         emptyFrames = []
 
-        animationLabel = tk.Label(animationFrame, text='Customize the animation parameters')
-        animationLabel.grid(column=0, columnspan=2, row=self.currentRow)
-
-        self.layoutEndRow(animationFrame, 10)
-        emptyFrames.append(tk.Frame(animationFrame))
-        emptyFrames[-1].grid(column=0, columnspan=2, row=self.currentRow)
-        self.layoutEndRow(animationFrame, 30)
-
         durationXLabel = tk.Label(animationFrame, text='Duration of expansion/reduction of a focused line (in milliseconds)')
         durationXLabel.grid(column=0, row=self.currentRow, sticky='e')
         durationXVariable = tk.StringVar()
@@ -1172,7 +1140,7 @@ class TimeTower:
             cleverInt(maxNumberVariable.get()),
             cleverInt(durationXVariable.get()), cleverInt(durationYVariable.get()), cleverInt(FPSVariable.get()),
             layoutWindow))
-        OKButton.pack(pady=30)
+        OKButton.pack(pady=10)
 
         self.createExampleLines(layoutWindow)
 

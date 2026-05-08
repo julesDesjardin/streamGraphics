@@ -505,142 +505,172 @@ class Cards:
         layoutNotebook = ttk.Notebook(layoutWindow)
         layoutNotebook.pack(pady=5)
 
-        # Name, text, results
-
-        textFrame = tk.Frame(layoutNotebook)
-        layoutNotebook.add(textFrame, text='Texts')
-        textFrame.columnconfigure(0, weight=1)
-        textFrame.columnconfigure(1, weight=1)
-        textFrame.columnconfigure(2, weight=1)
-        textFrame.columnconfigure(3, weight=1)
-        self.currentRow = 0
-        emptyFrames = []
-
         fonts = list(font.families())
         fonts.sort()
 
-        layoutLabel = tk.Label(textFrame, text='Customize the cards layout')
-        layoutLabel.grid(column=0, columnspan=4, row=self.currentRow)
+        # Background
 
-        self.layoutEndRow(textFrame, 10)
-        emptyFrames.append(tk.Frame(textFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 30)
+        backgroundFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(backgroundFrame, text='Background')
+        backgroundFrame.columnconfigure(0, weight=1)
+        backgroundFrame.columnconfigure(1, weight=1)
+        backgroundFrame.columnconfigure(2, weight=1)
+        backgroundFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
 
-        widthLabel = tk.Label(textFrame, text='Card width')
+        widthLabel = tk.Label(backgroundFrame, text='Card width')
         widthLabel.grid(column=0, row=self.currentRow, sticky='e')
         widthVariable = tk.StringVar()
-        widthSpinbox = tk.Spinbox(textFrame, width=20, from_=0, to=2000, textvariable=widthVariable)
+        widthSpinbox = tk.Spinbox(backgroundFrame, width=20, from_=0, to=2000, textvariable=widthVariable)
         widthSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         widthVariable.set(f'{self.width}')
 
-        heightLabel = tk.Label(textFrame, text='Card height')
+        heightLabel = tk.Label(backgroundFrame, text='Card height')
         heightLabel.grid(column=2, row=self.currentRow, sticky='e')
         heightVariable = tk.StringVar()
-        heightSpinbox = tk.Spinbox(textFrame, width=20, from_=0, to=2000, textvariable=heightVariable)
+        heightSpinbox = tk.Spinbox(backgroundFrame, width=20, from_=0, to=2000, textvariable=heightVariable)
         heightSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         heightVariable.set(f'{self.height}')
 
-        self.layoutEndRow(textFrame, 10)
-        emptyFrames.append(tk.Frame(textFrame))
+        self.layoutEndRow(backgroundFrame, 10)
+        emptyFrames.append(tk.Frame(backgroundFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 30)
+        self.layoutEndRow(backgroundFrame, 30)
 
-        nameLabel = tk.Label(textFrame, text='Name:')
-        nameLabel.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 10)
+        introFileVariable = tk.StringVar()
+        loopFileVariable = tk.StringVar()
+        outroFileVariable = tk.StringVar()
+        introFileVariable.set(self.introFile)
+        loopFileVariable.set(self.loopFile)
+        outroFileVariable.set(self.outroFile)
+        backgroundButton = tk.Button(backgroundFrame, text='Update background image/video',
+                                     command=lambda: self.updateBackground(backgroundFrame, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable, outroFileVariable))
+        backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
 
-        nameFontLabel = tk.Label(textFrame, text='Name Font')
+        self.layoutEndRow(backgroundFrame, 10)
+
+        backgroundColorLabel = tk.Label(backgroundFrame, text='Background color:')
+        backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
+        backgroundColorVariable = tk.StringVar()
+        backgroundColorVariable.set(self.backgroundColor)
+        backgroundColorButtonFrame = tk.Frame(backgroundFrame, highlightbackground='black', highlightthickness=1)
+        backgroundColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
+        backgroundColorButton = tk.Button(backgroundColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
+        backgroundColorButton.configure(command=lambda: colorButtonCommand(backgroundColorButton, backgroundColorVariable, 'Background color'))
+        backgroundColorButton.pack()
+
+        self.layoutEndRow(backgroundFrame, 10)
+
+        # Name
+
+        nameFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(nameFrame, text='Name')
+        nameFrame.columnconfigure(0, weight=1)
+        nameFrame.columnconfigure(1, weight=1)
+        nameFrame.columnconfigure(2, weight=1)
+        nameFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
+
+        nameFontLabel = tk.Label(nameFrame, text='Name Font')
         nameFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameFontVariable = tk.StringVar()
-        nameFontMenu = ttk.Combobox(textFrame, textvariable=nameFontVariable)
+        nameFontMenu = ttk.Combobox(nameFrame, textvariable=nameFontVariable)
         nameFontMenu['values'] = fonts
         nameFontVariable.set(self.nameFont)
         nameFontMenu.set(self.nameFont)
         nameFontMenu['state'] = 'readonly'
         nameFontMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        nameSizeLabel = tk.Label(textFrame, text='Name font size')
+        nameSizeLabel = tk.Label(nameFrame, text='Name font size')
         nameSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
         nameSizeVariable = tk.StringVar()
-        nameSizeSpinbox = tk.Spinbox(textFrame, from_=0, to=500, textvariable=nameSizeVariable)
+        nameSizeSpinbox = tk.Spinbox(nameFrame, from_=0, to=500, textvariable=nameSizeVariable)
         nameSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         nameSizeVariable.set(f'{self.nameSize}')
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(nameFrame, 10)
 
         self.nameBoldVariable = tk.BooleanVar()
-        nameBoldCheckbox = tk.Checkbutton(textFrame, text='Bold', variable=self.nameBoldVariable)
+        nameBoldCheckbox = tk.Checkbutton(nameFrame, text='Bold', variable=self.nameBoldVariable)
         nameBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         self.nameItalicVariable = tk.BooleanVar()
-        nameItalicCheckbox = tk.Checkbutton(textFrame, text='Italic', variable=self.nameItalicVariable)
+        nameItalicCheckbox = tk.Checkbutton(nameFrame, text='Italic', variable=self.nameItalicVariable)
         nameItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         setModifiersVariables(self.nameModifiers, self.nameBoldVariable, self.nameItalicVariable)
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(nameFrame, 10)
 
-        nameColorLabel = tk.Label(textFrame, text='Name color:')
+        nameColorLabel = tk.Label(nameFrame, text='Name color:')
         nameColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         nameColorVariable = tk.StringVar()
         nameColorVariable.set(self.nameColor)
-        nameColorButtonFrame = tk.Frame(textFrame, highlightbackground='black', highlightthickness=1)
+        nameColorButtonFrame = tk.Frame(nameFrame, highlightbackground='black', highlightthickness=1)
         nameColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         nameColorButton = tk.Button(nameColorButtonFrame, text='', background=self.nameColor, relief=tk.FLAT, width=10)
         nameColorButton.configure(command=lambda: colorButtonCommand(nameColorButton, nameColorVariable, 'Name color'))
         nameColorButton.pack()
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(nameFrame, 10)
 
-        nameXLabel = tk.Label(textFrame, text='Name position X')
+        nameXLabel = tk.Label(nameFrame, text='Name position X')
         nameXLabel.grid(column=0, row=self.currentRow, sticky='e')
         nameXVariable = tk.StringVar()
-        nameXSpinbox = tk.Spinbox(textFrame, from_=0, to=self.width, textvariable=nameXVariable)
+        nameXSpinbox = tk.Spinbox(nameFrame, from_=0, to=self.width, textvariable=nameXVariable)
         nameXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         nameXVariable.set(f'{self.nameX}')
 
-        nameYLabel = tk.Label(textFrame, text='Name position Y')
+        nameYLabel = tk.Label(nameFrame, text='Name position Y')
         nameYLabel.grid(column=2, row=self.currentRow, sticky='e')
         nameYVariable = tk.StringVar()
-        nameYSpinbox = tk.Spinbox(textFrame, from_=0, to=self.height, textvariable=nameYVariable)
+        nameYSpinbox = tk.Spinbox(nameFrame, from_=0, to=self.height, textvariable=nameYVariable)
         nameYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         nameYVariable.set(f'{self.nameY}')
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(nameFrame, 10)
 
         nameAnchorXVariable = tk.StringVar()
         nameAnchorYVariable = tk.StringVar()
         setAnchorVariables(self.nameAnchor, nameAnchorXVariable, nameAnchorYVariable)
-        nameAnchorXLabel = tk.Label(textFrame, text='Horizontal alignment')
+        nameAnchorXLabel = tk.Label(nameFrame, text='Horizontal alignment')
         nameAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
-        nameAnchorXMenu = ttk.Combobox(textFrame, textvariable=nameAnchorXVariable, values=['Left', 'Center', 'Right'])
+        nameAnchorXMenu = ttk.Combobox(nameFrame, textvariable=nameAnchorXVariable, values=['Left', 'Center', 'Right'])
         nameAnchorXMenu.set(nameAnchorXVariable.get())
         nameAnchorXMenu['state'] = 'readonly'
         nameAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        nameAnchorYLabel = tk.Label(textFrame, text='Vertical alignment')
+        nameAnchorYLabel = tk.Label(nameFrame, text='Vertical alignment')
         nameAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
-        nameAnchorYMenu = ttk.Combobox(textFrame, textvariable=nameAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        nameAnchorYMenu = ttk.Combobox(nameFrame, textvariable=nameAnchorYVariable, values=['Top', 'Center', 'Bottom'])
         nameAnchorYMenu.set(nameAnchorYVariable.get())
         nameAnchorYMenu['state'] = 'readonly'
         nameAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(nameFrame, 10)
 
         nameIsFullVariable = tk.BooleanVar()
-        nameIsFullLabel = tk.Label(textFrame, text='Use full name instead of abbreviated one')
+        nameIsFullLabel = tk.Label(nameFrame, text='Use full name instead of abbreviated one')
         nameIsFullLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
-        nameIsFullCheckbox = tk.Checkbutton(textFrame, text='', variable=nameIsFullVariable)
+        nameIsFullCheckbox = tk.Checkbutton(nameFrame, text='', variable=nameIsFullVariable)
         nameIsFullCheckbox.grid(column=2, row=self.currentRow, sticky='w')
         nameIsFullVariable.set(self.nameIsFull)
 
-        self.layoutEndRow(textFrame, 10)
-        emptyFrames.append(tk.Frame(textFrame))
+        self.layoutEndRow(nameFrame, 10)
+        emptyFrames.append(tk.Frame(nameFrame))
         emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 30)
+        self.layoutEndRow(nameFrame, 30)
 
-        textLabel = tk.Label(textFrame, text='Text:')
-        textLabel.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 10)
+        # Text
+
+        textFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(textFrame, text='Text')
+        textFrame.columnconfigure(0, weight=1)
+        textFrame.columnconfigure(1, weight=1)
+        textFrame.columnconfigure(2, weight=1)
+        textFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
 
         textFontLabel = tk.Label(textFrame, text='Text Font')
         textFontLabel.grid(column=0, row=self.currentRow, sticky='e')
@@ -716,85 +746,87 @@ class Cards:
         textAnchorYMenu['state'] = 'readonly'
         textAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
 
-        self.layoutEndRow(textFrame, 10)
-        emptyFrames.append(tk.Frame(textFrame))
-        emptyFrames[-1].grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 30)
+        # Text
 
-        resultLabel = tk.Label(textFrame, text='Results:')
-        resultLabel.grid(column=0, columnspan=4, row=self.currentRow)
-        self.layoutEndRow(textFrame, 10)
+        resultFrame = tk.Frame(layoutNotebook)
+        layoutNotebook.add(resultFrame, text='Results')
+        resultFrame.columnconfigure(0, weight=1)
+        resultFrame.columnconfigure(1, weight=1)
+        resultFrame.columnconfigure(2, weight=1)
+        resultFrame.columnconfigure(3, weight=1)
+        self.currentRow = 0
+        emptyFrames = []
 
-        resultFontLabel = tk.Label(textFrame, text='Results Font')
+        resultFontLabel = tk.Label(resultFrame, text='Results Font')
         resultFontLabel.grid(column=0, row=self.currentRow, sticky='e')
         resultFontVariable = tk.StringVar()
-        resultFontMenu = ttk.Combobox(textFrame, textvariable=resultFontVariable)
+        resultFontMenu = ttk.Combobox(resultFrame, textvariable=resultFontVariable)
         resultFontMenu['values'] = fonts
         resultFontVariable.set(self.resultFont)
         resultFontMenu.set(self.resultFont)
         resultFontMenu['state'] = 'readonly'
         resultFontMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        resultSizeLabel = tk.Label(textFrame, text='Results font size')
+        resultSizeLabel = tk.Label(resultFrame, text='Results font size')
         resultSizeLabel.grid(column=2, row=self.currentRow, sticky='e')
         resultSizeVariable = tk.StringVar()
-        resultSizeSpinbox = tk.Spinbox(textFrame, from_=0, to=500, textvariable=resultSizeVariable)
+        resultSizeSpinbox = tk.Spinbox(resultFrame, from_=0, to=500, textvariable=resultSizeVariable)
         resultSizeSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         resultSizeVariable.set(f'{self.resultSize}')
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(resultFrame, 10)
 
         self.resultBoldVariable = tk.BooleanVar()
-        resultBoldCheckbox = tk.Checkbutton(textFrame, text='Bold', variable=self.resultBoldVariable)
+        resultBoldCheckbox = tk.Checkbutton(resultFrame, text='Bold', variable=self.resultBoldVariable)
         resultBoldCheckbox.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         self.resultItalicVariable = tk.BooleanVar()
-        resultItalicCheckbox = tk.Checkbutton(textFrame, text='Italic', variable=self.resultItalicVariable)
+        resultItalicCheckbox = tk.Checkbutton(resultFrame, text='Italic', variable=self.resultItalicVariable)
         resultItalicCheckbox.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         setModifiersVariables(self.resultModifiers, self.resultBoldVariable, self.resultItalicVariable)
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(resultFrame, 10)
 
-        resultColorLabel = tk.Label(textFrame, text='Results color:')
+        resultColorLabel = tk.Label(resultFrame, text='Results color:')
         resultColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
         resultColorVariable = tk.StringVar()
         resultColorVariable.set(self.resultColor)
-        resultColorButtonFrame = tk.Frame(textFrame, highlightbackground='black', highlightthickness=1)
+        resultColorButtonFrame = tk.Frame(resultFrame, highlightbackground='black', highlightthickness=1)
         resultColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
         resultColorButton = tk.Button(resultColorButtonFrame, text='', background=self.resultColor, relief=tk.FLAT, width=10)
         resultColorButton.configure(command=lambda: colorButtonCommand(resultColorButton, resultColorVariable, 'Results color'))
         resultColorButton.pack()
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(resultFrame, 10)
 
-        resultXLabel = tk.Label(textFrame, text='Results position X')
+        resultXLabel = tk.Label(resultFrame, text='Results position X')
         resultXLabel.grid(column=0, row=self.currentRow, sticky='e')
         resultXVariable = tk.StringVar()
-        resultXSpinbox = tk.Spinbox(textFrame, from_=0, to=self.width, textvariable=resultXVariable)
+        resultXSpinbox = tk.Spinbox(resultFrame, from_=0, to=self.width, textvariable=resultXVariable)
         resultXSpinbox.grid(column=1, row=self.currentRow, sticky='w')
         resultXVariable.set(f'{self.resultX}')
 
-        resultYLabel = tk.Label(textFrame, text='Results position Y')
+        resultYLabel = tk.Label(resultFrame, text='Results position Y')
         resultYLabel.grid(column=2, row=self.currentRow, sticky='e')
         resultYVariable = tk.StringVar()
-        resultYSpinbox = tk.Spinbox(textFrame, from_=0, to=self.height, textvariable=resultYVariable)
+        resultYSpinbox = tk.Spinbox(resultFrame, from_=0, to=self.height, textvariable=resultYVariable)
         resultYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         resultYVariable.set(f'{self.resultY}')
 
-        self.layoutEndRow(textFrame, 10)
+        self.layoutEndRow(resultFrame, 10)
 
         resultAnchorXVariable = tk.StringVar()
         resultAnchorYVariable = tk.StringVar()
         setAnchorVariables(self.resultAnchor, resultAnchorXVariable, resultAnchorYVariable)
-        resultAnchorXLabel = tk.Label(textFrame, text='Horizontal alignment')
+        resultAnchorXLabel = tk.Label(resultFrame, text='Horizontal alignment')
         resultAnchorXLabel.grid(column=0, row=self.currentRow, sticky='e')
-        resultAnchorXMenu = ttk.Combobox(textFrame, textvariable=resultAnchorXVariable, values=['Left', 'Center', 'Right'])
+        resultAnchorXMenu = ttk.Combobox(resultFrame, textvariable=resultAnchorXVariable, values=['Left', 'Center', 'Right'])
         resultAnchorXMenu.set(resultAnchorXVariable.get())
         resultAnchorXMenu['state'] = 'readonly'
         resultAnchorXMenu.grid(column=1, row=self.currentRow, sticky='w')
 
-        resultAnchorYLabel = tk.Label(textFrame, text='Vertical alignment')
+        resultAnchorYLabel = tk.Label(resultFrame, text='Vertical alignment')
         resultAnchorYLabel.grid(column=2, row=self.currentRow, sticky='e')
-        resultAnchorYMenu = ttk.Combobox(textFrame, textvariable=resultAnchorYVariable, values=['Top', 'Center', 'Bottom'])
+        resultAnchorYMenu = ttk.Combobox(resultFrame, textvariable=resultAnchorYVariable, values=['Top', 'Center', 'Bottom'])
         resultAnchorYMenu.set(resultAnchorYVariable.get())
         resultAnchorYMenu['state'] = 'readonly'
         resultAnchorYMenu.grid(column=3, row=self.currentRow, sticky='w')
@@ -881,41 +913,6 @@ class Cards:
         avatarYSpinbox = tk.Spinbox(imageFrame, from_=0, to=self.height, textvariable=avatarYVariable)
         avatarYSpinbox.grid(column=3, row=self.currentRow, sticky='w')
         avatarYVariable.set(f'{self.avatarY}')
-
-        # Background
-
-        backgroundFrame = tk.Frame(layoutNotebook)
-        layoutNotebook.add(backgroundFrame, text='Background')
-        backgroundFrame.columnconfigure(0, weight=1)
-        backgroundFrame.columnconfigure(1, weight=1)
-        backgroundFrame.columnconfigure(2, weight=1)
-        backgroundFrame.columnconfigure(3, weight=1)
-        self.currentRow = 0
-        emptyFrames = []
-
-        introFileVariable = tk.StringVar()
-        loopFileVariable = tk.StringVar()
-        outroFileVariable = tk.StringVar()
-        introFileVariable.set(self.introFile)
-        loopFileVariable.set(self.loopFile)
-        outroFileVariable.set(self.outroFile)
-        backgroundButton = tk.Button(backgroundFrame, text='Update background image/video',
-                                     command=lambda: self.updateBackground(backgroundFrame, exampleCanvas, exampleBackground, widthVariable, heightVariable, introFileVariable, loopFileVariable, outroFileVariable))
-        backgroundButton.grid(column=0, row=self.currentRow, columnspan=4)
-
-        self.layoutEndRow(backgroundFrame, 10)
-
-        backgroundColorLabel = tk.Label(backgroundFrame, text='Background color:')
-        backgroundColorLabel.grid(column=0, columnspan=2, row=self.currentRow, sticky='e')
-        backgroundColorVariable = tk.StringVar()
-        backgroundColorVariable.set(self.backgroundColor)
-        backgroundColorButtonFrame = tk.Frame(backgroundFrame, highlightbackground='black', highlightthickness=1)
-        backgroundColorButtonFrame.grid(column=2, columnspan=2, row=self.currentRow, sticky='w')
-        backgroundColorButton = tk.Button(backgroundColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
-        backgroundColorButton.configure(command=lambda: colorButtonCommand(backgroundColorButton, backgroundColorVariable, 'Background color'))
-        backgroundColorButton.pack()
-
-        self.layoutEndRow(backgroundFrame, 10)
 
         OKButton = tk.Button(layoutWindow, text='OK', command=lambda: self.updateLayoutCloseButton(
             layoutWindow, backgroundColorVariable.get(), introFileVariable.get(), loopFileVariable.get(), outroFileVariable.get(),

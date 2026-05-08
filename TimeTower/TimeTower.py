@@ -199,6 +199,7 @@ class TimeTower:
             'colorForeignerResult': self.colorForeignerResult,
             'durationX': self.durationX,
             'durationY': self.durationY,
+            'maxNumber': self.maxNumber,
             'FPS': self.FPS,
             'botToken': self.botToken,
             'botChannelId': self.botChannelId
@@ -224,6 +225,7 @@ class TimeTower:
                 loadSettingsJson['widthBPAWPASeparator'] = timeTowerUtils.DEFAULT_WIDTH_BPAWPA_SEPARATOR
                 loadSettingsJson['BPAWPASize'] = timeTowerUtils.DEFAULT_FONT_SIZE_SMALL
                 loadSettingsJson['BPAWPAModifiers'] = 'italic'
+                loadSettingsJson['maxNumber'] = timeTowerUtils.DEFAULT_MAX_NUMBER
             self.compId = loadSettingsJson['compId']
             self.delay = loadSettingsJson['delay']
             self.region = loadSettingsJson['region']
@@ -262,6 +264,7 @@ class TimeTower:
             self.colorForeignerResult = loadSettingsJson['colorForeignerResult']
             self.durationX = loadSettingsJson['durationX']
             self.durationY = loadSettingsJson['durationY']
+            self.maxNumber = loadSettingsJson['maxNumber']
             self.FPS = loadSettingsJson['FPS']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']

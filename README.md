@@ -30,6 +30,7 @@ v2.0: (released in May 2026)
 - Send results from TimeTower to Interface to show full results on Cards.
 - Support new Blind Best Of 5 format.
 - Support both "Firstname Surname" and "F. Surname" name for Cards.
+- Fixed maximum number of lines not being saved/loaded in TimeTower.
 
 ### Future versions
 Ideas for v3.0 (planned for early 2027):

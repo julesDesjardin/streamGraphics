@@ -173,7 +173,7 @@ class Cards:
         country = messageArray[1]
         fullName = messageArray[2].split('(')[0].strip()
         fullNameSplit = fullName.split(' ')
-        if self.nameIsFull:
+        if self.nameIsFull or fullName == '':
             name = fullName
         else:
             name = (fullNameSplit[0][0] + '. ' + ' '.join(fullNameSplit[1:]))

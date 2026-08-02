@@ -1,3 +1,4 @@
+from Common.commonUtils import colorButtonCommand, getTextColorFromBackground
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
@@ -7,7 +8,6 @@ from . import interfaceUtils
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
-from Common.commonUtils import colorButtonCommand, getTextColorFromBackground
 
 
 class Stage:

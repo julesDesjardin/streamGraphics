@@ -5,12 +5,14 @@ import tkinter.messagebox
 import tkinter.filedialog
 from tkinter import ttk
 import json
+import queue
 import urllib.request
 from . import Stage
 from . import WCIFParse
 from . import interfaceUtils
 from . import InterfaceFrame
 from . import PresentationInterface
+from . import FlaskServer
 from . import dataWrite
 import threading
 
@@ -54,6 +56,12 @@ class Interface:
         self.botToken = ''
         self.botChannelId = ''
         self.bot = None
+        self.flaskPort = interfaceUtils.FLASK_PORT
+        self.flaskQueueGroupsInput = queue.Queue()
+        self.flaskQueueGroupsOutput = queue.Queue()
+        self.flaskQueueButtons = queue.Queue()
+        self.flaskActive = False
+        self.flaskServer = None
         self.settingsChanged = tk.BooleanVar()
         self.settingsChanged.set(False)
         addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Interface')
@@ -76,7 +84,6 @@ class Interface:
 
     def botCallback(self, message):
         [id, results] = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
-        print(f'{id}, {results}')
         for i in range(self.cameraCount):
             camera = self.interfaceFrames[i]
             if id in camera.fullResults:
@@ -106,7 +113,9 @@ class Interface:
             'customTexts': self.customTexts,
             'customImages': self.customImages,
             'botToken': self.botToken,
-            'botChannelId': self.botChannelId
+            'botChannelId': self.botChannelId,
+            'flaskPort': self.flaskPort,
+            'flaskActive': self.flaskActive
         }
         saveFile.write(json.dumps(saveSettingsJson, indent=4))
         self.settingsChanged.set(False)
@@ -126,6 +135,9 @@ class Interface:
                 loadSettingsJson['version'] = 10
             # Retrocompat
             version = loadSettingsJson['version']
+            if version < 30:
+                loadSettingsJson['flaskPort'] = interfaceUtils.FLASK_PORT
+                loadSettingsJson['flaskActive'] = False
             if version < 20:
                 loadSettingsJson['cameraCols'] = interfaceUtils.CAMERAS_COLS
                 loadSettingsJson['cameraRows'] = interfaceUtils.CAMERAS_ROWS
@@ -156,6 +168,8 @@ class Interface:
             self.customImages = loadSettingsJson['customImages']
             self.botToken = loadSettingsJson['botToken']
             self.botChannelId = loadSettingsJson['botChannelId']
+            self.flaskPort = loadSettingsJson['flaskPort']
+            self.flaskActive = loadSettingsJson['flaskActive']
         except:
             tkinter.messagebox.showerror(title='Settings Error !',
                                          message='Error in the Settings file, please make sure you selected the correct file and try to load again')
@@ -175,6 +189,17 @@ class Interface:
         except:
             tkinter.messagebox.showerror(
                 title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
+            return
+
+        try:
+            if self.flaskServer is None and self.flaskActive:
+                self.flaskServer = FlaskServer.FlaskServer(self.flaskPort, self.flaskQueueGroupsInput,
+                                                           self.flaskQueueGroupsOutput, self.flaskQueueButtons)
+                self.flaskServer.start()
+                self.processQueues()
+        except:
+            tkinter.messagebox.showerror(
+                title='Flask Error !', message='Flask Server Error ! Please make sure the Settings are correct')
             return
 
         self.reloadInterfaceFrames()
@@ -510,6 +535,40 @@ This supports the following characters to be replaced by the appropriate value:
                                         command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
         telegramCloseButton.pack(pady=20)
 
+    def updateFlaskSettingsCloseButton(self, port, active, window):
+        self.flaskPort = port
+        self.flaskActive = active
+        if self.flaskActive:
+            try:
+                if self.flaskServer is None:
+                    self.flaskServer = FlaskServer.FlaskServer(port, self.flaskQueueGroupsInput, self.flaskQueueGroupsOutput, self.flaskQueueButtons)
+                    self.flaskServer.start()
+                    self.processQueues()
+            except:
+                tkinter.messagebox.showerror(
+                    title='Flask Error !', message='Flask Server Error ! Please make sure the Settings are correct')
+            else:
+                self.reloadInterfaceFrames()
+                window.destroy()
+                self.settingsChanged.set(True)
+
+    def updateFlaskSettings(self):
+        flaskWindow = tk.Toplevel(self.root)
+        flaskWindow.grab_set()
+        flaskLabel = tk.Label(flaskWindow, text='Please enter Flask settings')
+        flaskLabel.pack(pady=20)
+        portLabel = tk.Label(flaskWindow, text='Flask port')
+        portLabel.pack(pady=5)
+        portEntry = tk.Entry(flaskWindow, width=50)
+        portEntry.insert(0, self.flaskPort)
+        portEntry.pack(pady=5)
+        activeVar = tk.IntVar()
+        activeButton = tk.Checkbutton(flaskWindow, text='Use Flask Server', variable=activeVar)
+        activeButton.pack(pady=5)
+        flaskCloseButton = tk.Button(flaskWindow, text='Save Flask Settings',
+                                     command=lambda: self.updateFlaskSettingsCloseButton(portEntry.get(), activeVar.get(), flaskWindow))
+        flaskCloseButton.pack(pady=20)
+
     def updateCubers(self):
         index = 0
         fullCompetitors = []
@@ -695,10 +754,12 @@ This supports the following characters to be replaced by the appropriate value:
         cardTextButton.grid(column=0, row=9)
         telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
         telegramButton.grid(column=0, row=10)
+        flaskButton = tk.Button(frame, text='Change Flask Settings (advanced)', command=self.updateFlaskSettings)
+        flaskButton.grid(column=0, row=11)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=11)
-        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
         saveButton.grid(column=0, row=12)
+        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
+        saveButton.grid(column=0, row=13)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -714,3 +775,64 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(10, pad=20)
         frame.rowconfigure(11, pad=20)
         frame.rowconfigure(12, pad=20)
+        frame.rowconfigure(13, pad=20)
+
+    def processQueues(self):
+        while not self.flaskQueueGroupsInput.empty():
+            stagesInput = self.flaskQueueGroupsInput.get()
+            print(stagesInput)
+            requestedStages = dict()
+            for stage in self.stages:
+                requestedStages[f'{stage.venue},{stage.room}'] = None
+
+            for stageToInput in stagesInput:
+                (venue, room, event, round, group) = stageToInput
+                if f'{venue},{room}' in requestedStages:
+                    requestedStages[f'{venue},{room}'] = (event, round, group)
+
+            print(requestedStages)
+            for stage in self.stages:
+                if requestedStages[f'{stage.venue},{stage.room}'] is None and stage.stageEnabled:
+                    stage.disableButton.invoke()
+                elif requestedStages[f'{stage.venue},{stage.room}'] is not None:
+                    if not stage.stageEnabled:
+                        stage.disableButton.invoke()
+                    (event, round, group) = requestedStages[f'{stage.venue},{stage.room}']
+                    if event not in interfaceUtils.EVENTS.values():
+                        stage.disableButton.invoke()
+                    else:
+                        for eventKey in interfaceUtils.EVENTS:
+                            if interfaceUtils.EVENTS[eventKey] == event:
+                                stage.eventVar.set(eventKey)
+                                break
+
+                        validRounds = [stage.roundMenu["menu"].entrycget(i, "label") for i in range(stage.roundMenu["menu"].index("end") + 1)]
+                        if round not in validRounds:
+                            stage.disableButton.invoke()
+                        else:
+                            stage.roundVar.set(round)
+                            validGroups = [stage.groupMenu["menu"].entrycget(i, "label") for i in range(stage.groupMenu["menu"].index("end") + 1)]
+
+                            if group not in validGroups:
+                                stage.disableButton.invoke()
+                            else:
+                                stage.groupVar.set(group)
+
+                                self.OKButton.invoke()
+
+            result = []
+            for button in self.interfaceFrames[0].buttons:
+                result.append((button['text'].split('\n')[0], button['bg']))  # Split the text to remove the extra text
+            self.flaskQueueGroupsOutput.put(result)
+
+        while not self.flaskQueueButtons.empty():
+            payload = self.flaskQueueButtons.get()
+            camera = payload['camera']
+            buttonId = payload['buttonId']
+            if camera < len(self.interfaceFrames) and buttonId < len(self.interfaceFrames[camera].buttons):
+                if (self.interfaceFrames[camera].buttonsActive[buttonId]):
+                    self.interfaceFrames[camera].buttons[buttonId].invoke()
+                else:
+                    self.interfaceFrames[camera].cleanButton.invoke()
+
+        self.root.after(100, self.processQueues)

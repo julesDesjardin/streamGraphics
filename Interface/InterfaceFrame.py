@@ -45,6 +45,7 @@ class InterfaceFrame:
 
         self.buttonFrames = []
         self.buttons = []
+        self.buttonsActive = []
         for button in range(0, self.buttonCols + 2):
             self.frame.columnconfigure(button, pad=interfaceUtils.BUTTON_PADX)
         for button in range(0, self.buttonRows):
@@ -54,6 +55,7 @@ class InterfaceFrame:
             self.buttonFrames.append(tk.Frame(self.frame, highlightthickness=interfaceUtils.BUTTON_THICKNESS))
             self.buttons.append(tk.Button(self.buttonFrames[-1], image=self.emptyPixel,
                                 compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
+            self.buttonsActive.append(False)
             self.buttons[-1].pack()
 
     def buttonCommand(self, buttonIndex, country, name, avatar, cardText, competitorId):
@@ -65,8 +67,6 @@ class InterfaceFrame:
                 self.buttonFrames[index].configure(highlightbackground='white')
                 self.buttons[index].configure(relief=tk.RAISED)
         dataWrite.sendCardData(self.bot, self.index, country, name.split('(')[0].strip(), avatar, cardText, False)
-        print(f'Competitor ID : {competitorId}')
-        print(self.fullResults)
         idString = f'{WCIFParse.getRegistrantId(self.wcif, competitorId)}'
         if idString in self.fullResults:
             dataWrite.sendCardResults(self.bot, self.index, self.fullResults[idString])
@@ -75,6 +75,7 @@ class InterfaceFrame:
     def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
         if not visible:
             self.buttonFrames[buttonIndex].grid_forget()
+            self.buttonsActive[buttonIndex] = False
         else:
             if int(round) > 1:
                 previousRound = int(round) - 1
@@ -96,6 +97,7 @@ class InterfaceFrame:
             self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
                 buttonIndex, WCIFParse.getCountry(self.wcif, id), name, avatar, cardTextReplaced, id))
             self.buttonFrames[buttonIndex].grid(row=row, column=column)
+            self.buttonsActive[buttonIndex] = True
 
     def showFrame(self):
         self.frame.grid(column=self.x, row=self.y)

@@ -1,0 +1,64 @@
+import flask
+import threading
+
+
+class FlaskServer:
+    def __init__(self, port, queueGroupsInput, queueGroupsOutput, queueButtons):
+        self.port = port
+        self.queueGroupsInput = queueGroupsInput
+        self.queueGroupsOutput = queueGroupsOutput
+        self.queueButtons = queueButtons
+        self.app = flask.Flask(__name__)
+
+        self.app.add_url_rule(
+            "/groups",
+            "groups",
+            self.groupsCallback,
+            methods=["GET"],
+        )
+
+        self.app.add_url_rule(
+            "/button",
+            "button",
+            self.buttonCallback,
+            methods=["GET", "POST"],
+        )
+
+    def start(self):
+        thread = threading.Thread(target=self.run, daemon=True)
+        thread.start()
+
+    def run(self):
+        self.app.run(
+            port=self.port
+        )
+
+    def groupsCallback(self):
+        venues = flask.request.args.getlist("venue")
+        rooms = flask.request.args.getlist("room")
+        events = flask.request.args.getlist("event")
+        rounds = flask.request.args.getlist("round")
+        groups = flask.request.args.getlist("group")
+
+        data = []
+        for i in range(min(len(venues), len(rooms), len(events), len(rounds), len(groups))):
+            data.append((venues[i], rooms[i], events[i], rounds[i], groups[i]))
+
+        self.queueGroupsInput.put(data)
+        while self.queueGroupsOutput.empty():
+            pass
+
+        result = self.queueGroupsOutput.get()
+        return flask.jsonify({"status": "ok", "result": result})
+
+    def buttonCallback(self):
+        # payload = flask.request.get_json(force=True)
+
+        # self.queueButtons.put(payload)
+
+        camera = flask.request.args.get("camera")
+        buttonId = flask.request.args.get("buttonId")
+
+        self.queueButtons.put({"camera": int(camera), "buttonId": int(buttonId)})
+
+        return flask.jsonify({"status": "ok"})

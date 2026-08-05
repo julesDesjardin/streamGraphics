@@ -159,7 +159,10 @@ def getCountry(wcif, competitor):
 
 
 def getWCAID(wcif, competitor):
-    return wcif['persons'][competitor]['wcaId']
+    wcaid = wcif['persons'][competitor]['wcaId']
+    if wcaid is None:
+        return ''
+    return wcaid
 
 
 def getCompetitorName(wcif, competitor):

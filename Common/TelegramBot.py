@@ -20,7 +20,7 @@ class TelegramBot:
         else:
             self.bot = telebot.TeleBot(token)
             self.id = id
-        if sender:
+        if sender and token != '':
             self.sendQueue = queue.Queue()
             self.sendThread = threading.Thread(target=self.loopSendMessage)
             self.sendThread.daemon = True
@@ -48,9 +48,6 @@ class TelegramBot:
     def startPolling(self):
         self.bot.polling()
 
-    def sendMessage(self, command, data):
-        self.sendQueue.put([command, data])
-
     def loopSendMessage(self):
         while True:
             messages = []
@@ -66,3 +63,13 @@ class TelegramBot:
 
     def sendSimpleMessage(self, message):
         self.bot.send_message(self.id, message)
+
+    def sendQueueMessage(self, command, data):
+        self.sendQueue.put([command, data])
+
+    def sendMessage(self, command, data):
+        if (self.id == 0):
+            fullMessage = '/streamCommand \n' + command + COMMAND_SYMBOL + data
+            self.sendSimpleMessage(fullMessage)
+        else:
+            self.sendQueueMessage(command, data)

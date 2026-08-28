@@ -780,7 +780,6 @@ This supports the following characters to be replaced by the appropriate value:
     def processQueues(self):
         while not self.flaskQueueGroupsInput.empty():
             stagesInput = self.flaskQueueGroupsInput.get()
-            print(stagesInput)
             requestedStages = dict()
             for stage in self.stages:
                 requestedStages[f'{stage.venue},{stage.room}'] = None
@@ -790,7 +789,6 @@ This supports the following characters to be replaced by the appropriate value:
                 if f'{venue},{room}' in requestedStages:
                     requestedStages[f'{venue},{room}'] = (event, round, group)
 
-            print(requestedStages)
             for stage in self.stages:
                 if requestedStages[f'{stage.venue},{stage.room}'] is None and stage.stageEnabled:
                     stage.disableButton.invoke()
@@ -817,8 +815,7 @@ This supports the following characters to be replaced by the appropriate value:
                                 stage.disableButton.invoke()
                             else:
                                 stage.groupVar.set(group)
-
-                                self.OKButton.invoke()
+            self.OKButton.invoke()
 
             result = []
             for index in range(self.buttonRows * self.buttonCols):

@@ -821,8 +821,10 @@ This supports the following characters to be replaced by the appropriate value:
                                 self.OKButton.invoke()
 
             result = []
-            for button in self.interfaceFrames[0].buttons:
-                result.append((button['text'].split('\n')[0], button['bg']))  # Split the text to remove the extra text
+            for index in range(self.buttonRows * self.buttonCols):
+                if self.interfaceFrames[0].buttonsActive[index]:
+                    button = self.interfaceFrames[0].buttons[index]
+                    result.append((button['text'].split('\n')[0], button['bg']))  # Split the text to remove the extra text
             self.flaskQueueGroupsOutput.put(result)
 
         while not self.flaskQueueButtons.empty():

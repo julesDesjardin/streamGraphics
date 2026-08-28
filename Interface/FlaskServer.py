@@ -3,11 +3,13 @@ import threading
 
 
 class FlaskServer:
-    def __init__(self, port, queueGroupsInput, queueGroupsOutput, queueButtons):
+    def __init__(self, port, queueGroupsInput, queueGroupsOutput, queueButtons, queueReload, queueReloadDone):
         self.port = port
         self.queueGroupsInput = queueGroupsInput
         self.queueGroupsOutput = queueGroupsOutput
         self.queueButtons = queueButtons
+        self.queueReload = queueReload
+        self.queueReloadDone = queueReloadDone
         self.app = flask.Flask(__name__)
 
         self.app.add_url_rule(
@@ -22,6 +24,13 @@ class FlaskServer:
             "button",
             self.buttonCallback,
             methods=["GET", "POST"],
+        )
+
+        self.app.add_url_rule(
+            "/reload",
+            "reload",
+            self.reloadCallback,
+            methods=["POST"],
         )
 
     def start(self):
@@ -61,4 +70,13 @@ class FlaskServer:
 
         self.queueButtons.put({"camera": int(camera), "buttonId": int(buttonId)})
 
+        return flask.jsonify({"status": "ok"})
+
+    def reloadCallback(self):
+        self.queueReload.put('')
+
+        while self.queueReloadDone.empty():
+            pass
+
+        _ = self.queueReloadDone.get()
         return flask.jsonify({"status": "ok"})

@@ -60,6 +60,8 @@ class Interface:
         self.flaskQueueGroupsInput = queue.Queue()
         self.flaskQueueGroupsOutput = queue.Queue()
         self.flaskQueueButtons = queue.Queue()
+        self.flaskQueueReload = queue.Queue()
+        self.flaskQueueReloadDone = queue.Queue()
         self.flaskActive = False
         self.flaskServer = None
         self.settingsChanged = tk.BooleanVar()
@@ -194,7 +196,7 @@ class Interface:
         try:
             if self.flaskServer is None and self.flaskActive:
                 self.flaskServer = FlaskServer.FlaskServer(self.flaskPort, self.flaskQueueGroupsInput,
-                                                           self.flaskQueueGroupsOutput, self.flaskQueueButtons)
+                                                           self.flaskQueueGroupsOutput, self.flaskQueueButtons, self.flaskQueueReload, self.flaskQueueReloadDone)
                 self.flaskServer.start()
                 self.processQueues()
         except:
@@ -833,5 +835,10 @@ This supports the following characters to be replaced by the appropriate value:
                     self.interfaceFrames[camera].buttons[buttonId].invoke()
                 else:
                     self.interfaceFrames[camera].cleanButton.invoke()
+
+        while not self.flaskQueueReload.empty():
+            _ = self.flaskQueueReload.get()
+            self.reloadWCIF()
+            self.flaskQueueReloadDone.put('')
 
         self.root.after(100, self.processQueues)

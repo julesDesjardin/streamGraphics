@@ -23,7 +23,7 @@ class FlaskServer:
             "/button",
             "button",
             self.buttonCallback,
-            methods=["GET", "POST"],
+            methods=["POST"],
         )
 
         self.app.add_url_rule(
@@ -61,14 +61,13 @@ class FlaskServer:
         return flask.jsonify({"status": "ok", "result": result})
 
     def buttonCallback(self):
-        # payload = flask.request.get_json(force=True)
+        payload = flask.request.get_json(force=True)
 
-        # self.queueButtons.put(payload)
+        camera = payload["camera"]
+        buttonId = payload["buttonId"]
 
-        camera = flask.request.args.get("camera")
-        buttonId = flask.request.args.get("buttonId")
-
-        self.queueButtons.put({"camera": int(camera), "buttonId": int(buttonId)})
+        print(f"{camera=}, {buttonId=}")
+        self.queueButtons.put({"camera": camera, "buttonId": buttonId})
 
         return flask.jsonify({"status": "ok"})
 

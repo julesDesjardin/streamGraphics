@@ -43,9 +43,9 @@ class Interface:
         self.interfaceFrames = []
         self.stages = []
         self.exampleStages = []
-        self.region = 'World'
-        self.cardText = ''
-        self.presentationText = ''
+        self.timeTowerRegion = 'World'
+        self.rankingRegion = 'World'
+        self.presentationRegion = 'World'
         self.customTexts = dict([])
         for event in interfaceUtils.EVENTS.values():
             self.customTexts[event] = dict([])
@@ -53,9 +53,8 @@ class Interface:
         self.customTextCuber = None
         self.textVars = None
         self.imageVars = None
-        self.botToken = ''
-        self.botChannelId = ''
-        self.bot = None
+        self.cardsToken = None
+        self.timeTowerToken = None
         self.flaskPort = interfaceUtils.FLASK_PORT
         self.flaskQueueGroupsInput = queue.Queue()
         self.flaskQueueGroupsOutput = queue.Queue()
@@ -68,34 +67,18 @@ class Interface:
         self.settingsChanged.set(False)
         addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Interface')
 
-        self.timeTowerEventVariable = tk.IntVar()
-        self.TimeTowerCheckbox = tk.Checkbutton(self.OKFrame, text="Update TimeTower", variable=self.timeTowerEventVariable)
-        self.TimeTowerCheckbox.pack()
         self.OKButton = tk.Button(self.OKFrame, text="OK", command=self.OKButtonCommand)
         self.OKButton.pack()
         emptyFrame = tk.Frame(self.OKFrame)
         emptyFrame.pack(pady=15)
         self.presentationButton = tk.Button(self.OKFrame, text='Start presentation', command=self.presentationButtonCommand)
         self.presentationButton.pack()
-        self.customTextsButton = tk.Button(self.OKFrame, text='Change custom texts and/or images', command=self.updateCustomTexts)
-        self.customTextsButton.pack(pady=5)
+        self.customsButton = tk.Button(self.OKFrame, text='Change facts and/or images', command=self.updateCustoms)
+        self.customsButton.pack(pady=5)
 
         self.showSettingsFrame()
         self.mainFrame.pack(side=tk.TOP, padx=10)
         self.OKFrame.pack(side=tk.BOTTOM, pady=20)
-
-    def botCallback(self, message):
-        [id, results] = message.split(TelegramBot.DATA_SPLIT_SYMBOL)
-        for i in range(self.cameraCount):
-            camera = self.interfaceFrames[i]
-            if id in camera.fullResults:
-                oldResult = camera.fullResults[id]
-            else:
-                oldResult = None
-            camera.fullResults[id] = results
-            if oldResult is None or results != oldResult:
-                if id == camera.activeCuber:
-                    dataWrite.sendCardResults(self.bot, i, results)
 
     def saveSettings(self):
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
@@ -109,13 +92,13 @@ class Interface:
             'buttonRows': self.buttonRows,
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
-            'region': self.region,
-            'cardText': self.cardText,
-            'presentationText': self.presentationText,
-            'customTexts': self.customTexts,
+            'timeTowerRegion': self.timeTowerRegion,
+            'rankingRegion': self.rankingRegion,
+            'presentationRegion': self.presentationRegion,
+            'facts': self.facts,
             'customImages': self.customImages,
-            'botToken': self.botToken,
-            'botChannelId': self.botChannelId,
+            'cardsToken': self.cardsToken,
+            'timeTowerToken': self.timeTowerToken,
             'flaskPort': self.flaskPort,
             'flaskActive': self.flaskActive
         }
@@ -138,11 +121,10 @@ class Interface:
             # Retrocompat
             version = loadSettingsJson['version']
             if version < 30:
-                loadSettingsJson['flaskPort'] = interfaceUtils.FLASK_PORT
-                loadSettingsJson['flaskActive'] = False
-            if version < 20:
-                loadSettingsJson['cameraCols'] = interfaceUtils.CAMERAS_COLS
-                loadSettingsJson['cameraRows'] = interfaceUtils.CAMERAS_ROWS
+                tkinter.messagebox.showerror(
+                    title='Wrong version !', message='This json was generated with an older version of this software, not supported anymore. Please start over.')
+                return
+
             self.compId = loadSettingsJson['compId']
             try:
                 self.reloadWCIF()
@@ -163,13 +145,13 @@ class Interface:
             self.stages = []
             for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
                 self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
-            self.region = loadSettingsJson['region']
-            self.cardText = loadSettingsJson['cardText']
-            self.presentationText = loadSettingsJson['presentationText']
+            self.timeTowerRegion = loadSettingsJson['timeTowerRegion']
+            self.rankingRegion = loadSettingsJson['rankingRegion']
+            self.presentationRegion = loadSettingsJson['presentationRegion']
             self.customTexts = loadSettingsJson['customTexts']
             self.customImages = loadSettingsJson['customImages']
-            self.botToken = loadSettingsJson['botToken']
-            self.botChannelId = loadSettingsJson['botChannelId']
+            self.cardsToken = loadSettingsJson['cardsToken']
+            self.timeTowerToken = loadSettingsJson['timeTowerToken']
             self.flaskPort = loadSettingsJson['flaskPort']
             self.flaskActive = loadSettingsJson['flaskActive']
         except:
@@ -179,19 +161,6 @@ class Interface:
 
         for stage in reversed(self.stages):
             stage.showStage()
-
-        try:
-            if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(self.botToken, self.botChannelId, True, True)
-                self.bot.sendSimpleMessage('Bot interface ready')
-                self.bot.setMessageHandler(['liveResults'], self.botCallback)
-                self.threadBot = threading.Thread(target=self.bot.startPolling)
-                self.threadBot.daemon = True
-                self.threadBot.start()
-        except:
-            tkinter.messagebox.showerror(
-                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
-            return
 
         try:
             if self.flaskServer is None and self.flaskActive:
@@ -436,106 +405,99 @@ class Interface:
         if regionBox.get() == SEPARATOR:
             regionBox.set('World')
 
-    def updateRegionCloseButton(self, region, window):
-        self.region = region
+    def updateRegionsCloseButton(self, timeTowerRegion, rankingRegion, presentationRegion, window):
+        self.timeTowerRegion = timeTowerRegion
+        self.rankingRegion = rankingRegion
+        self.presentationRegion = presentationRegion
         window.destroy()
         self.settingsChanged.set(True)
 
-    def updateRegion(self):
-        regionWindow = tk.Toplevel(self.root)
-        regionWindow.grab_set()
-        regionLabel = tk.Label(
-            regionWindow, text='Please choose a region (country or continent) if you want foreign competitors to be shown first in the presentation.\nThe "World" option will keep the round order (last to first).')
-        regionLabel.pack(padx=20, pady=5)
-        regionBox = ttk.Combobox(regionWindow)
-        regionBox['values'] = REGION_OPTIONS
-        regionBox.set(self.region)
-        regionBox['state'] = 'readonly'
-        regionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(regionBox))
-        regionBox.pack(padx=20, pady=5)
-        regionCloseButton = tk.Button(regionWindow, text='Update region',
-                                      command=lambda: self.updateRegionCloseButton(regionBox.get(), regionWindow))
-        regionCloseButton.pack(padx=20, pady=5)
+    def updateRegions(self):
+        regionsWindow = tk.Toplevel(self.root)
+        regionsWindow.grab_set()
+        regionsLabel = tk.Label(
+            regionsWindow, text='Please choose regions (country or continent) for the following settings:')
+        regionsLabel.pack(padx=20, pady=20)
+        timeTowerRegionLabel = tk.Label(
+            regionsWindow, text='Time Tower: if you want foreign competitors to be shown differently in the Time Tower.\nThe "World" option will show everyone the same way.')
+        timeTowerRegionLabel.pack(padx=20, pady=5)
+        timeTowerRegionFrame = tk.Frame(regionsWindow)
+        timeTowerRegionSmallLabel = tk.Label(timeTowerRegionFrame, text='Time Tower:')
+        timeTowerRegionSmallLabel.pack(side='left', padx=0)
+        timeTowerRegionBox = ttk.Combobox(timeTowerRegionFrame)
+        timeTowerRegionBox['values'] = REGION_OPTIONS
+        timeTowerRegionBox.set(self.timeTowerRegion)
+        timeTowerRegionBox['state'] = 'readonly'
+        timeTowerRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(timeTowerRegionBox))
+        timeTowerRegionBox.pack(side='left', padx=0)
+        timeTowerRegionFrame.pack(padx=20, pady=5)
 
-    def updateCardTextCloseButton(self, text, isCard, window):
-        if isCard:
-            self.cardText = text
-            self.reloadInterfaceFrames()
-        else:
-            self.presentationText = text
+        rankingRegionLabel = tk.Label(
+            regionsWindow, text='Ranking: Selecting World will show the World rank of every competitor in cards.\nSelecting a country or continent will show the National/Continental ranking of competitors from this country/continent, and World ranking for foreigners.')
+        rankingRegionLabel.pack(padx=20, pady=5)
+        rankingRegionFrame = tk.Frame(regionsWindow)
+        rankingRegionSmallLabel = tk.Label(rankingRegionFrame, text='Ranking:')
+        rankingRegionSmallLabel.pack(side='left', padx=0)
+        rankingRegionBox = ttk.Combobox(rankingRegionFrame)
+        rankingRegionBox['values'] = REGION_OPTIONS
+        rankingRegionBox.set(self.rankingRegion)
+        rankingRegionBox['state'] = 'readonly'
+        rankingRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(rankingRegionBox))
+        rankingRegionBox.pack(side='left', padx=0)
+        rankingRegionFrame.pack(padx=20, pady=5)
+
+        presentationRegionLabel = tk.Label(
+            regionsWindow, text='Presentation: if you want foreign competitors to be first in the Presentation mode.\nThe "World" option will keep the round order (last to first).')
+        presentationRegionLabel.pack(padx=20, pady=5)
+        presentationRegionFrame = tk.Frame(regionsWindow)
+        rankingRegionSmallLabel = tk.Label(presentationRegionFrame, text='Presentation:')
+        rankingRegionSmallLabel.pack(side='left', padx=0)
+        presentationRegionBox = ttk.Combobox(presentationRegionFrame)
+        presentationRegionBox['values'] = REGION_OPTIONS
+        presentationRegionBox.set(self.presentationRegion)
+        presentationRegionBox['state'] = 'readonly'
+        presentationRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(presentationRegionBox))
+        presentationRegionBox.pack(side='left', padx=0)
+        presentationRegionFrame.pack(padx=20, pady=5)
+
+        regionCloseButton = tk.Button(regionsWindow, text='Update regions',
+                                      command=lambda: self.updateRegionsCloseButton(timeTowerRegionBox.get(), rankingRegionBox.get(), presentationRegionBox.get(), regionsWindow))
+        regionCloseButton.pack(padx=20, pady=20)
+
+    def updateSingularSettingsCloseButton(self, cardsToken, timeTowerToken, window):
+        cardsToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
+        timeTowerToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
+
+        self.cardsToken = cardsToken
+        self.timeTowerToken = timeTowerToken
         window.destroy()
         self.settingsChanged.set(True)
 
-    def updateCardText(self, isCard):
-        cardTextWindow = tk.Toplevel(self.root)
-        cardTextWindow.grab_set()
-        cardOrPresentation = 'card' if isCard else 'presentation'
-        cardTextDescription = f'''
-Please enter the text to show on the {cardOrPresentation}
-This supports the following characters to be replaced by the appropriate value:
-%WCAID: WCA ID
-%prSingle: PR single
-%prAverage: PR average/mean
-%nrSingle: National ranking single
-%nrAverage: National ranking average/mean
-%crSingle: Continental ranking single
-%crAverage: Continental ranking average/mean
-%wrSingle: World ranking single
-%wrAverage: World ranking average/mean
-%seed: Seed (based on PRs before the competition)
-%previousRank: Place on the previous round (when applicable)
-%previousSingle: Single on the previous round (when applicable)
-%previousAverage: Average on the previous round (when applicable)
-'''
-        cardTextLabel = tk.Label(cardTextWindow, text=cardTextDescription, justify='left')
-        cardTextLabel.pack(padx=20, pady=5)
-        cardTextEntry = tk.Text(cardTextWindow)
-        if isCard:
-            cardTextEntry.insert('1.0', self.cardText)
-        else:
-            cardTextEntry.insert('1.0', self.presentationText)
-        cardTextEntry.pack(padx=20, pady=5)
-        cardTextCloseButton = tk.Button(cardTextWindow, text=f'Save {cardOrPresentation} text',
-                                        command=lambda: self.updateCardTextCloseButton(cardTextEntry.get('1.0', 'end-1c'), isCard, cardTextWindow))
-        cardTextCloseButton.pack(padx=20, pady=5)
+    def updateSingularSettings(self):
+        singularWindow = tk.Toplevel(self.root)
+        singularWindow.grab_set()
+        singularLabel = tk.Label(singularWindow, text='Please enter Singular tokens for your data streams')
+        singularLabel.pack(padx=20, pady=5)
 
-    def updateTelegramSettingsCloseButton(self, token, id, window):
-        self.botToken = token
-        self.botChannelId = id
-        try:
-            if self.bot is None:
-                self.bot = TelegramBot.TelegramBot(token, id, True, True)
-                self.bot.sendSimpleMessage('Bot Interface ready')
-                self.bot.setMessageHandler(['liveResults'], self.botCallback)
-                self.threadBot = threading.Thread(target=self.bot.startPolling)
-                self.threadBot.daemon = True
-                self.threadBot.start()
-        except:
-            tkinter.messagebox.showerror(
-                title='Bot Error !', message='Telegram Bot Error ! Please make sure the Settings are correct')
-        else:
-            self.reloadInterfaceFrames()
-            window.destroy()
-            self.settingsChanged.set(True)
+        cardsFrame = tk.Frame(singularWindow)
+        cardsLabel = tk.Label(cardsFrame, text='Cards Data stream:')
+        cardsLabel.pack(side='left', padx=0)
+        cardsEntry = tk.Entry(cardsFrame, width=20)
+        cardsEntry.insert(0, '' if self.cardsToken is None else self.cardsToken)
+        cardsEntry.pack(side='left', padx=0)
+        cardsFrame.pack(padx=20, pady=5)
 
-    def updateTelegramSettings(self):
-        telegramWindow = tk.Toplevel(self.root)
-        telegramWindow.grab_set()
-        telegramLabel = tk.Label(telegramWindow, text='Please enter Telegram settings')
-        telegramLabel.pack(pady=20)
-        tokenLabel = tk.Label(telegramWindow, text='Interface bot token')
-        tokenLabel.pack(pady=5)
-        tokenEntry = tk.Entry(telegramWindow, width=50)
-        tokenEntry.insert(0, self.botToken)
-        tokenEntry.pack(pady=5)
-        idLabel = tk.Label(telegramWindow, text='Channel ID between interface and card bots')
-        idLabel.pack(pady=5)
-        idEntry = tk.Entry(telegramWindow, width=50)
-        idEntry.insert(0, self.botChannelId)
-        idEntry.pack(pady=5)
-        telegramCloseButton = tk.Button(telegramWindow, text='Save Telegram Settings',
-                                        command=lambda: self.updateTelegramSettingsCloseButton(tokenEntry.get(), idEntry.get(), telegramWindow))
-        telegramCloseButton.pack(pady=20)
+        timeTowerFrame = tk.Frame(singularWindow)
+        timeTowerLabel = tk.Label(timeTowerFrame, text='Time Tower Data stream:')
+        timeTowerLabel.pack(side='left', padx=0)
+        timeTowerEntry = tk.Entry(timeTowerFrame, width=20)
+        timeTowerEntry.insert(0, '' if self.timeTowerToken is None else self.timeTowerToken)
+        timeTowerEntry.pack(side='left', padx=0)
+        timeTowerFrame.pack(padx=20, pady=5)
+
+        singularCloseButton = tk.Button(singularWindow, text='Save Singular tokens',
+                                       command=lambda: self.updateSingularSettingsCloseButton(cardsEntry.get(), timeTowerEntry.get(), singularWindow))
+        singularCloseButton.pack(padx=20, pady=5)
 
     def updateFlaskSettingsCloseButton(self, port, active, window):
         self.flaskPort = port
@@ -580,7 +542,6 @@ This supports the following characters to be replaced by the appropriate value:
         rounds = []
         for stage in self.stages:
             if stage.stageEnabled:
-                activities = WCIFParse.getActivities(self.wcif, stage.venue, stage.room)
                 event = stage.eventVar.get()
                 round = stage.roundVar.get()
                 group = stage.groupVar.get()
@@ -632,10 +593,6 @@ This supports the following characters to be replaced by the appropriate value:
         return ret
 
     def OKButtonCommand(self):
-        if self.timeTowerEventVariable.get():
-            (_, _, event, round, _) = self.getStageInfo()[0]
-            if event is not None:
-                dataWrite.sendTimeTowerEvent(self.bot, interfaceUtils.EVENTS[event], round)
         self.updateCubers()
         for frame in self.interfaceFrames:
             frame.buttonCommand(-1, '', '', '', '', -1)
@@ -657,7 +614,7 @@ This supports the following characters to be replaced by the appropriate value:
         imageEntry.delete(0, tk.END)
         imageEntry.insert(tk.END, self.imageVars[nextCuber].get())
 
-    def updateCustomTextsCloseButton(self, event, textEntry, imageEntry, nextCuber, window):
+    def updateCustomsCloseButton(self, event, textEntry, imageEntry, nextCuber, window):
         self.updateSingleCustomText(textEntry, imageEntry, nextCuber)
         for cuber in self.textVars:
             if cuber in self.customTexts[interfaceUtils.EVENTS[event]] and self.textVars[cuber].get() == '':
@@ -670,7 +627,7 @@ This supports the following characters to be replaced by the appropriate value:
                 self.customImages[cuber] = self.imageVars[cuber].get()
         window.destroy()
 
-    def updateCustomTexts(self):
+    def updateCustoms(self):
         (_, _, event, _, _) = self.getStageInfo()[0]
         if event is not None:
             self.settingsChanged.set(True)
@@ -729,7 +686,7 @@ This supports the following characters to be replaced by the appropriate value:
             customCuberVar.set(WCIFParse.getWCAID(self.wcif, competitors[0][0]))
 
             customTextsCloseButton = tk.Button(customTextsWindow, text='Save Custom Texts',
-                                               command=lambda: self.updateCustomTextsCloseButton(event, customTextEntry, customImageEntry, customCuberVar.get(), customTextsWindow))
+                                               command=lambda: self.updateCustomsCloseButton(event, customTextEntry, customImageEntry, customCuberVar.get(), customTextsWindow))
             customTextsCloseButton.pack(pady=20)
 
     def showSettingsFrame(self):
@@ -748,20 +705,16 @@ This supports the following characters to be replaced by the appropriate value:
         buttonsButton.grid(column=0, row=5)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
         stagesButton.grid(column=0, row=6)
-        regionButton = tk.Button(frame, text='Change championship region for presentation', command=self.updateRegion)
+        regionButton = tk.Button(frame, text='Change championship regions', command=self.updateRegions)
         regionButton.grid(column=0, row=7)
-        cardTextButton = tk.Button(frame, text='Change text on card', command=lambda: self.updateCardText(True))
-        cardTextButton.grid(column=0, row=8)
-        cardTextButton = tk.Button(frame, text='Change text on presentation', command=lambda: self.updateCardText(False))
-        cardTextButton.grid(column=0, row=9)
-        telegramButton = tk.Button(frame, text='Change Telegram Settings', command=self.updateTelegramSettings)
-        telegramButton.grid(column=0, row=10)
+        singularButton = tk.Button(frame, text='Change Singular Settings', command=self.updateSingularSettings)
+        singularButton.grid(column=0, row=8)
         flaskButton = tk.Button(frame, text='Change Flask Settings (advanced)', command=self.updateFlaskSettings)
-        flaskButton.grid(column=0, row=11)
+        flaskButton.grid(column=0, row=9)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=12)
+        saveButton.grid(column=0, row=10)
         saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
-        saveButton.grid(column=0, row=13)
+        saveButton.grid(column=0, row=11)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -776,8 +729,6 @@ This supports the following characters to be replaced by the appropriate value:
         frame.rowconfigure(9, pad=20)
         frame.rowconfigure(10, pad=20)
         frame.rowconfigure(11, pad=20)
-        frame.rowconfigure(12, pad=20)
-        frame.rowconfigure(13, pad=20)
 
     def processQueues(self):
         while not self.flaskQueueGroupsInput.empty():

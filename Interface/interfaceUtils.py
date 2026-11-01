@@ -61,6 +61,7 @@ BUTTON_PADX = 5
 BUTTON_PADY = 5
 LABEL_HEIGHT = 30
 
+SINGULAR_URL_START = 'https://datastream.singular.live/datastreams/'
 
 def resultToString(result):
     if result == 'DNF':

@@ -506,7 +506,7 @@ class Interface:
             try:
                 if self.flaskServer is None:
                     self.flaskServer = FlaskServer.FlaskServer(port, self.flaskQueueCompetitorsInput,
-                                                               self.flaskQueueCompetitorsOutput, self.flaskQueueButtons)
+                                                               self.flaskQueueCompetitorsOutput, self.flaskQueueButtons, self.flaskQueueReload, self.flaskQueueReloadDone)
                     self.flaskServer.start()
                     self.processQueues()
             except:

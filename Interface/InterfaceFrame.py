@@ -46,6 +46,7 @@ class InterfaceFrame:
         self.buttonFrames = []
         self.buttons = []
         self.buttonsActive = []
+        self.countries = []
         for button in range(0, self.buttonCols + 2):
             self.frame.columnconfigure(button, pad=interfaceUtils.BUTTON_PADX)
         for button in range(0, self.buttonRows):
@@ -56,6 +57,7 @@ class InterfaceFrame:
             self.buttons.append(tk.Button(self.buttonFrames[-1], image=self.emptyPixel,
                                 compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
             self.buttonsActive.append(False)
+            self.countries.append('')
             self.buttons[-1].pack()
 
     def buttonCommand(self, buttonIndex, country, name, avatar, cardText, competitorId):
@@ -84,6 +86,7 @@ class InterfaceFrame:
             id = competitor[0]
             seed = competitor[1]
             name = competitor[2]
+            country = WCIFParse.getCountry(self.wcif, id)
             previousRank = WCIFParse.getRoundRank(self.wcif, id, event, previousRound)
             extraButtonText = f'Seed {seed}'
             if previousRank is not None:
@@ -95,9 +98,10 @@ class InterfaceFrame:
             else:
                 avatar = WCIFParse.getAvatar(self.wcif, id)
             self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
-                buttonIndex, WCIFParse.getCountry(self.wcif, id), name, avatar, cardTextReplaced, id))
+                buttonIndex, country, name, avatar, cardTextReplaced, id))
             self.buttonFrames[buttonIndex].grid(row=row, column=column)
             self.buttonsActive[buttonIndex] = True
+            self.countries[buttonIndex] = country
 
     def showFrame(self):
         self.frame.grid(column=self.x, row=self.y)

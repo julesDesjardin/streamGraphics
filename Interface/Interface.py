@@ -56,8 +56,8 @@ class Interface:
         self.cardsToken = None
         self.timeTowerToken = None
         self.flaskPort = interfaceUtils.FLASK_PORT
-        self.flaskQueueGroupsInput = queue.Queue()
-        self.flaskQueueGroupsOutput = queue.Queue()
+        self.flaskQueueCompetitorsInput = queue.Queue()
+        self.flaskQueueCompetitorsOutput = queue.Queue()
         self.flaskQueueButtons = queue.Queue()
         self.flaskQueueReload = queue.Queue()
         self.flaskQueueReloadDone = queue.Queue()
@@ -164,8 +164,8 @@ class Interface:
 
         try:
             if self.flaskServer is None and self.flaskActive:
-                self.flaskServer = FlaskServer.FlaskServer(self.flaskPort, self.flaskQueueGroupsInput,
-                                                           self.flaskQueueGroupsOutput, self.flaskQueueButtons, self.flaskQueueReload, self.flaskQueueReloadDone)
+                self.flaskServer = FlaskServer.FlaskServer(self.flaskPort, self.flaskQueueCompetitorsInput,
+                                                           self.flaskQueueCompetitorsOutput, self.flaskQueueButtons, self.flaskQueueReload, self.flaskQueueReloadDone)
                 self.flaskServer.start()
                 self.processQueues()
         except:
@@ -505,7 +505,8 @@ class Interface:
         if self.flaskActive:
             try:
                 if self.flaskServer is None:
-                    self.flaskServer = FlaskServer.FlaskServer(port, self.flaskQueueGroupsInput, self.flaskQueueGroupsOutput, self.flaskQueueButtons)
+                    self.flaskServer = FlaskServer.FlaskServer(port, self.flaskQueueCompetitorsInput,
+                                                               self.flaskQueueCompetitorsOutput, self.flaskQueueButtons)
                     self.flaskServer.start()
                     self.processQueues()
             except:
@@ -731,8 +732,8 @@ class Interface:
         frame.rowconfigure(11, pad=20)
 
     def processQueues(self):
-        while not self.flaskQueueGroupsInput.empty():
-            stagesInput = self.flaskQueueGroupsInput.get()
+        while not self.flaskQueueCompetitorsInput.empty():
+            stagesInput = self.flaskQueueCompetitorsInput.get()
             requestedStages = dict()
             for stage in self.stages:
                 requestedStages[f'{stage.venue},{stage.room}'] = None
@@ -774,15 +775,17 @@ class Interface:
             for index in range(self.buttonRows * self.buttonCols):
                 if self.interfaceFrames[0].buttonsActive[index]:
                     button = self.interfaceFrames[0].buttons[index]
-                    result.append((button['text'].split('\n')[0], button['bg']))  # Split the text to remove the extra text
-            self.flaskQueueGroupsOutput.put(result)
+                    # Split the text to remove the extra text + get seed/ranking
+                    result.append((button['text'].split('\n')[0], button['bg'], int(
+                        button['text'].split('\n')[1].split(' ')[-1]), self.interfaceFrames[0].countries[index]))
+            self.flaskQueueCompetitorsOutput.put(result)
 
         while not self.flaskQueueButtons.empty():
             payload = self.flaskQueueButtons.get()
             camera = payload['camera']
             buttonId = payload['buttonId']
-            if camera < len(self.interfaceFrames) and buttonId < len(self.interfaceFrames[camera].buttons):
-                if (self.interfaceFrames[camera].buttonsActive[buttonId]):
+            if camera < len(self.interfaceFrames):
+                if buttonId < len(self.interfaceFrames[camera].buttons) and (self.interfaceFrames[camera].buttonsActive[buttonId]):
                     self.interfaceFrames[camera].buttons[buttonId].invoke()
                 else:
                     self.interfaceFrames[camera].cleanButton.invoke()

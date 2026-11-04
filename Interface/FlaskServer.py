@@ -3,19 +3,19 @@ import threading
 
 
 class FlaskServer:
-    def __init__(self, port, queueGroupsInput, queueGroupsOutput, queueButtons, queueReload, queueReloadDone):
+    def __init__(self, port, queueCompetitorsInput, queueCompetitorsOutput, queueButtons, queueReload, queueReloadDone):
         self.port = port
-        self.queueGroupsInput = queueGroupsInput
-        self.queueGroupsOutput = queueGroupsOutput
+        self.queueCompetitorsInput = queueCompetitorsInput
+        self.queueCompetitorsOutput = queueCompetitorsOutput
         self.queueButtons = queueButtons
         self.queueReload = queueReload
         self.queueReloadDone = queueReloadDone
         self.app = flask.Flask(__name__)
 
         self.app.add_url_rule(
-            "/groups",
-            "groups",
-            self.groupsCallback,
+            "/competitors",
+            "competitors",
+            self.competitorsCallback,
             methods=["GET"],
         )
 
@@ -42,7 +42,7 @@ class FlaskServer:
             port=self.port
         )
 
-    def groupsCallback(self):
+    def competitorsCallback(self):
         venues = flask.request.args.getlist("venue")
         rooms = flask.request.args.getlist("room")
         events = flask.request.args.getlist("event")
@@ -53,11 +53,11 @@ class FlaskServer:
         for i in range(min(len(venues), len(rooms), len(events), len(rounds), len(groups))):
             data.append((venues[i], rooms[i], events[i], rounds[i], groups[i]))
 
-        self.queueGroupsInput.put(data)
-        while self.queueGroupsOutput.empty():
+        self.queueCompetitorsInput.put(data)
+        while self.queueCompetitorsOutput.empty():
             pass
 
-        result = self.queueGroupsOutput.get()
+        result = self.queueCompetitorsOutput.get()
         return flask.jsonify({"status": "ok", "result": result})
 
     def buttonCallback(self):

@@ -496,7 +496,7 @@ class Interface:
         timeTowerFrame.pack(padx=20, pady=5)
 
         singularCloseButton = tk.Button(singularWindow, text='Save Singular tokens',
-                                       command=lambda: self.updateSingularSettingsCloseButton(cardsEntry.get(), timeTowerEntry.get(), singularWindow))
+                                        command=lambda: self.updateSingularSettingsCloseButton(cardsEntry.get(), timeTowerEntry.get(), singularWindow))
         singularCloseButton.pack(padx=20, pady=5)
 
     def updateFlaskSettingsCloseButton(self, port, active, window):
@@ -516,6 +516,9 @@ class Interface:
                 self.reloadInterfaceFrames()
                 window.destroy()
                 self.settingsChanged.set(True)
+        else:
+            window.destroy()
+            self.settingsChanged.set(True)
 
     def updateFlaskSettings(self):
         flaskWindow = tk.Toplevel(self.root)

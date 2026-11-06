@@ -1,23 +1,21 @@
 import tkinter as tk
 import tkinter.messagebox
 from . import interfaceUtils
-from . import dataWrite
 from . import WCIFParse
-from Common import TelegramBot
 
 
 class InterfaceFrame:
 
-    def __init__(self, root, wcif, cardText, customTexts, customImages, bot, buttonRows, buttonCols, x, y, index):
+    def __init__(self, root, wcif, datastream, region, customTexts, customImages, buttonRows, buttonCols, x, y, index):
 
         self.emptyPixel = tk.PhotoImage(width=1, height=1)
 
         self.root = root
         self.wcif = wcif
-        self.cardText = cardText
+        self.datastream = datastream
+        self.region = region
         self.customTexts = customTexts
         self.customImages = customImages
-        self.bot = bot
         self.buttonRows = buttonRows
         self.buttonCols = buttonCols
         self.x = x
@@ -40,7 +38,7 @@ class InterfaceFrame:
 
         self.cleanButton = tk.Button(self.frame)
         self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT,
-                                   command=lambda: self.buttonCommand(-1, '', '', '', '', -1))
+                                   command=lambda: self.buttonCommand(-1, '', '', '', ''))
         self.cleanButton.grid(column=0, row=1, columnspan=self.buttonCols)
 
         self.buttonFrames = []
@@ -60,7 +58,7 @@ class InterfaceFrame:
             self.countries.append('')
             self.buttons[-1].pack()
 
-    def buttonCommand(self, buttonIndex, country, name, avatar, cardText, competitorId):
+    def buttonCommand(self, buttonIndex, id, event, round, seed):
         for index in range(len(self.buttons)):
             if index == buttonIndex:
                 self.buttonFrames[index].configure(highlightbackground='black')
@@ -68,11 +66,54 @@ class InterfaceFrame:
             else:
                 self.buttonFrames[index].configure(highlightbackground='white')
                 self.buttons[index].configure(relief=tk.RAISED)
-        dataWrite.sendCardData(self.bot, self.index, country, name.split('(')[0].strip(), avatar, cardText, False)
-        idString = f'{WCIFParse.getRegistrantId(self.wcif, competitorId)}'
-        if idString in self.fullResults:
-            dataWrite.sendCardResults(self.bot, self.index, self.fullResults[idString])
-        self.activeCuber = idString
+
+        if buttonIndex == -1:
+            return
+
+        # Get info to write to the card
+        payload = {}
+        if int(round) > 1:
+            previousRound = int(round) - 1
+        else:
+            previousRound = None
+        payload['previousRank'] = WCIFParse.getRoundRank(self.wcif, id, event, previousRound)
+        WCAID = WCIFParse.getWCAID(self.wcif, id)
+        payload['WCAID'] = WCAID
+        payload['name'] = WCIFParse.getCompetitorName(self.wcif, id)
+        country = WCIFParse.getCountry(self.wcif, id)
+        payload['countryFlag'] = interfaceUtils.getFlagURL(country)
+        payload['prSingle'] = interfaceUtils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'single'))
+        payload['prAverage'] = interfaceUtils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'average'))
+        if self.region == 'World':
+            payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
+            payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
+        elif self.region in interfaceUtils.CONTINENTS:
+            if interfaceUtils.COUNTRIES[country][1] == self.region:
+                payload['rankingSingle'] = f"CR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'continental')}"
+                payload['rankingAverage'] = f"CR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'continental')}"
+            else:
+                payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
+                payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
+        else:
+            if interfaceUtils.COUNTRIES[country][0] == self.region:
+                payload['rankingSingle'] = f"NR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'national')}"
+                payload['rankingAverage'] = f"NR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'national')}"
+            else:
+                payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
+                payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
+        payload['seed'] = seed
+        payload['previousSingle'] = interfaceUtils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'single'))
+        payload['previousAverage'] = interfaceUtils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'average'))
+        if WCAID in self.customTexts[interfaceUtils.EVENTS[event]]:
+            payload['fact'] = self.customTexts[interfaceUtils.EVENTS[event]][WCAID]
+        else:
+            payload['fact'] = ''
+        if WCAID in self.customImages:
+            payload['image'] = self.customImages[WCAID]
+        else:
+            payload['image'] = WCIFParse.getAvatar(self.wcif, id)
+
+        interfaceUtils.sendPayload(self.datastream, payload)
 
     def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
         if not visible:
@@ -91,14 +132,8 @@ class InterfaceFrame:
             extraButtonText = f'Seed {seed}'
             if previousRank is not None:
                 extraButtonText = extraButtonText + f', Placed {previousRank}'
-            cardTextReplaced = interfaceUtils.replaceText(self.cardText, self.wcif, id, seed, event, round, self.customTexts)
-            WCAID = WCIFParse.getWCAID(self.wcif, id)
-            if WCAID in self.customImages:
-                avatar = self.customImages[WCAID]
-            else:
-                avatar = WCIFParse.getAvatar(self.wcif, id)
-            self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg, command=lambda: self.buttonCommand(
-                buttonIndex, country, name, avatar, cardTextReplaced, id))
+            self.buttons[buttonIndex].configure(text=f'{name}\n{extraButtonText}', bg=bg, fg=fg,
+                                                command=lambda: self.buttonCommand(buttonIndex, id, event, round, seed))
             self.buttonFrames[buttonIndex].grid(row=row, column=column)
             self.buttonsActive[buttonIndex] = True
             self.countries[buttonIndex] = country

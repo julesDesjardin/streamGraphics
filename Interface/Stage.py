@@ -1,4 +1,3 @@
-from Common.commonUtils import colorButtonCommand, getTextColorFromBackground
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
@@ -126,7 +125,7 @@ class Stage:
         self.venue = WCIFParse.getVenueId(self.wcif, venue)
         self.room = WCIFParse.getRoomId(self.wcif, self.venue, room)
         self.backgroundColor = color
-        self.textColor = getTextColorFromBackground(self.backgroundColor)
+        self.textColor = interfaceUtils.getTextColorFromBackground(self.backgroundColor)
         self.frame.configure(bg=self.backgroundColor)
         self.eventLabel.configure(bg=self.backgroundColor, fg=self.textColor)
         self.roundLabel.configure(bg=self.backgroundColor, fg=self.textColor)
@@ -165,7 +164,7 @@ class Stage:
         bgColorButtonFrame = tk.Frame(window, highlightbackground='black', highlightthickness=1)
         bgColorButtonFrame.grid(row=4, column=1, sticky='w')
         bgColorButton = tk.Button(bgColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
-        bgColorButton.configure(command=lambda: colorButtonCommand(bgColorButton, bgColorVariable, 'Stage color'))
+        bgColorButton.configure(command=lambda: interfaceUtils.colorButtonCommand(bgColorButton, bgColorVariable, 'Stage color'))
         bgColorButton.pack()
 
         sampleUnclickedFrame = tk.Frame(window, highlightbackground='white', highlightthickness=2)
@@ -180,9 +179,9 @@ class Stage:
         sampleClickedButton.pack()
 
         bgColorVariable.trace_add('write', lambda var, index, mode:
-                                  sampleUnclickedButton.configure(bg=bgColorVariable.get(), fg=getTextColorFromBackground(bgColorVariable.get())))
+                                  sampleUnclickedButton.configure(bg=bgColorVariable.get(), fg=interfaceUtils.getTextColorFromBackground(bgColorVariable.get())))
         bgColorVariable.trace_add('write', lambda var, index, mode:
-                                  sampleClickedButton.configure(bg=bgColorVariable.get(), fg=getTextColorFromBackground(bgColorVariable.get())))
+                                  sampleClickedButton.configure(bg=bgColorVariable.get(), fg=interfaceUtils.getTextColorFromBackground(bgColorVariable.get())))
         bgColorVariable.trace_add('write', lambda var, index, mode: bgColorButton.configure(bg=bgColorVariable.get()))
 
         OKButton = tk.Button(window, text='OK', command=lambda:

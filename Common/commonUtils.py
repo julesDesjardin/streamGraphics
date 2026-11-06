@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
 from tkinter.colorchooser import askcolor
-
+import requests
 
 COUNTRIES = dict([
     ('AF', ('Afghanistan', 'Asia')),
@@ -321,6 +321,28 @@ def getTextColorFromBackground(bg):
         return '#000000'
     else:
         return '#ffffff'
+
+
+def getFlagURL(country):
+    if country == 'TW':
+        return 'https://assets.worldcubeassociation.org/assets/c278ac8/packs/static/ChineseTaipei-1ba9a456aa87a706b47b.svg'
+    else:
+        return f'https://flagcdn.com/w320/{country.lower()}.png'
+
+
+SINGULAR_URL_START = 'https://datastream.singular.live/datastreams/'
+
+
+def sendPayload(datastream, payload):
+    response = requests.put(
+        SINGULAR_URL_START + datastream,
+        json=payload,
+        timeout=10
+    )
+
+    print('Sending payload:')
+    print(payload)
+    response.raise_for_status()
 
 
 CURRENT_VERSION = 30

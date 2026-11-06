@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-from . import dataWrite
 from . import WCIFParse
 from . import interfaceUtils
 
@@ -93,11 +92,11 @@ class PresentationInterface:
         else:
             self.nextButton.configure(text=f'Next: {self.competitorsName[self.id + 1]}')
 
-        if self.id == -1:
-            dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
-        else:
-            dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
-                self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round, self.customTexts), True)
+        # if self.id == -1:
+        #     dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
+        # else:
+        #     dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
+        #         self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round, self.customTexts), True)
 
     def previousButtonCommand(self):
         self.id = self.id - 1
@@ -105,7 +104,7 @@ class PresentationInterface:
 
     def nextButtonCommand(self):
         if self.id == len(self.competitors) - 1:
-            dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
+            # dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
             self.window.destroy()
         else:
             self.id = self.id + 1

@@ -1,4 +1,4 @@
-from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS, SEPARATOR, CURRENT_VERSION
+from Common.commonUtils import addCheckSettingsChanged, REGION_OPTIONS, SEPARATOR, CURRENT_VERSION, SINGULAR_URL_START
 from Common import TelegramBot
 import tkinter as tk
 import tkinter.messagebox
@@ -13,7 +13,6 @@ from . import interfaceUtils
 from . import InterfaceFrame
 from . import PresentationInterface
 from . import FlaskServer
-from . import dataWrite
 import threading
 
 import sys
@@ -44,7 +43,7 @@ class Interface:
         self.stages = []
         self.exampleStages = []
         self.timeTowerRegion = 'World'
-        self.rankingRegion = 'World'
+        self.cardsRegion = 'World'
         self.presentationRegion = 'World'
         self.customTexts = dict([])
         for event in interfaceUtils.EVENTS.values():
@@ -93,9 +92,9 @@ class Interface:
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
             'timeTowerRegion': self.timeTowerRegion,
-            'rankingRegion': self.rankingRegion,
+            'cardsRegion': self.cardsRegion,
             'presentationRegion': self.presentationRegion,
-            'facts': self.facts,
+            'customTexts': self.customTexts,
             'customImages': self.customImages,
             'cardsToken': self.cardsToken,
             'timeTowerToken': self.timeTowerToken,
@@ -146,7 +145,7 @@ class Interface:
             for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
                 self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
             self.timeTowerRegion = loadSettingsJson['timeTowerRegion']
-            self.rankingRegion = loadSettingsJson['rankingRegion']
+            self.cardsRegion = loadSettingsJson['cardsRegion']
             self.presentationRegion = loadSettingsJson['presentationRegion']
             self.customTexts = loadSettingsJson['customTexts']
             self.customImages = loadSettingsJson['customImages']
@@ -233,7 +232,7 @@ class Interface:
         for cameraY in range(0, self.cameraRows):
             for cameraX in range(0, self.cameraCols):
                 self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardText, self.customTexts, self.customImages, self.bot, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * self.cameraCols + cameraX))
+                                            (self.mainFrame, self.wcif, self.cardsToken, self.cardsRegion, self.customTexts, self.customImages, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * self.cameraCols + cameraX))
         for frame in self.interfaceFrames:
             frame.showFrame()
 
@@ -242,10 +241,10 @@ class Interface:
             self.cameraRows = int(cameraRows)
             self.cameraCols = int(cameraCols)
             self.cameraCount = self.cameraRows * self.cameraCols
-            self.reloadInterfaceFrames()
         except:
             tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
         else:
+            self.reloadInterfaceFrames()
             window.destroy()
             self.settingsChanged.set(True)
 
@@ -405,9 +404,9 @@ class Interface:
         if regionBox.get() == SEPARATOR:
             regionBox.set('World')
 
-    def updateRegionsCloseButton(self, timeTowerRegion, rankingRegion, presentationRegion, window):
+    def updateRegionsCloseButton(self, timeTowerRegion, cardsRegion, presentationRegion, window):
         self.timeTowerRegion = timeTowerRegion
-        self.rankingRegion = rankingRegion
+        self.cardsRegion = cardsRegion
         self.presentationRegion = presentationRegion
         window.destroy()
         self.settingsChanged.set(True)
@@ -432,26 +431,26 @@ class Interface:
         timeTowerRegionBox.pack(side='left', padx=0)
         timeTowerRegionFrame.pack(padx=20, pady=5)
 
-        rankingRegionLabel = tk.Label(
-            regionsWindow, text='Ranking: Selecting World will show the World rank of every competitor in cards.\nSelecting a country or continent will show the National/Continental ranking of competitors from this country/continent, and World ranking for foreigners.')
-        rankingRegionLabel.pack(padx=20, pady=5)
-        rankingRegionFrame = tk.Frame(regionsWindow)
-        rankingRegionSmallLabel = tk.Label(rankingRegionFrame, text='Ranking:')
-        rankingRegionSmallLabel.pack(side='left', padx=0)
-        rankingRegionBox = ttk.Combobox(rankingRegionFrame)
-        rankingRegionBox['values'] = REGION_OPTIONS
-        rankingRegionBox.set(self.rankingRegion)
-        rankingRegionBox['state'] = 'readonly'
-        rankingRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(rankingRegionBox))
-        rankingRegionBox.pack(side='left', padx=0)
-        rankingRegionFrame.pack(padx=20, pady=5)
+        cardsRegionLabel = tk.Label(
+            regionsWindow, text='Cards: Selecting World will show the World rank of every competitor in cards.\nSelecting a country or continent will show the National/Continental ranking of competitors from this country/continent, and World ranking for foreigners.')
+        cardsRegionLabel.pack(padx=20, pady=5)
+        cardsRegionFrame = tk.Frame(regionsWindow)
+        cardsRegionSmallLabel = tk.Label(cardsRegionFrame, text='Ranking:')
+        cardsRegionSmallLabel.pack(side='left', padx=0)
+        cardsRegionBox = ttk.Combobox(cardsRegionFrame)
+        cardsRegionBox['values'] = REGION_OPTIONS
+        cardsRegionBox.set(self.cardsRegion)
+        cardsRegionBox['state'] = 'readonly'
+        cardsRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(cardsRegionBox))
+        cardsRegionBox.pack(side='left', padx=0)
+        cardsRegionFrame.pack(padx=20, pady=5)
 
         presentationRegionLabel = tk.Label(
             regionsWindow, text='Presentation: if you want foreign competitors to be first in the Presentation mode.\nThe "World" option will keep the round order (last to first).')
         presentationRegionLabel.pack(padx=20, pady=5)
         presentationRegionFrame = tk.Frame(regionsWindow)
-        rankingRegionSmallLabel = tk.Label(presentationRegionFrame, text='Presentation:')
-        rankingRegionSmallLabel.pack(side='left', padx=0)
+        cardsRegionSmallLabel = tk.Label(presentationRegionFrame, text='Presentation:')
+        cardsRegionSmallLabel.pack(side='left', padx=0)
         presentationRegionBox = ttk.Combobox(presentationRegionFrame)
         presentationRegionBox['values'] = REGION_OPTIONS
         presentationRegionBox.set(self.presentationRegion)
@@ -461,12 +460,12 @@ class Interface:
         presentationRegionFrame.pack(padx=20, pady=5)
 
         regionCloseButton = tk.Button(regionsWindow, text='Update regions',
-                                      command=lambda: self.updateRegionsCloseButton(timeTowerRegionBox.get(), rankingRegionBox.get(), presentationRegionBox.get(), regionsWindow))
+                                      command=lambda: self.updateRegionsCloseButton(timeTowerRegionBox.get(), cardsRegionBox.get(), presentationRegionBox.get(), regionsWindow))
         regionCloseButton.pack(padx=20, pady=20)
 
     def updateSingularSettingsCloseButton(self, cardsToken, timeTowerToken, window):
-        cardsToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
-        timeTowerToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
+        cardsToken.removeprefix(SINGULAR_URL_START)
+        timeTowerToken.removeprefix(SINGULAR_URL_START)
 
         self.cardsToken = cardsToken
         self.timeTowerToken = timeTowerToken
@@ -599,14 +598,14 @@ class Interface:
     def OKButtonCommand(self):
         self.updateCubers()
         for frame in self.interfaceFrames:
-            frame.buttonCommand(-1, '', '', '', '', -1)
+            frame.buttonCommand(-1, '', '', '', '')
             frame.fullResults = dict([])
 
     def presentationButtonCommand(self):
         (_, _, event, _, _) = self.getStageInfo()[0]
         if event is not None:
             presentation = PresentationInterface.PresentationInterface(
-                self.root, self.wcif, self.presentationText, self.customTexts, self.customImages, self.region, self.getStageInfo(), self.bot)
+                self.root, self.wcif, self.customTexts, self.customImages, self.presentationRegion, self.getStageInfo())
 
     def updateSingleCustomText(self, textEntry, imageEntry, nextCuber):
         if self.customTextCuber is not None:

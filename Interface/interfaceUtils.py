@@ -1,5 +1,7 @@
 import tkinter as tk
-from . import WCIFParse
+import tkinter.messagebox
+from tkinter.colorchooser import askcolor
+import requests
 
 EVENTS = dict([
     ('3x3x3', '333'),
@@ -60,11 +62,6 @@ BUTTON_HEIGHT = 30
 BUTTON_PADX = 5
 BUTTON_PADY = 5
 LABEL_HEIGHT = 30
-
-import tkinter as tk
-import tkinter.messagebox
-from tkinter.colorchooser import askcolor
-import requests
 
 COUNTRIES = dict([
     ('AF', ('Afghanistan', 'Asia')),
@@ -274,77 +271,6 @@ SEPARATOR = '-----'
 REGION_OPTIONS = ['World'] + [SEPARATOR] + CONTINENTS + [SEPARATOR] + [country[0] for country in COUNTRIES.values()]
 
 
-def cleverInt(string):
-    if string == '' or int(string) == 0:
-        return 1
-    else:
-        return int(string)
-
-
-def setModifiersVariables(modifiers, boldVar, italicVar):
-    if 'bold' in modifiers:
-        boldVar.set(True)
-    else:
-        boldVar.set(False)
-    if 'italic' in modifiers:
-        italicVar.set(True)
-    else:
-        italicVar.set(False)
-
-
-def getModifiers(bold, italic):
-    modifiers = []
-    if bold:
-        modifiers.append('bold')
-    if italic:
-        modifiers.append('italic')
-    return ' '.join(modifiers)
-
-
-def setAnchorVariables(anchor, XVar, YVar):
-    if anchor == 'center':
-        XVar.set('Center')
-        YVar.set('Center')
-    else:
-        if 'w' in anchor:
-            XVar.set('Left')
-        elif 'e' in anchor:
-            XVar.set('Right')
-        else:
-            XVar.set('Center')
-        if 'n' in anchor:
-            YVar.set('Top')
-        elif 's' in anchor:
-            YVar.set('Bottom')
-        else:
-            YVar.set('Center')
-
-
-def getAnchor(XVar, YVar):
-    anchor = ''
-    if YVar == 'Top':
-        anchor = anchor + 'n'
-    elif YVar == 'Bottom':
-        anchor = anchor + 's'
-    if XVar == 'Left':
-        anchor = anchor + 'w'
-    elif XVar == 'Right':
-        anchor = anchor + 'e'
-    if anchor == '':
-        anchor = 'center'
-    return anchor
-
-
-def getJustify(anchor):
-    if anchor == 'center':
-        return tk.LEFT
-    if 'w' in anchor:
-        return tk.LEFT
-    if 'e' in anchor:
-        return tk.RIGHT
-    return tk.CENTER
-
-
 checkSettings = []
 
 
@@ -408,9 +334,6 @@ def sendPayload(datastream, payload):
     response.raise_for_status()
 
 
-CURRENT_VERSION = 30
-
-
 def resultToString(result):
     if result == 'DNF':
         return 'DNF'
@@ -419,30 +342,4 @@ def resultToString(result):
     return f"{((result % 6000) / 100):.2f}"
 
 
-def replaceText(text, wcif, id, seed, event, round, customTexts):
-    if int(round) > 1:
-        previousRound = int(round) - 1
-    else:
-        previousRound = None
-    previousRank = WCIFParse.getRoundRank(wcif, id, event, previousRound)
-    prSingleInt = WCIFParse.getPb(wcif, id, event, 'single')
-    prAverageInt = WCIFParse.getPb(wcif, id, event, 'average')
-    WCAID = WCIFParse.getWCAID(wcif, id)
-    text = text.replace('%WCAID', WCAID)
-    text = text.replace('%prSingle', resultToString(prSingleInt))
-    text = text.replace('%prAverage', resultToString(prAverageInt))
-    text = text.replace('%nrSingle', f"{WCIFParse.getRanking(wcif,id,event,'single','national')}")
-    text = text.replace('%nrAverage', f"{WCIFParse.getRanking(wcif,id,event,'average','national')}")
-    text = text.replace('%crSingle', f"{WCIFParse.getRanking(wcif,id,event,'single','continental')}")
-    text = text.replace('%crAverage', f"{WCIFParse.getRanking(wcif,id,event,'average','continental')}")
-    text = text.replace('%wrSingle', f"{WCIFParse.getRanking(wcif,id,event,'single','world')}")
-    text = text.replace('%wrAverage', f"{WCIFParse.getRanking(wcif,id,event,'average','world')}")
-    text = text.replace('%seed', f"{seed}")
-    text = text.replace('%previousRank', f"{previousRank}")
-    text = text.replace('%previousSingle', resultToString(WCIFParse.getRoundResult(wcif, id, event, previousRound, 'single')))
-    text = text.replace('%previousAverage', resultToString(WCIFParse.getRoundResult(wcif, id, event, previousRound, 'average')))
-    if WCAID in customTexts[EVENTS[event]]:
-        text = text.replace('%custom', customTexts[EVENTS[event]][WCAID])
-    else:
-        text = text.replace('%custom', '')
-    return text
+CURRENT_VERSION = 30

@@ -34,10 +34,7 @@ class Interface:
         self.buttonRows = interfaceUtils.BUTTONS_ROWS
         self.buttonCols = interfaceUtils.BUTTONS_COLS
         self.buttonCount = self.buttonRows * self.buttonCols
-        self.cameraRows = interfaceUtils.CAMERAS_ROWS
-        self.cameraCols = interfaceUtils.CAMERAS_COLS
-        self.cameraCount = self.cameraRows * self.cameraCols
-        self.interfaceFrames = []
+        self.frame = None
         self.stages = []
         self.exampleStages = []
         self.timeTowerRegion = 'World'
@@ -84,8 +81,6 @@ class Interface:
             'version': interfaceUtils.CURRENT_VERSION,
             'compId': self.compId,
             'maxSeed': self.maxSeed,
-            'cameraRows': self.cameraRows,
-            'cameraCols': self.cameraCols,
             'buttonRows': self.buttonRows,
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
@@ -130,9 +125,6 @@ class Interface:
                     title='Competition ID Error !', message='The WCIF was not found ! Please ensure that the competition ID is correct, you have access to the internet, and the WCA website is up')
                 return
             self.maxSeed = loadSettingsJson['maxSeed']
-            self.cameraRows = loadSettingsJson['cameraRows']
-            self.cameraCols = loadSettingsJson['cameraCols']
-            self.cameraCount = self.cameraRows * self.cameraCols
             self.buttonRows = loadSettingsJson['buttonRows']
             self.buttonCols = loadSettingsJson['buttonCols']
             self.buttonCount = self.buttonRows * self.buttonCols
@@ -170,7 +162,7 @@ class Interface:
                 title='Flask Error !', message='Flask Server Error ! Please make sure the Settings are correct')
             return
 
-        self.reloadInterfaceFrames()
+        self.reloadFrame()
         self.settingsChanged.set(False)
 
     def updateCompIdCloseButton(self, compId, window):
@@ -221,60 +213,19 @@ class Interface:
                                        command=lambda: self.updateMaxSeedCloseButton(maxSeedEntry.get(), maxSeedWindow))
         maxSeedCloseButton.pack(padx=20, pady=5)
 
-    def reloadInterfaceFrames(self):
-        for frame in self.interfaceFrames:
-            frame.hideFrame()
-        self.interfaceFrames = []
-        for cameraY in range(0, self.cameraRows):
-            for cameraX in range(0, self.cameraCols):
-                self.interfaceFrames.append(InterfaceFrame.InterfaceFrame
-                                            (self.mainFrame, self.wcif, self.cardsToken, self.cardsRegion, self.customTexts, self.customImages, self.buttonRows, self.buttonCols, cameraX, cameraY, cameraY * self.cameraCols + cameraX))
-        for frame in self.interfaceFrames:
-            frame.showFrame()
-
-    def updateCamerasCloseButton(self, cameraRows, cameraCols, window):
-        try:
-            self.cameraRows = int(cameraRows)
-            self.cameraCols = int(cameraCols)
-            self.cameraCount = self.cameraRows * self.cameraCols
-        except:
-            tkinter.messagebox.showerror(title='Cameras Error !', message='Error ! Please make sure both values are numbers')
-        else:
-            self.reloadInterfaceFrames()
-            window.destroy()
-            self.settingsChanged.set(True)
-
-    def updateCameras(self):
-        camerasWindow = tk.Toplevel(self.root)
-        camerasWindow.grab_set()
-        camerasWindow.rowconfigure(0, pad=20)
-        camerasWindow.rowconfigure(1, pad=20)
-        camerasWindow.rowconfigure(2, pad=20)
-        camerasWindow.rowconfigure(3, pad=20)
-        camerasLabel = tk.Label(camerasWindow, text='Please change the number of rows and columns of cameras')
-        camerasLabel.grid(column=0, row=0, columnspan=2)
-        cameraRowsLabel = tk.Label(camerasWindow, text='Rows:')
-        cameraRowsLabel.grid(column=0, row=1, sticky='e')
-        cameraRowsVariable = tk.StringVar()
-        cameraRowsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraRowsVariable)
-        cameraRowsVariable.set(self.cameraRows)
-        cameraRowsSpinbox.grid(column=1, row=1, sticky='w')
-        cameraColsLabel = tk.Label(camerasWindow, text='Columns:')
-        cameraColsLabel.grid(column=0, row=2, sticky='e')
-        cameraColsVariable = tk.StringVar()
-        cameraColsSpinbox = tk.Spinbox(camerasWindow, from_=1, to=10, textvariable=cameraColsVariable)
-        cameraColsVariable.set(self.cameraCols)
-        cameraColsSpinbox.grid(column=1, row=2, sticky='w')
-        camerasCloseButton = tk.Button(camerasWindow, text='OK', command=lambda:
-                                       self.updateCamerasCloseButton(cameraRowsVariable.get(), cameraColsVariable.get(), camerasWindow))
-        camerasCloseButton.grid(column=0, row=3, columnspan=2)
+    def reloadFrame(self):
+        if self.frame is not None:
+            self.frame.hideFrame()
+        self.frame = InterfaceFrame.InterfaceFrame(
+            self.mainFrame, self.wcif, self.cardsToken, self.cardsRegion, self.customTexts, self.customImages, self.buttonRows, self.buttonCols)
+        self.frame.showFrame()
 
     def updateButtonsCloseButton(self, buttonRows, buttonCols, window):
         try:
             self.buttonRows = int(buttonRows)
             self.buttonCols = int(buttonCols)
             self.buttonCount = self.buttonRows * self.buttonCols
-            self.reloadInterfaceFrames()
+            self.reloadFrame()
         except:
             tkinter.messagebox.showerror(title='Buttons Error !', message='Error ! Please make sure both values are numbers')
         else:
@@ -508,7 +459,7 @@ class Interface:
                 tkinter.messagebox.showerror(
                     title='Flask Error !', message='Flask Server Error ! Please make sure the Settings are correct')
             else:
-                self.reloadInterfaceFrames()
+                self.reloadFrame()
                 window.destroy()
                 self.settingsChanged.set(True)
         else:
@@ -572,13 +523,11 @@ class Interface:
             for j in range(0, self.buttonCols):
                 buttonIndex = i * self.buttonCols + j
                 if index < len(fullCompetitors):
-                    for frame in self.interfaceFrames:
-                        frame.configureButton(buttonIndex, events[index], rounds[index],
-                                              fullCompetitors[index], True, i + 3, j, bg[index], fg[index])
+                    self.frame.configureButton(buttonIndex, events[index], rounds[index],
+                                               fullCompetitors[index], True, i + 3, j, bg[index], fg[index])
                     index = index + 1
                 else:
-                    for frame in self.interfaceFrames:
-                        frame.configureButton(buttonIndex, '', '', (0, 0, ''), False, i + 3, j, '#000000', '#000000')
+                    self.frame.configureButton(buttonIndex, '', '', (0, 0, ''), False, i + 3, j, '#000000', '#000000')
 
     def getStageInfo(self):
         ret = []
@@ -593,9 +542,8 @@ class Interface:
 
     def OKButtonCommand(self):
         self.updateCubers()
-        for frame in self.interfaceFrames:
-            frame.buttonCommand(-1, '', '', '', '')
-            frame.fullResults = dict([])
+        self.frame.buttonCommand(-1, '', '', '', '')
+        self.frame.fullResults = dict([])
 
     def presentationButtonCommand(self):
         (_, _, event, _, _) = self.getStageInfo()[0]
@@ -698,22 +646,20 @@ class Interface:
         reloadButton.grid(column=0, row=2)
         maxSeedButton = tk.Button(frame, text='Change Max Seed', command=self.updateMaxSeed)
         maxSeedButton.grid(column=0, row=3)
-        maxSeedButton = tk.Button(frame, text='Change number of cameras', command=self.updateCameras)
-        maxSeedButton.grid(column=0, row=4)
         buttonsButton = tk.Button(frame, text='Change number of buttons', command=self.updateButtons)
-        buttonsButton.grid(column=0, row=5)
+        buttonsButton.grid(column=0, row=4)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
-        stagesButton.grid(column=0, row=6)
+        stagesButton.grid(column=0, row=5)
         regionButton = tk.Button(frame, text='Change championship regions', command=self.updateRegions)
-        regionButton.grid(column=0, row=7)
+        regionButton.grid(column=0, row=6)
         singularButton = tk.Button(frame, text='Change Singular Settings', command=self.updateSingularSettings)
-        singularButton.grid(column=0, row=8)
+        singularButton.grid(column=0, row=7)
         flaskButton = tk.Button(frame, text='Change Flask Settings (advanced)', command=self.updateFlaskSettings)
-        flaskButton.grid(column=0, row=9)
+        flaskButton.grid(column=0, row=8)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=10)
-        saveButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
-        saveButton.grid(column=0, row=11)
+        saveButton.grid(column=0, row=9)
+        loadButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
+        loadButton.grid(column=0, row=10)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -727,7 +673,6 @@ class Interface:
         frame.rowconfigure(8, pad=20)
         frame.rowconfigure(9, pad=20)
         frame.rowconfigure(10, pad=20)
-        frame.rowconfigure(11, pad=20)
 
     def processQueues(self):
         while not self.flaskQueueCompetitorsInput.empty():
@@ -771,22 +716,20 @@ class Interface:
 
             result = []
             for index in range(self.buttonRows * self.buttonCols):
-                if self.interfaceFrames[0].buttonsActive[index]:
-                    button = self.interfaceFrames[0].buttons[index]
+                if self.frame.buttonsActive[index]:
+                    button = self.frame.buttons[index]
                     # Split the text to remove the extra text + get seed/ranking
                     result.append((button['text'].split('\n')[0], button['bg'], int(
-                        button['text'].split('\n')[1].split(' ')[-1]), self.interfaceFrames[0].countries[index]))
+                        button['text'].split('\n')[1].split(' ')[-1]), self.frame.countries[index]))
             self.flaskQueueCompetitorsOutput.put(result)
 
         while not self.flaskQueueButtons.empty():
             payload = self.flaskQueueButtons.get()
-            camera = payload['camera']
             buttonId = payload['buttonId']
-            if camera < len(self.interfaceFrames):
-                if buttonId < len(self.interfaceFrames[camera].buttons) and (self.interfaceFrames[camera].buttonsActive[buttonId]):
-                    self.interfaceFrames[camera].buttons[buttonId].invoke()
-                else:
-                    self.interfaceFrames[camera].cleanButton.invoke()
+            if buttonId < len(self.frame.buttons) and (self.frame.buttonsActive[buttonId]):
+                self.frame.buttons[buttonId].invoke()
+            else:
+                self.frame.cleanButton.invoke()
 
         while not self.flaskQueueReload.empty():
             _ = self.flaskQueueReload.get()

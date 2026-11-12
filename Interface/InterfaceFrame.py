@@ -6,7 +6,7 @@ from . import WCIFParse
 
 class InterfaceFrame:
 
-    def __init__(self, root, wcif, datastream, region, customTexts, customImages, buttonRows, buttonCols, x, y, index):
+    def __init__(self, root, wcif, datastream, region, customTexts, customImages, buttonRows, buttonCols):
 
         self.emptyPixel = tk.PhotoImage(width=1, height=1)
 
@@ -18,9 +18,6 @@ class InterfaceFrame:
         self.customImages = customImages
         self.buttonRows = buttonRows
         self.buttonCols = buttonCols
-        self.x = x
-        self.y = y
-        self.index = index
         self.activeCuber = ''
         self.fullResults = dict([])
 
@@ -33,13 +30,10 @@ class InterfaceFrame:
         self.frame.grid_propagate(0)
         self.frame.grid_rowconfigure(0, minsize=interfaceUtils.LABEL_HEIGHT)
 
-        self.label = tk.Label(self.frame, text=f'Cuber on camera {index+1}')
-        self.label.grid(column=0, row=0, columnspan=self.buttonCols)
-
         self.cleanButton = tk.Button(self.frame)
         self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT,
                                    command=lambda: self.buttonCommand(-1, '', '', '', ''))
-        self.cleanButton.grid(column=0, row=1, columnspan=self.buttonCols)
+        self.cleanButton.grid(column=0, row=0, columnspan=self.buttonCols)
 
         self.buttonFrames = []
         self.buttons = []
@@ -139,7 +133,7 @@ class InterfaceFrame:
             self.countries[buttonIndex] = country
 
     def showFrame(self):
-        self.frame.grid(column=self.x, row=self.y)
+        self.frame.grid(column=0, row=0)
 
     def hideFrame(self):
         self.frame.grid_forget()

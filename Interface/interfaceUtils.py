@@ -62,6 +62,7 @@ BUTTON_HEIGHT = 30
 BUTTON_PADX = 5
 BUTTON_PADY = 5
 LABEL_HEIGHT = 30
+RELOAD_PERIOD = 1000
 
 COUNTRIES = dict([
     ('AF', ('Afghanistan', 'Asia')),

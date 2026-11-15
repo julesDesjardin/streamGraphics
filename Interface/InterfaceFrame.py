@@ -19,7 +19,6 @@ class InterfaceFrame:
         self.buttonRows = buttonRows
         self.buttonCols = buttonCols
         self.activeCuber = ''
-        self.fullResults = dict([])
 
         frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + (self.buttonCols + 1) * \
             (interfaceUtils.BUTTON_WIDTH + 2 * interfaceUtils.BUTTON_PADX + 2 * interfaceUtils.BUTTON_THICKNESS + 3)

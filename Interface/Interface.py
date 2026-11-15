@@ -5,6 +5,8 @@ from tkinter import ttk
 import json
 import queue
 import urllib.request
+
+from Results import Results
 from . import Stage
 from . import WCIFParse
 from . import interfaceUtils
@@ -35,6 +37,8 @@ class Interface:
         self.buttonCols = interfaceUtils.BUTTONS_COLS
         self.buttonCount = self.buttonRows * self.buttonCols
         self.frame = None
+        self.reloadPeriod = interfaceUtils.RELOAD_PERIOD
+        self.results = None
         self.stages = []
         self.exampleStages = []
         self.timeTowerRegion = 'World'
@@ -84,6 +88,7 @@ class Interface:
             'buttonRows': self.buttonRows,
             'buttonCols': self.buttonCols,
             'stages': [(stage.backgroundColor, stage.textColor, stage.venue, stage.room) for stage in self.stages],
+            'reloadPeriod': self.reloadPeriod,
             'timeTowerRegion': self.timeTowerRegion,
             'cardsRegion': self.cardsRegion,
             'presentationRegion': self.presentationRegion,
@@ -134,6 +139,7 @@ class Interface:
             self.stages = []
             for (stageBackgroundColor, stageTextColor, stageVenue, stageRoom) in loadSettingsJson['stages']:
                 self.stages.append(Stage.Stage(self.root, self.wcif, stageBackgroundColor, stageTextColor, stageVenue, stageRoom))
+            self.reloadPeriod = loadSettingsJson['reloadPeriod']
             self.timeTowerRegion = loadSettingsJson['timeTowerRegion']
             self.cardsRegion = loadSettingsJson['cardsRegion']
             self.presentationRegion = loadSettingsJson['presentationRegion']
@@ -347,6 +353,28 @@ class Interface:
         OKButton = tk.Button(stagesWindow, text='OK', command=lambda: self.updateStagesCloseWindow(stagesWindow))
         OKButton.grid(row=3, column=0)
 
+    def updateReloadPeriodCloseButton(self, reloadPeriod, window):
+        try:
+            self.reloadPeriod = int(reloadPeriod)
+        except:
+            tkinter.messagebox.showerror(title='Reload period Error !', message='Error ! Please make sure the reload period is a number')
+        else:
+            window.destroy()
+            self.settingsChanged.set(True)
+
+    def updateReloadPeriod(self):
+        reloadPeriodWindow = tk.Toplevel(self.root)
+        reloadPeriodWindow.grab_set()
+        reloadPeriodLabel = tk.Label(
+            reloadPeriodWindow, text='Please enter the TimeTower reload period (in milliseconds):')
+        reloadPeriodLabel.pack(padx=20, pady=20)
+        reloadPeriodEntry = tk.Entry(reloadPeriodWindow)
+        reloadPeriodEntry.insert(0, self.reloadPeriod)
+        reloadPeriodEntry.pack(padx=20, pady=5)
+        reloadPeriodButton = tk.Button(reloadPeriodWindow, text='OK', command=lambda: self.updateReloadPeriodCloseButton(
+            reloadPeriodEntry.get(), reloadPeriodWindow))
+        reloadPeriodButton.pack(padx=20, pady=5)
+
     def checkRegionSeparator(self, regionBox):
         if regionBox.get() == interfaceUtils.SEPARATOR:
             regionBox.set('World')
@@ -540,10 +568,17 @@ class Interface:
             ret.append((None, None, None, None, None))
         return ret
 
+    def getResults(self):
+        if self.results is not None:
+            self.results.stopFetching()
+
+        (_, _, event, round, group) = self.getStageInfo()[0]
+        self.results = Results.Results(self.wcif, self.compId, event, round, group, self.reloadPeriod)
+
     def OKButtonCommand(self):
         self.updateCubers()
         self.frame.buttonCommand(-1, '', '', '', '')
-        self.frame.fullResults = dict([])
+        self.getResults()
 
     def presentationButtonCommand(self):
         (_, _, event, _, _) = self.getStageInfo()[0]
@@ -650,16 +685,18 @@ class Interface:
         buttonsButton.grid(column=0, row=4)
         stagesButton = tk.Button(frame, text='Setup stages', command=self.updateStages)
         stagesButton.grid(column=0, row=5)
+        reloadPeriodButton = tk.Button(frame, text='Change TimeTower Reload Period', command=self.updateReloadPeriod)
+        reloadPeriodButton.grid(column=0, row=6)
         regionButton = tk.Button(frame, text='Change championship regions', command=self.updateRegions)
-        regionButton.grid(column=0, row=6)
+        regionButton.grid(column=0, row=7)
         singularButton = tk.Button(frame, text='Change Singular Settings', command=self.updateSingularSettings)
-        singularButton.grid(column=0, row=7)
+        singularButton.grid(column=0, row=8)
         flaskButton = tk.Button(frame, text='Change Flask Settings (advanced)', command=self.updateFlaskSettings)
-        flaskButton.grid(column=0, row=8)
+        flaskButton.grid(column=0, row=9)
         saveButton = tk.Button(frame, text='Save Interface Settings...', command=self.saveSettings)
-        saveButton.grid(column=0, row=9)
+        saveButton.grid(column=0, row=10)
         loadButton = tk.Button(frame, text='Load Interface Settings...', command=self.loadSettings)
-        loadButton.grid(column=0, row=10)
+        loadButton.grid(column=0, row=11)
         frame.pack(side=tk.LEFT, fill=tk.BOTH)
         frame.columnconfigure(0, pad=20)
         frame.rowconfigure(0, pad=20)
@@ -673,6 +710,7 @@ class Interface:
         frame.rowconfigure(8, pad=20)
         frame.rowconfigure(9, pad=20)
         frame.rowconfigure(10, pad=20)
+        frame.rowconfigure(11, pad=20)
 
     def processQueues(self):
         while not self.flaskQueueCompetitorsInput.empty():

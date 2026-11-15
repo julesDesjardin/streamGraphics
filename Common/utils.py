@@ -271,6 +271,8 @@ CONTINENTS = ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South Ame
 SEPARATOR = '-----'
 REGION_OPTIONS = ['World'] + [SEPARATOR] + CONTINENTS + [SEPARATOR] + [country[0] for country in COUNTRIES.values()]
 
+NUMBER_RANKED = 12
+NUMBER_FOCUSED = 4
 
 checkSettings = []
 
@@ -341,6 +343,21 @@ def resultToString(result):
     elif result >= 6000:
         return f"{int(result / 6000)}:{((result % 6000) / 100):05.2f}"
     return f"{((result % 6000) / 100):.2f}"
+
+
+def getRequestResult(url):
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error occurred while making the request: {e}")
+        return None
+
+
+def cleanName(name):
+    # Remove local name
+    return name.split(' (')[0]
 
 
 CURRENT_VERSION = 30

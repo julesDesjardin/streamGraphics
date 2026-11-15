@@ -8,8 +8,7 @@ import urllib.request
 
 from Results import Results
 from . import Stage
-from . import WCIFParse
-from . import interfaceUtils
+from Common import utils, WCIFParse
 from . import InterfaceFrame
 from . import PresentationInterface
 from . import FlaskServer
@@ -32,20 +31,22 @@ class Interface:
         self.wcif = {}
         self.rounds = {}
         self.groups = {}
-        self.maxSeed = interfaceUtils.MAX_SEED
-        self.buttonRows = interfaceUtils.BUTTONS_ROWS
-        self.buttonCols = interfaceUtils.BUTTONS_COLS
+        self.maxSeed = utils.MAX_SEED
+        self.buttonRows = utils.BUTTONS_ROWS
+        self.buttonCols = utils.BUTTONS_COLS
         self.buttonCount = self.buttonRows * self.buttonCols
         self.frame = None
-        self.reloadPeriod = interfaceUtils.RELOAD_PERIOD
+        self.reloadPeriod = utils.RELOAD_PERIOD
         self.results = None
         self.stages = []
         self.exampleStages = []
         self.timeTowerRegion = 'World'
         self.cardsRegion = 'World'
         self.presentationRegion = 'World'
+        self.numberRanked = utils.NUMBER_RANKED
+        self.numberFocused = utils.NUMBER_FOCUSED
         self.customTexts = dict([])
-        for event in interfaceUtils.EVENTS.values():
+        for event in utils.EVENTS.values():
             self.customTexts[event] = dict([])
         self.customImages = dict([])
         self.customTextCuber = None
@@ -53,7 +54,7 @@ class Interface:
         self.imageVars = None
         self.cardsToken = None
         self.timeTowerToken = None
-        self.flaskPort = interfaceUtils.FLASK_PORT
+        self.flaskPort = utils.FLASK_PORT
         self.flaskQueueCompetitorsInput = queue.Queue()
         self.flaskQueueCompetitorsOutput = queue.Queue()
         self.flaskQueueButtons = queue.Queue()
@@ -63,7 +64,7 @@ class Interface:
         self.flaskServer = None
         self.settingsChanged = tk.BooleanVar()
         self.settingsChanged.set(False)
-        interfaceUtils.addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Interface')
+        utils.addCheckSettingsChanged(self.root, self.settingsChanged, self.saveSettings, 'Interface')
 
         self.OKButton = tk.Button(self.OKFrame, text="OK", command=self.OKButtonCommand)
         self.OKButton.pack()
@@ -82,7 +83,7 @@ class Interface:
         saveFile = tkinter.filedialog.asksaveasfile(initialdir='./', filetypes=(("JSON Files", "*.json"),
                                                     ("All Files", "*.*")), defaultextension='.json')
         saveSettingsJson = {
-            'version': interfaceUtils.CURRENT_VERSION,
+            'version': utils.CURRENT_VERSION,
             'compId': self.compId,
             'maxSeed': self.maxSeed,
             'buttonRows': self.buttonRows,
@@ -376,7 +377,7 @@ class Interface:
         reloadPeriodButton.pack(padx=20, pady=5)
 
     def checkRegionSeparator(self, regionBox):
-        if regionBox.get() == interfaceUtils.SEPARATOR:
+        if regionBox.get() == utils.SEPARATOR:
             regionBox.set('World')
 
     def updateRegionsCloseButton(self, timeTowerRegion, cardsRegion, presentationRegion, window):
@@ -399,7 +400,7 @@ class Interface:
         timeTowerRegionSmallLabel = tk.Label(timeTowerRegionFrame, text='Time Tower:')
         timeTowerRegionSmallLabel.pack(side='left', padx=0)
         timeTowerRegionBox = ttk.Combobox(timeTowerRegionFrame)
-        timeTowerRegionBox['values'] = interfaceUtils.REGION_OPTIONS
+        timeTowerRegionBox['values'] = utils.REGION_OPTIONS
         timeTowerRegionBox.set(self.timeTowerRegion)
         timeTowerRegionBox['state'] = 'readonly'
         timeTowerRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(timeTowerRegionBox))
@@ -413,7 +414,7 @@ class Interface:
         cardsRegionSmallLabel = tk.Label(cardsRegionFrame, text='Ranking:')
         cardsRegionSmallLabel.pack(side='left', padx=0)
         cardsRegionBox = ttk.Combobox(cardsRegionFrame)
-        cardsRegionBox['values'] = interfaceUtils.REGION_OPTIONS
+        cardsRegionBox['values'] = utils.REGION_OPTIONS
         cardsRegionBox.set(self.cardsRegion)
         cardsRegionBox['state'] = 'readonly'
         cardsRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(cardsRegionBox))
@@ -427,7 +428,7 @@ class Interface:
         cardsRegionSmallLabel = tk.Label(presentationRegionFrame, text='Presentation:')
         cardsRegionSmallLabel.pack(side='left', padx=0)
         presentationRegionBox = ttk.Combobox(presentationRegionFrame)
-        presentationRegionBox['values'] = interfaceUtils.REGION_OPTIONS
+        presentationRegionBox['values'] = utils.REGION_OPTIONS
         presentationRegionBox.set(self.presentationRegion)
         presentationRegionBox['state'] = 'readonly'
         presentationRegionBox.bind('<<ComboboxSelected>>', lambda event: self.checkRegionSeparator(presentationRegionBox))
@@ -439,8 +440,8 @@ class Interface:
         regionCloseButton.pack(padx=20, pady=20)
 
     def updateSingularSettingsCloseButton(self, cardsToken, timeTowerToken, window):
-        cardsToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
-        timeTowerToken.removeprefix(interfaceUtils.SINGULAR_URL_START)
+        cardsToken.removeprefix(utils.SINGULAR_URL_START)
+        timeTowerToken.removeprefix(utils.SINGULAR_URL_START)
 
         self.cardsToken = cardsToken
         self.timeTowerToken = timeTowerToken
@@ -572,8 +573,13 @@ class Interface:
         if self.results is not None:
             self.results.stopFetching()
 
-        (_, _, event, round, group) = self.getStageInfo()[0]
-        self.results = Results.Results(self.wcif, self.compId, event, round, group, self.reloadPeriod)
+        venues = []
+        rooms = []
+        for (venue, room, event, round, group) in self.getStageInfo():
+            venues.append(venue)
+            rooms.append(room)
+        self.results = Results.Results(self.wcif, self.compId, venues, rooms, event, round, group,
+                                       self.reloadPeriod, self.numberRanked, self.numberFocused)
 
     def OKButtonCommand(self):
         self.updateCubers()
@@ -599,10 +605,10 @@ class Interface:
     def updateCustomsCloseButton(self, event, textEntry, imageEntry, nextCuber, window):
         self.updateSingleCustomText(textEntry, imageEntry, nextCuber)
         for cuber in self.textVars:
-            if cuber in self.customTexts[interfaceUtils.EVENTS[event]] and self.textVars[cuber].get() == '':
-                del self.customTexts[interfaceUtils.EVENTS[event]][cuber]
+            if cuber in self.customTexts[utils.EVENTS[event]] and self.textVars[cuber].get() == '':
+                del self.customTexts[utils.EVENTS[event]][cuber]
             elif self.textVars[cuber].get() != '':
-                self.customTexts[interfaceUtils.EVENTS[event]][cuber] = self.textVars[cuber].get()
+                self.customTexts[utils.EVENTS[event]][cuber] = self.textVars[cuber].get()
             if cuber in self.customImages and self.imageVars[cuber].get() == '':
                 del self.customImages[cuber]
             elif self.imageVars[cuber].get() != '':
@@ -654,8 +660,8 @@ class Interface:
                     command=lambda id=WCAID: customCuberVar.set(id))
                 self.textVars[WCAID] = tk.StringVar()
                 self.imageVars[WCAID] = tk.StringVar()
-                if WCAID in self.customTexts[interfaceUtils.EVENTS[event]]:
-                    self.textVars[WCAID].set(self.customTexts[interfaceUtils.EVENTS[event]][WCAID])
+                if WCAID in self.customTexts[utils.EVENTS[event]]:
+                    self.textVars[WCAID].set(self.customTexts[utils.EVENTS[event]][WCAID])
                 else:
                     self.textVars[WCAID].set('')
                 if WCAID in self.customImages:
@@ -731,11 +737,11 @@ class Interface:
                     if not stage.stageEnabled:
                         stage.disableButton.invoke()
                     (event, round, group) = requestedStages[f'{stage.venue},{stage.room}']
-                    if event not in interfaceUtils.EVENTS.values():
+                    if event not in utils.EVENTS.values():
                         stage.disableButton.invoke()
                     else:
-                        for eventKey in interfaceUtils.EVENTS:
-                            if interfaceUtils.EVENTS[eventKey] == event:
+                        for eventKey in utils.EVENTS:
+                            if utils.EVENTS[eventKey] == event:
                                 stage.eventVar.set(eventKey)
                                 break
 

@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox
-from . import interfaceUtils
-from . import WCIFParse
+from Common import utils, WCIFParse
 
 
 class InterfaceFrame:
@@ -20,17 +19,17 @@ class InterfaceFrame:
         self.buttonCols = buttonCols
         self.activeCuber = ''
 
-        frameWidth = 2 * interfaceUtils.FRAME_THICKNESS + (self.buttonCols + 1) * \
-            (interfaceUtils.BUTTON_WIDTH + 2 * interfaceUtils.BUTTON_PADX + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
-        frameHeight = 2 * interfaceUtils.FRAME_THICKNESS + interfaceUtils.LABEL_HEIGHT + \
-            (self.buttonRows + 2) * (interfaceUtils.BUTTON_HEIGHT + 2 * interfaceUtils.BUTTON_PADY + 2 * interfaceUtils.BUTTON_THICKNESS + 3)
+        frameWidth = 2 * utils.FRAME_THICKNESS + (self.buttonCols + 1) * \
+            (utils.BUTTON_WIDTH + 2 * utils.BUTTON_PADX + 2 * utils.BUTTON_THICKNESS + 3)
+        frameHeight = 2 * utils.FRAME_THICKNESS + utils.LABEL_HEIGHT + \
+            (self.buttonRows + 2) * (utils.BUTTON_HEIGHT + 2 * utils.BUTTON_PADY + 2 * utils.BUTTON_THICKNESS + 3)
         self.frame = tk.Frame(self.root, highlightbackground='black',
-                              highlightthickness=interfaceUtils.FRAME_THICKNESS, width=frameWidth, height=frameHeight)
+                              highlightthickness=utils.FRAME_THICKNESS, width=frameWidth, height=frameHeight)
         self.frame.grid_propagate(0)
-        self.frame.grid_rowconfigure(0, minsize=interfaceUtils.LABEL_HEIGHT)
+        self.frame.grid_rowconfigure(0, minsize=utils.LABEL_HEIGHT)
 
         self.cleanButton = tk.Button(self.frame)
-        self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT,
+        self.cleanButton.configure(text=f'Clean', image=self.emptyPixel, compound='c', width=utils.BUTTON_WIDTH, height=utils.BUTTON_HEIGHT,
                                    command=lambda: self.buttonCommand(-1, '', '', '', ''))
         self.cleanButton.grid(column=0, row=0, columnspan=self.buttonCols)
 
@@ -39,14 +38,14 @@ class InterfaceFrame:
         self.buttonsActive = []
         self.countries = []
         for button in range(0, self.buttonCols + 2):
-            self.frame.columnconfigure(button, pad=interfaceUtils.BUTTON_PADX)
+            self.frame.columnconfigure(button, pad=utils.BUTTON_PADX)
         for button in range(0, self.buttonRows):
-            self.frame.rowconfigure(button, pad=interfaceUtils.BUTTON_PADY)
+            self.frame.rowconfigure(button, pad=utils.BUTTON_PADY)
 
         for button in range(0, self.buttonCols * self.buttonRows):
-            self.buttonFrames.append(tk.Frame(self.frame, highlightthickness=interfaceUtils.BUTTON_THICKNESS))
+            self.buttonFrames.append(tk.Frame(self.frame, highlightthickness=utils.BUTTON_THICKNESS))
             self.buttons.append(tk.Button(self.buttonFrames[-1], image=self.emptyPixel,
-                                compound='c', width=interfaceUtils.BUTTON_WIDTH, height=interfaceUtils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
+                                compound='c', width=utils.BUTTON_WIDTH, height=utils.BUTTON_HEIGHT, anchor=tk.W, justify=tk.LEFT))
             self.buttonsActive.append(False)
             self.countries.append('')
             self.buttons[-1].pack()
@@ -74,31 +73,31 @@ class InterfaceFrame:
         payload['WCAID'] = WCAID
         payload['name'] = WCIFParse.getCompetitorName(self.wcif, id)
         country = WCIFParse.getCountry(self.wcif, id)
-        payload['countryFlag'] = interfaceUtils.getFlagURL(country)
-        payload['prSingle'] = interfaceUtils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'single'))
-        payload['prAverage'] = interfaceUtils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'average'))
+        payload['countryFlag'] = utils.getFlagURL(country)
+        payload['prSingle'] = utils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'single'))
+        payload['prAverage'] = utils.resultToString(WCIFParse.getPb(self.wcif, id, event, 'average'))
         if self.region == 'World':
             payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
             payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
-        elif self.region in interfaceUtils.CONTINENTS:
-            if interfaceUtils.COUNTRIES[country][1] == self.region:
+        elif self.region in utils.CONTINENTS:
+            if utils.COUNTRIES[country][1] == self.region:
                 payload['rankingSingle'] = f"CR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'continental')}"
                 payload['rankingAverage'] = f"CR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'continental')}"
             else:
                 payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
                 payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
         else:
-            if interfaceUtils.COUNTRIES[country][0] == self.region:
+            if utils.COUNTRIES[country][0] == self.region:
                 payload['rankingSingle'] = f"NR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'national')}"
                 payload['rankingAverage'] = f"NR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'national')}"
             else:
                 payload['rankingSingle'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'single', 'world')}"
                 payload['rankingAverage'] = f"WR: {WCIFParse.getRanking(self.wcif, id, event, 'average', 'world')}"
         payload['seed'] = seed
-        payload['previousSingle'] = interfaceUtils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'single'))
-        payload['previousAverage'] = interfaceUtils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'average'))
-        if WCAID in self.customTexts[interfaceUtils.EVENTS[event]]:
-            payload['fact'] = self.customTexts[interfaceUtils.EVENTS[event]][WCAID]
+        payload['previousSingle'] = utils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'single'))
+        payload['previousAverage'] = utils.resultToString(WCIFParse.getRoundResult(self.wcif, id, event, previousRound, 'average'))
+        if WCAID in self.customTexts[utils.EVENTS[event]]:
+            payload['fact'] = self.customTexts[utils.EVENTS[event]][WCAID]
         else:
             payload['fact'] = ''
         if WCAID in self.customImages:
@@ -106,7 +105,7 @@ class InterfaceFrame:
         else:
             payload['image'] = WCIFParse.getAvatar(self.wcif, id)
 
-        interfaceUtils.sendPayload(self.datastream, payload)
+        utils.sendPayload(self.datastream, payload)
 
     def configureButton(self, buttonIndex, event, round, competitor, visible, row, column, bg, fg):
         if not visible:

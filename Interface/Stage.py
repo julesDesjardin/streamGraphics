@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
-from . import WCIFParse
-from . import interfaceUtils
+from Common import utils, WCIFParse
 
 import sys
 import os
@@ -25,7 +24,7 @@ class Stage:
                                    activebackground=self.backgroundColor, activeforeground=self.textColor)
         self.eventLabel.grid(column=1, row=0, sticky=tk.E)
         self.eventVar = tk.StringVar()
-        self.eventMenu = ttk.OptionMenu(self.frame, self.eventVar, list(interfaceUtils.EVENTS.keys())[0], *list(interfaceUtils.EVENTS.keys()))
+        self.eventMenu = ttk.OptionMenu(self.frame, self.eventVar, list(utils.EVENTS.keys())[0], *list(utils.EVENTS.keys()))
         self.eventMenu.grid(column=2, row=0, sticky=tk.W)
         self.roundLabel = tk.Label(self.frame, text='Round:', bg=self.backgroundColor, fg=self.textColor,
                                    activebackground=self.backgroundColor, activeforeground=self.textColor)
@@ -70,7 +69,7 @@ class Stage:
         groups = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
-            if activitySplit[0] == interfaceUtils.EVENTS[self.eventVar.get()] and activitySplit[1] == f'r{self.roundVar.get()}':
+            if activitySplit[0] == utils.EVENTS[self.eventVar.get()] and activitySplit[1] == f'r{self.roundVar.get()}':
                 groups.append(int(activitySplit[2][1:]))
         menu = self.groupMenu["menu"]
         menu.delete(0, "end")
@@ -87,7 +86,7 @@ class Stage:
         rounds = []
         for activity in activities:
             activitySplit = activities[activity].split('-')
-            if activitySplit[0] == interfaceUtils.EVENTS[self.eventVar.get()]:
+            if activitySplit[0] == utils.EVENTS[self.eventVar.get()]:
                 newRound = int(activitySplit[1][1:])
                 if newRound not in rounds:
                     rounds.append(newRound)
@@ -125,7 +124,7 @@ class Stage:
         self.venue = WCIFParse.getVenueId(self.wcif, venue)
         self.room = WCIFParse.getRoomId(self.wcif, self.venue, room)
         self.backgroundColor = color
-        self.textColor = interfaceUtils.getTextColorFromBackground(self.backgroundColor)
+        self.textColor = utils.getTextColorFromBackground(self.backgroundColor)
         self.frame.configure(bg=self.backgroundColor)
         self.eventLabel.configure(bg=self.backgroundColor, fg=self.textColor)
         self.roundLabel.configure(bg=self.backgroundColor, fg=self.textColor)
@@ -164,7 +163,7 @@ class Stage:
         bgColorButtonFrame = tk.Frame(window, highlightbackground='black', highlightthickness=1)
         bgColorButtonFrame.grid(row=4, column=1, sticky='w')
         bgColorButton = tk.Button(bgColorButtonFrame, text='', background=self.backgroundColor, relief=tk.FLAT, width=10)
-        bgColorButton.configure(command=lambda: interfaceUtils.colorButtonCommand(bgColorButton, bgColorVariable, 'Stage color'))
+        bgColorButton.configure(command=lambda: utils.colorButtonCommand(bgColorButton, bgColorVariable, 'Stage color'))
         bgColorButton.pack()
 
         sampleUnclickedFrame = tk.Frame(window, highlightbackground='white', highlightthickness=2)
@@ -179,9 +178,9 @@ class Stage:
         sampleClickedButton.pack()
 
         bgColorVariable.trace_add('write', lambda var, index, mode:
-                                  sampleUnclickedButton.configure(bg=bgColorVariable.get(), fg=interfaceUtils.getTextColorFromBackground(bgColorVariable.get())))
+                                  sampleUnclickedButton.configure(bg=bgColorVariable.get(), fg=utils.getTextColorFromBackground(bgColorVariable.get())))
         bgColorVariable.trace_add('write', lambda var, index, mode:
-                                  sampleClickedButton.configure(bg=bgColorVariable.get(), fg=interfaceUtils.getTextColorFromBackground(bgColorVariable.get())))
+                                  sampleClickedButton.configure(bg=bgColorVariable.get(), fg=utils.getTextColorFromBackground(bgColorVariable.get())))
         bgColorVariable.trace_add('write', lambda var, index, mode: bgColorButton.configure(bg=bgColorVariable.get()))
 
         OKButton = tk.Button(window, text='OK', command=lambda:

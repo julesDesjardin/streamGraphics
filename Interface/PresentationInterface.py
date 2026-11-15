@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import json
-from . import WCIFParse
-from . import interfaceUtils
+from Common import utils, WCIFParse
 
 import sys
 import os
@@ -31,9 +30,9 @@ class PresentationInterface:
             activityId = WCIFParse.getActivityId(wcif, venue, room, event, round, group)
 
             foreignCompetitors += [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
-                                   if self.region != 'World' and self.region not in interfaceUtils.COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+                                   if self.region != 'World' and self.region not in utils.COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
             localCompetitors += [competitor for competitor in WCIFParse.getCompetitors(wcif, activityId, event)
-                                 if self.region == 'World' or self.region in interfaceUtils.COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
+                                 if self.region == 'World' or self.region in utils.COUNTRIES[WCIFParse.getCountry(self.wcif, competitor[0])]]
         foreignCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
         localCompetitors.sort(key=lambda x: self.getKey(x[0]), reverse=True)
 
@@ -68,9 +67,9 @@ class PresentationInterface:
 
     def getKey(self, id):
         if self.round == 1:
-            return WCIFParse.getRanking(self.wcif, id, self.event, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[self.event]], 'world')
+            return WCIFParse.getRanking(self.wcif, id, self.event, utils.SEED_TYPE[utils.EVENTS[self.event]], 'world')
         else:
-            return WCIFParse.getRoundResult(self.wcif, id, self.event, self.round - 1, interfaceUtils.SEED_TYPE[interfaceUtils.EVENTS[self.event]])
+            return WCIFParse.getRoundResult(self.wcif, id, self.event, self.round - 1, utils.SEED_TYPE[utils.EVENTS[self.event]])
 
     def updateButtons(self):
         if self.id == -1:
@@ -93,7 +92,7 @@ class PresentationInterface:
         # if self.id == -1:
         #     dataWrite.sendCardData(self.bot, 0, '', '', '', '', True)
         # else:
-        #     dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], interfaceUtils.replaceText(
+        #     dataWrite.sendCardData(self.bot, 0, WCIFParse.getCountry(self.wcif, self.competitors[self.id][0]), self.competitorsName[self.id], self.avatars[self.id], utils.replaceText(
         #         self.text, self.wcif, self.competitors[self.id][0], self.competitors[self.id][1], self.event, self.round, self.customTexts), True)
 
     def previousButtonCommand(self):

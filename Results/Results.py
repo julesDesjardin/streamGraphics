@@ -49,7 +49,7 @@ class Results:
             competitorsId[WCIFParse.getRegistrantId(wcif, competitor)] = competitor
 
         # Get all competitors: first get their registrationId
-        self.requestUrl = f"https://www.worldcubeassociation.org/api/v1/competitions/{self.compId}/live/rounds/{f'{utils.EVENTS[self.event]}-r{self.round}'}"
+        self.requestUrl = f"v1/competitions/{self.compId}/live/rounds/{f'{utils.EVENTS[self.event]}-r{self.round}'}"
         requestCompetitors = utils.getRequestResult(self.requestUrl)['competitors']
         self.allCompetitors = []
         for competitor in requestCompetitors:

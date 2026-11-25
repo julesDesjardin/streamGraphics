@@ -347,7 +347,7 @@ def resultToString(result):
 
 def getRequestResult(url):
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(f'https://www.worldcubeassociation.org/api/{url}', timeout=10)
         response.raise_for_status()
         return response.json()
     except Exception as e:

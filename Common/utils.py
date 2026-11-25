@@ -38,10 +38,33 @@ SEED_TYPE = dict([
     ('pyram', 'average'),
     ('skewb', 'average'),
     ('sq1', 'average'),
-    ('444bf', 'average'),
-    ('555bf', 'average'),
-    ('333mbf', 'average'),
+    ('444bf', 'single'),
+    ('555bf', 'single'),
+    ('333mbf', 'single'),
 ])
+
+CRITERIA = dict([
+    ('333', 'average'),
+    ('222', 'average'),
+    ('444', 'average'),
+    ('555', 'average'),
+    ('666', 'mean'),
+    ('777', 'mean'),
+    ('333bf', 'single'),
+    ('333fm', 'mean'),
+    ('333oh', 'average'),
+    ('clock', 'average'),
+    ('minx', 'average'),
+    ('pyram', 'average'),
+    ('skewb', 'average'),
+    ('sq1', 'average'),
+    ('444bf', 'single'),
+    ('555bf', 'single'),
+    ('333mbf', 'single'),
+])
+
+DNF_ATTEMPT = 3 * 60 * 60 * 100  # 3h, so an avg5/mo3 goes higher than 10 min
+DNF_RESULT = 60 * 60 * 100  # 1h
 
 MAX_RANKING = 999999
 MAX_SEED = 10000
@@ -338,11 +361,14 @@ def sendPayload(datastream, payload):
 
 
 def resultToString(result):
-    if result == 'DNF':
+    if (result >= DNF_RESULT):
         return 'DNF'
-    elif result >= 6000:
-        return f"{int(result / 6000)}:{((result % 6000) / 100):05.2f}"
-    return f"{((result % 6000) / 100):.2f}"
+    output = ''
+    if (result >= 6000):
+        output = output + f'{int(result / 6000)}:'
+    result = result % 6000
+    output = output + f'{int(result / 100):02}.{result % 100:02}'
+    return output
 
 
 def getRequestResult(url):
@@ -358,6 +384,28 @@ def getRequestResult(url):
 def cleanName(name):
     # Remove local name
     return name.split(' (')[0]
+
+
+def filterDNFAttempt(attempt):
+    if attempt < 0:
+        return DNF_ATTEMPT
+    return attempt
+
+
+def getCurrentResult(results, criteria):
+    currentResult = DNF_RESULT
+    match criteria:
+        case 'single':
+            currentResult = min(r.result for r in results)
+        case 'mean':
+            currentResult = round(sum(r.result for r in results) / len(results))
+        case 'average':
+            if (len(results) < 3):
+                currentResult = round(sum(r.result for r in results) / len(results))
+            else:
+                strippedResults = sorted(r.result for r in results)[1:-1]
+                currentResult = round(sum(strippedResults) / len(strippedResults))
+    return min(DNF_RESULT, currentResult)
 
 
 CURRENT_VERSION = 30

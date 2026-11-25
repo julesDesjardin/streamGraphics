@@ -81,7 +81,7 @@ def getPb(wcif, competitor, event, singleOrAverage):
     for pb in wcif['persons'][competitor]['personalBests']:
         if pb['eventId'] == utils.EVENTS[event] and pb['type'] == singleOrAverage:
             return pb['best']
-    return 'DNF'
+    return utils.DNF_RESULT
 
 
 def getRanking(wcif, competitor, event, singleOrAverage, scale):
@@ -93,7 +93,7 @@ def getRanking(wcif, competitor, event, singleOrAverage, scale):
 
 def getRoundResult(wcif, competitor, event, round, singleOrAverage):
     if round is None:
-        return 'DNF'
+        return utils.DNF_RESULT
     registrantId = wcif['persons'][competitor]['registrantId']
     for wcifEvent in wcif['events']:
         if (wcifEvent['id'] == utils.EVENTS[event]):
@@ -104,7 +104,7 @@ def getRoundResult(wcif, competitor, event, round, singleOrAverage):
                             if (singleOrAverage == 'single'):
                                 return result['best']
                             return result['average']
-    return 'DNF'
+    return utils.DNF_RESULT
 
 
 def getRoundRank(wcif, competitor, event, round):

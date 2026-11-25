@@ -22,6 +22,8 @@ class Competitor:
     prSingle: int
     prAverage: int
     results: list[SingleResult] = field(default_factory=list)
+    bestResult: int = utils.DNF_RESULT
+    currentResult: int = utils.DNF_RESULT
     resultUpdated: bool = False
     bpa: SingleResult | None = None
     wpa: SingleResult | None = None
@@ -82,16 +84,27 @@ class Results:
                     if competitor.registrationId == result['registration_id']:
                         for (i, attempt) in enumerate(result['attempts']):
                             if i >= len(competitor.results):
-                                competitor.results.append(SingleResult(result=attempt['value'], tag=''))
+                                competitor.results.append(SingleResult(result=utils.filterDNFAttempt(attempt['value']), tag=''))
                                 competitor.resultUpdated = True
                             elif competitor.results[i].result != attempt['value']:
-                                competitor.results[i] = SingleResult(result=attempt['value'], tag='')
+                                competitor.results[i] = SingleResult(result=utils.filterDNFAttempt(attempt['value']), tag='')
                                 competitor.resultUpdated = True
         except Exception as e:
             print(f"Error fetching results: {e}")
 
+        # TODO handle tags, best, worst
+
+        for competitor in self.allCompetitors:
+            if competitor.resultUpdated:
+                competitor.currentResult = utils.getCurrentResult(competitor.results, utils.CRITERIA[utils.EVENTS[self.event]])
+                competitor.bestResult = min(r.result for r in competitor.results)
+
+        self.allCompetitors.sort(key=lambda competitor: (competitor.currentResult, competitor.bestResult))
+
     def fullLoop(self):
         while (not self.stopEvent.is_set()):
             self.updateResults()
-            print(self.allCompetitors)
+            for comp in self.allCompetitors:
+                print(f"{comp.name}, {comp.bestResult}, {comp.currentResult}")
+            print("Done")
             self.stopEvent.wait(self.reloadPeriod / 1000)
